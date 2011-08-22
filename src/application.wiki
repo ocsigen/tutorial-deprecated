@@ -1,0 +1,847 @@
+<<header| = Writing a client/server Eliom application >>
+
+<<wip|
+
+The code of this tutorial has been tested against
+the 2.0-rc1 release of the Ocsigen bundle.
+
+>>
+
+This chapter and the two following ones are an overview of the
+features the Ocsigen framework brings to build Web applications.  They
+will allow you to understand the philosophy of Eliom (the Web
+programming framework in OCaml), and are also a good starting point to
+understand other libraries of the Ocsigen project: Lwt, Macaque, etc.
+
+Theses chapters do not aim at exhaustiveness but many references
+towards other chapters are made all along the text, so that you can
+learn the concepts in detail if you want to.
+
+We assume the reader has a good knowledge of the Objective Caml
+language.
+
+The present chapter is a tutorial for writing a small client/server
+[[site:graffiti/|collaborative drawing application]]. You will learn
+how to:
+
+* Create new //services//
+* Output //valid HTML//
+* Send //OCaml code// to be executed //on the client//
+* Call //Javascript methods// from OCaml
+* Catch //mouse events//
+* //Communicate// with the server, in both directions
+* Use the //O'Closure// widget library
+* Create services with //non-HTML output//
+
+The next chapter is devoted to server side programming.  We will
+create a new Web site with several pages and user connection. In this
+chapter, you will learn how to:
+
+* Create a //link// towards another service
+* Create //forms//
+* Register //session data// or //session services//
+* Create services performing //actions// (with no output)
+* Dynamically register new services (//continuation based// Web programming)
+
+The third chapter is an overview of miscellaneous features.  We will
+mix the application from the first chapter with the one from the
+second chapter to produce a multi-user collaborative drawing
+application.  In this chapter, you will learn how to:
+
+* Integrate a typical Web interaction (links, forms,~ …) with a client side program.
+* Use //Macaque// for safe database interaction
+* Add //sounds or videos// to your application
+* Change pages //without stopping the client side program//
+* Connect with external accounts (//openID//) <<wip-inline| !!! >>
+* Add an Atom stream
+
+If you are not interested in client-side programming you can safely
+skip most of the first chapter (although I recommend you read at least
+the first section, which explains the basics). Conversely, if you are
+not interested in standard Web interactions, with sessions links, and
+forms, you can skip the second chapter.
+
+Keep in mind that one of the key feature of Eliom is that it allows
+one to mix commonplace Web interactions (URLs, forms, links,
+bookmarks, back button) with dynamic client side features. In
+particular, the client-side program **does not stop** when the user
+clicks a link, sends a form, or presses the back button--yet the user
+still can save bookmarks on pages!  This opens up a wide field of new
+possibilities, and should facilitate the emergence of new kinds of Web
+applications.
+
+In this chapter, we will write a [[site:graffiti/|collaborative
+drawing application]] (the final code is available <<a_file
+src="tutorial.tar.gz"|here>>).
+
+==@@id="basics"@@ Basics ==
+
+In this first section, we will build a collaborative drawing
+application. It is a client/server Web application displaying an area
+where users can draw using the mouse, and see what other users are
+drawing.
+
+===My first page===
+
+<<concepts|Services\\Configuration file\\Static validation of HTML>>
+
+Our Web application consists of a single page for now. Let's start by
+creating a very basic page.  We define the service that will implement
+this page by the following declaration:
+
+<<code language="ocaml" |
+open Lwt
+open Eliom_pervasives
+open HTML5.M
+open Eliom_services
+open Eliom_parameters
+open Eliom_output.Html5
+
+let main_service =
+  register_service ~path:["graff"] ~get_params:unit
+    (fun () () -> return (html (head (title (pcdata "")) [])
+                               (body [h1 [pcdata "Graffiti"]])))>>
+
+The same, written with fully qualified names (without {{{open}}}):
+
+<<code language="ocaml"|
+let main_service =
+  Eliom_output.Html5.register_service ~path:["graff"] ~get_params:Eliom_parameters.unit
+    (fun () () ->
+      Lwt.return
+        (HTML5.M.html (HTML5.M.head (HTML5.M.title (HTML5.M.pcdata "")) [])
+                       (HTML5.M.body [HTML5.M.h1 [HTML5.M.pcdata "Graffiti"]])))
+>>
+
+Copy one of the two pieces of code above in a file {{{graffiti.ml}}},
+then compile it by typing:
+
+{{{
+ocamlfind ocamlc -thread -package eliom.server -c graffiti.ml
+}}}
+
+This will create a file called {{{graffiti.cmo}}}.
+
+Take the configuration file provided in directory<<a_file
+src="tutorial.tar.gz"|{{{chapter1/start}}}>>, then launch Ocsigen
+server, with the following command:
+
+{{{
+ocsigenserver -c graffiti.conf
+}}}
+
+Your page is now available at the URL:
+
+{{{
+http://localhost:8080/graff
+}}}
+
+<<concept title="Services"|
+
+Unlike typical Web programming techniques (CGI, PHP,~ ...), with
+Eliom, you don't write one file for each URL, but a single Caml module
+(*.cmo or *.cma) for the whole Web site.
+
+The <<a_api project="eliom" | module Eliom_services >> module allows
+to create new entry points to your Web site, called //services//. In
+general, services are attached to a URL and generate a Web page.
+Services are represented by OCaml values, through which you must
+register a function that will generate a page.
+
+The {{{~path}}} parameter corresponds to the URL where you want to
+attach your service. It is a list of strings.  The value <<code-inline|["foo"; "bar"]>> corresponds to the URL <<code-inline|foo/bar>>.  <<code-inline|["dir"; ""]>> corresponds
+to the URL <<code-inline|dir/>> (that is: the default page of
+the directory <<code-inline|dir>>). 
+
+>>
+
+<<concept title="Configuration file"|
+
+Consider the sample configuration file below.  It contains various
+directives for Ocsigen server (port, log files, extensions to be
+loaded, etc.), and something like:
+
+{{{
+<host>
+    <static dir="~///path_to///graffiti" />
+    <eliom module="~///path_to///graffiti.cmo" />
+</host>
+}}}
+
+These instructions tell the server to:
+
+* serve files from the directory <<code-inline|
+  ~///path_to///graffiti >> if they exists,
+* generate pages from service in the Eliom application
+  {{{graffiti.cmo}}} otherwise.
+
+>>
+
+<<concept title="Static validation of HTML"|
+
+There are several ways to create pages for Eliom.  You can generate
+pages as strings (as in other Web frameworks).  But we prefer checking
+that the HTML will be correct at compile time.  Eliom provides several
+modules to do that, either using OcamlDuce (if you have it installed)
+or using OCaml's polymorphic variants.  This tutorial is using the
+second solution, using the module <<a_api project="eliom"
+version="dev"| module Eliom_output.Html5 >>. This module defines a
+construction function for each HTML5 tag.
+
+//Note that it is also possible to use <<a_manual project="eliom"
+chapter="xhtml" version="dev" | the usual HTML syntax>>.//
+
+Typing of HTML with <<a_api project="tyxml" version="dev"| module
+HTML5.M >> and <<a_api project="tyxml" version="dev"| module XHTML.M
+>> is very strict and compels you to respect HTML5 standard (with some
+limitations). For example if you write:
+
+<<code language="ocaml"|
+(html
+   (head (title (pcdata "")) [pcdata ""])
+   (body [pcdata "Hallo"]))
+>>
+
+You will get the following error message:
+
+{{{
+Error: This expression has type ([> `PCDATA ] as 'a) HTML5.M.elt
+       but an expression was expected of type HTML5_types.head_content_fun HTML5.M.elt
+       Type 'a is not compatible with type HTML5_types.head_content_fun =
+           [ `Base
+           | `Command
+           | `Link
+           | `Meta
+           | `Noscript of [ `Link | `Meta | `Style ]
+           | `Script
+           | `Style ]
+       The second variant type does not allow tag(s) `PCDATA
+}}}
+
+<<code-inline|HTML5_types.head_content_fun>> is the type of
+content allowed inside <<code-inline| <head> >>.  You see that
+{{{`PCDATA}}} (i.e. raw text) is not in this polymorphic variant type.
+
+**Another example:** In HTML5, some tags cannot be empty. For example
+<<code-inline| <table> >> must contain at least one row.  To
+enforce this, the <<a_api project="tyxml" version="dev"|
+val HTML5.M.table >> function takes two parameters: the first one is
+the first row, the second one is a list containing all the other rows.
+(same thing for <<code-inline|<tr> >> <<code-inline|<form> >> <<code-inline|<dl> >> <<code-inline|<ol> >> <<code-inline|<ul> >> <<code-inline|<dd> >> <<code-inline|<select> >> ...)  This forces
+the user to handle the empty list case specially and thus make the
+output conform to the recommendation from the W3C.
+
+//Strict typing of HTML may seem arduous initially, but in fact it is
+very easy to get used to.  It actually saves a huge amount of
+debugging time as you will never have to bother about the validity of
+pages afterwards.//
+
+A more detailed introduction to <<code-inline|HTML5.M>> is
+available in the <<a_manual project="eliom" chapter="xhtml"
+version="dev" | eliom manual >> and <<a_api project="tyxml"
+text="TyXML reference API" version="dev" | module HTML5.M >>.
+
+>>
+
+<<concept title="Lwt"|
+
+**Important warning:** All the functions you write must be written in
+collaborative manner using Lwt. Lwt is a very convenient way to
+implement concurrent programs in OCaml, which is now widely used even
+for applications not related to Ocsigen.
+
+For now we will just use the {{{Lwt.return}}} function as above.  We
+will come back later on Lwt programming.  You can also have a look at
+the <<a_manual project="lwt"|Lwt programming guide>>. 
+
+>>
+
+=== Execute parts of the program on the client ===
+
+<<concepts|
+Service sending an application\\
+Client and server code\\
+Compiling a Web application with server and client parts\\
+Calling Javascript methods with Js_of_ocaml
+>>
+
+To create our first service, we used the function <<a_api | val
+Eliom_output.Html5.register_service>>, as we wanted to return HTML5.
+
+But actually we want our service to send an Eliom application.  To do
+that, we will create our own registration module by using the functor
+{{{Eliom_output.Eliom_appl}}}:
+
+<<code language="ocaml"|
+open Eliom_pervasives
+open HTML5.M
+
+module My_appl =
+  Eliom_output.Eliom_appl (
+    struct
+      let application_name = "graffiti"
+    end)
+>>
+
+It is now possible to use this module for registering our main service:
+
+<<code language="ocaml"|
+let main_service =
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+    (fun () () ->
+      Lwt.return
+        (html
+           (head (title (pcdata "Graffiti")) [])
+           (body [h1 [pcdata "Graffiti"]]) ) )
+>>
+
+We now want to add some OCaml code to be executed by the browser.
+We start by a very basic program, that will display a message to the user
+by calling the Javascript function {{{alert}}}. We add the following lines
+to the program:
+
+<<code language="ocaml"|
+{client{
+  let _ = Dom_html.window##alert(Js.string "Hello")
+}}
+>>
+
+As you can see, we are using a syntax extension to distinguish between
+server and client code in the same file. Take the {{{Makefile}}} and
+{{{graffiti.conf}}} files provided in directory <<a_file
+src="tutorial.tar.gz"| chapter1/no_oclosure >>. You may want to adapt
+the configuration file to set some paths, especially the directory for
+static files. (To make things easier for the tutorial, you can use
+your source directory but keep in mind that it is not necessary (and
+sometimes dangerous) to put {{{.ml}}} and {{{.cma}}}/{{{.cmo}}} in the
+static files directory!)
+
+The default {{{Makefile}}} recognizes files using Eliom's syntax extension by
+their extension {{{.eliom}}} (instead of {{{.ml}}}).
+Put the new version of our program in a file named {{{graffiti.eliom}}}
+and compile it by typing:
+
+{{{
+make
+}}}
+
+This will generate a file called {{{graffiti.cma}}}
+and another one called {{{graffiti.js}}}.
+The latter //must be placed in the
+static file directory//. type
+
+{{{
+make install
+}}}
+
+to copy it to its rightfull place.
+
+Now run Ocsigen server:
+
+{{{
+ocsigenserver -c graffiti.conf
+}}}
+
+Your page is now available at URL {{{http://localhost:8080/}}}. It
+should open an alert box. If not, check that the static file directory
+in the configuration file is correct.
+
+<<concept title="Client side code"|
+
+Eliom's syntax extension implements four kinds of quotations:
+* {{{ {client{ ... }} }}} for client side code
+* {{{ {server{ ... }} }}} (optional) for server side code
+* {{{ {shared{ ... }} }}} for code that will be used both for the server and the client
+* {{{ {{ ... }} }}} for client side code in expressions (see later)
+
+In the default Makefile we automatically split the code, compile the server
+part as usual, and compile the client part using {{{js_of_ocaml}}},
+to create a Javascript file.
+
+>>
+
+<<concept title="Js_of_ocaml"|
+
+ The client-side parts of the program are compiled to Javascript by
+Js_of_ocaml, which recompiles OCaml bytecode, generating Javascript.
+It is easy to bind Javascript libraries to call Javascript functions
+from OCaml programs. In the example, we are using the <<a_api
+project="js_of_ocaml" | module Dom_html >> module, which is a binding
+to allow the manipulation of an HTML page.
+
+Js_of_ocaml is using a syntax extension to call Javascript methods:
+* {{{obj##m(a, b, c)}}} to call the method {{{m}}} of object {{{obj}}}
+with parameters {{{(a, b, c)}}}
+* {{{obj##m}}} to get a property
+* {{{obj##m <- e}}} to set a property
+* {{{jsnew constr (e1, ..., en)}}} to call a Javascript constructor
+
+Find more information in the <<a_manual project="js_of_ocaml" |
+Js_of_ocaml's manual >>.
+
+>>
+
+==@@id="graffiti"@@ Collaborative drawing application ==
+
+===Drawing on a canvas===
+
+<<concepts|
+
+Canvas
+
+>>
+
+To draw something on the page, we will use an HTML5 canvas.
+We define a client-side function called {{{draw}}} to draw a line.
+Then when the service is called, we want to add dynamically a canvas
+to the page, and draw a line.
+
+Here is the (full) new version of the program:
+
+<<code language="ocaml"|
+{shared{
+  open Eliom_pervasives
+  open HTML5.M
+  let width = 700
+  let height = 400
+}}
+
+module My_appl =
+  Eliom_output.Eliom_appl (
+    struct
+      let application_name = "graffiti"
+    end)
+
+{client{
+  let draw ctx (color, size, (x1, y1), (x2, y2)) =
+    ctx##strokeStyle <- (Js.string color);
+    ctx##lineWidth <- float size;
+    ctx##beginPath();
+    ctx##moveTo(float x1, float y1);
+    ctx##lineTo(float x2, float y2);
+    ctx##stroke()
+}}
+
+let main_service =
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+    (fun () () ->
+       Eliom_services.onload
+         {{
+           let canvas = Dom_html.createCanvas Dom_html.document in
+           let ctx = canvas##getContext (Dom_html._2d_) in
+           canvas##width <- width; canvas##height <- height;
+           ctx##lineCap <- Js.string "round";
+
+           Dom.appendChild Dom_html.document##body canvas;
+
+           draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
+         }};
+      Lwt.return
+        (html
+           (head (title (pcdata "Graffiti")) [] )
+           (body [h1 [pcdata "Graffiti"]]) ) )
+>>
+
+Since we want to draw the canvas only on that page and not on the other (future)
+pages of the site, we use the function {{{Eliom_services.onload}}} to
+describe the code to be executed when this service in called.
+
+<<concept title="Javascript datatypes in OCaml"|
+Note that we use the function {{{Js.string}}} from Js_of_ocaml's library
+to convert OCaml string into JS strings.
+>>
+
+===Single user drawing application===
+
+<<concepts|
+Mouse events with arrows
+>>
+
+We now want to catch mouse events to draw lines with the mouse.  To do
+that, we will use the <<wip-inline title=""|very experimental>>
+<<a_api project="js_of_ocaml"| module Event_arrows >> module from Js_of_ocaml's library.
+
+Add:
+
+<<code language="ocaml"|
+          open Event_arrows
+>>
+
+in client side code (for example just before the draw function) and
+replace the line:
+
+<<code language="ocaml"|
+          draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
+>>
+
+by the following piece of code:
+
+<<code language="ocaml"|
+          let x = ref 0 and y = ref 0 in
+          let set_coord ev =
+            let x0, y0 = Dom_html.elementClientPosition canvas in
+            x := ev##clientX - x0; y := ev##clientY - y0 in
+          let compute_line ev =
+            let oldx = !x and oldy = !y in
+            set_coord ev;
+            ("#ff9933", 5, (oldx, oldy), (!x, !y))
+          in
+          let line ev = draw ctx (compute_line ev) in
+          ignore (run (mousedowns canvas
+                         (arr (fun ev -> set_coord ev; line ev)
+                          >~>> first [mousemoves Dom_html.document (arr line);
+                                     mouseup Dom_html.document >~>> (arr line)])) ());
+>>
+
+Compile, run the program and draw!
+
+We use to references {{{x}}} and {{{y}}} to record the last mouse
+position.  The function {{{set_coord}}} updates these references from
+mouse event data.  The function {{{compute_line}}} computes the
+coordinates of a line from the initial (old) coordinates to the new
+coordinates--the event data sent as a parameter.
+
+The event handling takes place as follows: for each mousedown event on
+the canvas, do {{{set_coord}}} then {{{line}}} (this will draw a dot),
+then behave as the first of the two following lines to terminate:
+
+* For each mousemove event on the document, call {{{line}}} (never terminates)
+* If there is a mouseup event on the document, call {{{line}}}.
+
+<<concept title="Handling events with arrows"|
+
+The module {{{Event_arrows}}} allows us to define event listeners
+easily (using arrows). An arrow from {{{'a}}} to {{{'b}}} has type
+{{{('a, 'b) Event_arrows.t}}}. The operator {{{>>>}}} is used to bind
+the output of an arrow to the input of the following one.
+
+For example {{{(mouseup Dom_html.document)}}} is an arrow from
+{{{unit}}} to {{{Dom_html.mouseEvent Js.t}}}.
+
+The combinator {{{arr}}} transforms a function of type {{{'a -> 'b}}}
+into an arrow of type {{{('a, 'b) Event_arrows.t}}}. There is also a
+combinator {{{lwt_arr}}} to transform a function of type {{{'a -> 'b
+Lwt.t}}} into an arrow of type {{{('a, 'b) Event_arrows.t}}}.
+
+Combinators like {{{mousedowns}}} or {{{mousemoves}}} (ending by "s")
+take as parameters the target of the event and an arrow that will be
+called each time the event occures.
+
+The function
+
+{{{
+Event_arrows.run :('a, unit) t -> 'a -> canceller
+}}}
+
+sets up an event handler. It returns a "canceller" that you can use to cancel
+it:
+
+{{{
+let c = Event_arrows.run ( ... ) in
+...
+Event_arrows.cancel c
+}}}
+
+The combinator {{{first}}} takes a list of arrows and behaves as the first
+to terminate. All the other arrows in the list are cancelled.
+
+>>
+
+<<wip|**Warning** Event arrows will evolve in the near future.>>
+
+=== Collaborative drawing application ===
+
+<<concepts|Client server communication >>
+
+We now want to do the following:
+
+* Send the coordinates to the server when the user draw a line, then
+* Dispatch the coordinates to all connected users.
+
+We first declare a shared type containing the color and coordinates of
+drawn lines.
+
+<<code language="ocaml"|
+{shared{
+type messages = (string * int * (int * int) * (int * int)) deriving (Json)
+}}
+>>
+
+We annotate with {{{deriving (Json)}}} to allow safe deserialization
+of this type. This is defined in the Deriving syntax extension. This
+annotation can only be added on types containing exclusively basics
+type or other types annotated with deriving. For more information, see
+<<a_api project="js_of_ocaml" | module Deriving_Json >>
+
+<<code language="ocaml"|
+let bus = Eliom_bus.create Json.t<messages>
+>>
+
+The value {{{Json.t<messages>}}} describes the contents of messages,
+it is used on server side for deserialization.
+
+To send the coordinates to the server, we just replace the function
+{{{line}}} by:
+
+<<code language="ocaml"|
+           let line ev =
+             let v = compute_line ev in
+             let _ = Eliom_bus.write %bus v in
+             draw ctx v
+           in
+>>
+
+And finaly we draw the lines received by adding the following just
+between the previous definition and the "arrow event handler".
+
+<<code language="ocaml"|
+           let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
+>>
+
+Now you can try the program using two browser windows to see that the lines
+are drawn on both.
+
+<<concept title="Antiquotations: Using server side values in client code"|
+
+Client side code can reference copies of server side values using the
+{{{%varible}}} syntax.  It is currently limited to code included in
+{{{ {{ }} }}} ( not available in top level client code {{{ {client{ }}
+}}} ).  Values sent that way are weakly type checked: the name of the
+client side type must match the server side one: if data type are ment
+to be sent, declare them in {{{ {shared{ }} }}}.
+
+It is not possible to send function, objects and not forced lazy
+values.  For more information, see <<a_manual project="eliom"
+chapter="wrapping" | here >>.
+
+>>
+
+<<concept title="Communication channels"|
+
+Eliom provides multiple ways for the server to send unsolicited datas
+to the client: * <<a_api project="eliom" subproject="server"
+version="dev" | type Eliom_bus.t >> are broadcasting channels where
+client and server can participate (see also <<a_api project="eliom"
+subproject="client" version="dev" | type Eliom_bus.t >> in the client
+api).
+
+* <<a_api project="eliom" subproject="server" version="dev" | module
+  Eliom_react >> Allows to send
+  [[http://erratique.ch/software/react/doc/React|React]] events from
+  the server to the client and conversly.
+* <<a_api project="eliom" subproject="server" version="dev" | type
+  Eliom_comet.Channels.t >> are one way communication channels
+  allowing finer control. It allow sending <<a_api project="lwt" |
+  module Lwt_stream >> to the client.  Eliom_react and Eliom_bus are
+  implemented over it.
+
+It is possible to control the idle behaviour with <<a_api
+project="eliom" subproject="client" version="dev" | module
+Eliom_comet.Configuration >>
+
+>>
+
+===Color and size of the brush===
+
+<<concepts| Widgets with OClosure >>
+
+In this section, we will add two widgets, taken from the OClosure
+widget library. We need to add some stylesheets and one JS file in the
+headers of our page.
+
+<<code language="ocaml"|
+      Lwt.return
+        (html
+           (head
+              (title (pcdata "Graffiti"))
+              [HTML5.M.link ~rel:[ `Stylesheet ]
+                 ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
+                 ();
+               HTML5.M.link ~rel:[ `Stylesheet ]
+                 ~href:(HTML5.M.uri_of_string"./css/common.css")
+                 ();
+               HTML5.M.link ~rel:[ `Stylesheet ]
+                 ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
+                 ();
+               HTML5.M.link ~rel:[ `Stylesheet ]
+                 ~href:(HTML5.M.uri_of_string"./css/slider.css")
+                 ();
+               HTML5.M.script
+                 ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js")]
+                 (HTML5.M.pcdata "");])
+           (body [h1 [pcdata "Graffiti"]]) ) )
+>>
+
+You need to install some stylesheets and images to your static files
+directory.  They are available in the <<a_file src="tutorial.tar.gz"|
+static >> directory.  The file {{{graffiti_oclosure.js}}} is generated
+by the Makefile ( in the {{{ with_oclosure }}} directory ) according
+to the {{{graffiti.js}}} with the following command:
+
+{{{
+oclosure_req graffiti.js
+}}}
+
+Then, to create the slider and color palette, we need to add the
+following code in the {{{onload}}} event handler, immediatly after
+appending the canvas to the page:
+
+<<code language="ocaml"|
+          (* Size of the brush *)
+          let slider = jsnew Goog.Ui.slider(Js.null) in
+          slider##setMinimum(1.);
+          slider##setMaximum(80.);
+          slider##setValue(10.);
+          slider##setMoveToPointEnabled(Js._true);
+          slider##render(Js.some Dom_html.document##body);
+
+          (* The color palette: *)
+          let pSmall =
+            jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
+				     Js.some (Js.string "goog-hsv-palette-sm"))
+          in
+          pSmall##render(Js.some Dom_html.document##body);
+>>
+
+Finally, replace last line of the function {{{compute_line}}} by;
+
+<<code language="ocaml"|
+            let color = Js.to_string (pSmall##getColor()) in
+            let size = int_of_float (Js.to_float (slider##getValue())) in
+            (color, size, (oldx, oldy), (!x, !y))
+>>
+
+Using the Makefile from {{{ with_oclosure }}} directory,
+
+{{{
+make install
+}}}
+
+will copy the needed css and images to your static files directory.
+
+<<concept title="OClosure" |
+
+OClosure is a Js_of_ocaml binding for the Google Closure widget
+library (used for example in GMail, Google calendar or Google Maps).
+You can use it for building complex user interfaces for your Eliom
+application. The full documentation is available [[wiki(33):|here]].
+
+>>
+
+=== Sending the initial image ===
+
+<<concepts|Services sending other data types>>
+
+To finish, we want to save the current drawing on server side and send
+the current image when a new user arrives. To do that, we will use the
+[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml.
+
+The {{{draw_server}}} function below is the equivalent of the
+{{{draw}}} function on the server side (in an ideal world, we would
+have a common interface for canvas so that we could share the code).
+The {{{image_string}}} function outputs the PNG image in a string.
+
+<<code language="ocaml"|
+let rgb_from_string color = (* color is in format "#rrggbb" *)
+  let get_color i = (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255. in
+  try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
+
+let draw_server, image_string =
+  let surface = Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height in
+  let ctx = Cairo.create surface in
+  ((fun ((color : string), size, (x1, y1), (x2, y2)) ->
+
+    (* Set thickness of brush *)
+    Cairo.set_line_width ctx (float size) ;
+    Cairo.set_line_join ctx Cairo.LINE_JOIN_ROUND ;
+    Cairo.set_line_cap ctx Cairo.LINE_CAP_ROUND ;
+    let red, green, blue =  rgb_from_string color in
+    Cairo.set_source_rgb ctx ~red ~green ~blue ;
+
+    Cairo.move_to ctx (float x1) (float y1) ;
+    Cairo.line_to ctx (float x2) (float y2) ;
+    Cairo.close_path ctx ;
+
+    (* Apply the ink *)
+    Cairo.stroke ctx ;
+   ),
+   (fun () ->
+     let b = Buffer.create 10000 in
+     (* Output a PNG in a string *)
+     Cairo_png.surface_write_to_stream surface (Buffer.add_string b);
+     Buffer.contents b
+   ))
+
+let _ = Lwt_stream.iter draw_server (Eliom_bus.stream bus)
+>>
+
+Now we define a service that will send the picture:
+
+<<code language="ocaml"|
+let imageservice =
+  Eliom_output.Text.register_service
+    ~path:["image"]
+    ~get_params:Eliom_parameters.unit
+    (fun () () -> Lwt.return (image_string (), "image/png"))
+>>
+
+<<concept title="Eliom_output"|
+
+The module {{{Eliom_output}}} defines several modules with
+registration functions for a variety of data types. We have already
+seen {{{Eliom_output.Html5}}} and {{{Eliom_output.Eliom_appl}}}.  The
+module {{{Eliom_output.Text}}} sends any text output.  The handler
+function must return a pair consisting of the string and the
+content-type.
+
+There are also several other output modules, for example:
+* {{{Eliom_output.Files}}} to send static files
+* {{{Eliom_output.Redirection}}} to create a redirection towards another page
+* {{{Eliom_output.Any}}} to create services that choose themselves what
+they want to send
+* {{{Eliom_output.Caml}}} to send marshaled OCaml data to be used in a
+client side program
+* {{{Eliom_output.Action}}} to create service with no output
+(the handler function just performs a side effect on the server)
+and reload the current page (or not). We will see an example of actions
+in the next chapter.
+
+>>
+
+We now want to load the initial image once the canvas is created.  Add
+the following lines just between the creation of the canvas and the
+creation of the slider:
+
+<<code language="ocaml"|
+           (* The initial image: *)
+           let img = Dom_html.createImg Dom_html.document in
+           img##alt <- Js.string "canvas";
+           img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:%imageservice ());
+           img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
+>>
+
+This new version of the {{{graffiti.cma}}} module now depends on
+{{{cairo}}}. It is not linked at compile time since we are doing
+plugins, hence we must ask {{{ocsigenserver}}} to load {{{cairo}}}
+before loading {{{graffiti.cma}}}. This is done by adding the
+following line in the configuration file.
+
+{{{
+<extension findlib-package="cairo" />
+}}}
+
+The first version of the program is now complete. Download the code
+<<a_file src="tutorial.tar.gz"|here>>.
+
+<<div class="exercices"|
+
+====Exercises====
+
+* Add an OClosure button to make possible to download the current
+  image and save it to the hard disk (reuse the service
+  {{{imageservice}}}).
+* Add an OClosure button with a color picker to select a color from
+  the drawing.  (Modify mouse events and use the function
+  {{{Dom_html.pixel_get}}}).
+
+>>
