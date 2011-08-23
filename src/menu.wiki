@@ -1,6 +1,5 @@
-= Tutorial
+= Tutorial: Your first application with the Ocsigen framework
 ==[[intro|Introduction]]
-= Your first application with the Ocsigen framework
 ==[[application|Writing a client/server Eliom application]]
 ==[[interaction|Implementing Web Interaction Using Eliom]]
 ==[[misc|Miscellaneous features]]
