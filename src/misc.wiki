@@ -1,6 +1,6 @@
 = Miscellaneous features =
 
-<<outline target="documentation">>
+<<|outline target="documentation">>
 
 //The code of this chapter of the tutorial has been
 tested against the 2.0 release of Eliom.//

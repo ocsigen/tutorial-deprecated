@@ -1,6 +1,6 @@
 <<header| = Writing a client/server Eliom application >>
 
-<<outline target="documentation">>
+<<|outline target="documentation">>
 
 //The code of this tutorial has been tested against
 the 2.0 release of the Ocsigen framework.//
