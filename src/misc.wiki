@@ -1,11 +1,9 @@
 = Miscellaneous features =
 
-<<div class="wip"|
+<<outline target="documentation">>
 
-**Work in progress** The code of this chapter of the tutorial has been
-tested against the 1.91 release of Eliom.
-
->>
+//The code of this chapter of the tutorial has been
+tested against the 2.0 release of Eliom.//
 
 == Multi-user collaborative drawing application ==
 
@@ -315,7 +313,7 @@ CLIENTLIB := -package ocsigen.deriving.syntax -package oclosure -package js_of_o
 It is also needed to add {{{-syntax camlp4o \}}} to commands that doesn't have it.
 
 === Cleaning previous pages ===
-<<div class="concepts"| Cancel threads and arrows\\ close buses>>
+<<concepts| Cancel threads and arrows\\ close buses>>
 
 A problem with the current version is that the client keeps receiving
 data from pages it leaved.
@@ -429,7 +427,7 @@ let login_name_form service button_text =
          ]]) ()
 >>
 
-<<div class="wip"| disconnection does not work yet: it also closes the application >>
+<<wip| disconnection does not work yet: it also closes the application >>
 
 We make a customized registration module such that disconnected users
 (those for which the username reference is not set), are automaticaly
@@ -605,7 +603,7 @@ Download the current versions of the files:
 <<a_file src="multigraffiti_macaque/create_table.sql" | create_table.sql >>
 
 ===Saving favorite pictures===
-<<div class="concepts"|Persitent tables with Ocsipersist\\
+<<concepts|Persitent tables with Ocsipersist\\
 Atom feed>>
 
 We will now add a button to the application to save the current
@@ -732,7 +730,7 @@ Download the current versions of the files:
 <<a_file src="multigraffiti_atom/server.ml" | server.ml >> 
 <<a_file src="multigraffiti_atom/graffiti.eliom" | graffiti.eliom >>
 
-<<div class="encadre"|====  ====
+<<concept title=""|
 >>
 
 ===Connection with external accounts===
@@ -744,11 +742,11 @@ It will show an example of use of this module.>>
 <<code language="ocaml"|
 >>
 
-<<div class="encadre"|====  ====
+<<concept title=""|
 >>
 
 ===listening music===
-<<div class="concepts"|Persistence of the client application\\
+<<concepts|Persistence of the client application\\
 Application container>>
 
 We will add an audio player to the page that will stay when page
@@ -794,7 +792,7 @@ Finally we call {{{launch_music}}} in the page handler.
     Lwt.return ([
 >>
 
-<<div class="encadre"|====  ====
+<<concept title=""|
 >>
 
 To run this example, you will need to add an ogg file in the static directory. If you can't find one, there are some [[http://www.gnu.org/music/free-software-song.html|here]]
@@ -804,7 +802,7 @@ Download the current versions of the files:
 <<a_file src="multigraffiti_audio/graffiti.eliom" | graffiti.eliom >>
 
 ===???===
-<<div class="concepts"|Other features: Client side service calls ...\\
+<<concepts|Other features: Client side service calls ...\\
 Client side forms ...\\
 **LWT** -> où ????????????,>>
 bla\\bla\\bla\\bla\\
@@ -812,5 +810,5 @@ bla\\bla\\bla\\bla\\
 <<code language="ocaml"|
 >>
 
-<<div class="encadre"|====  ====
+<<concept title=""|
 >>

@@ -1,9 +1,9 @@
 =Implementing Web Interaction Using Eliom=
 
+<<outline target="documentation">>
+
 //The code of this tutorial has been tested against
 the 2.0 release of the Ocsigen framework.//
-
-<<outline>>
 
 This chapter is a tutorial explaining how to create a small Web site
 with several pages, users, sessions, etc. Then, to show that we can
@@ -15,7 +15,7 @@ We assume you have read at least the first section of the previous
 chapter, which explained how to create a service and constuct valid
 HTML pages.
 
-We will create a simple Web site wi␘th one main page and a page for
+We will create a simple Web site with one main page and a page for
 each user (assuming we have several users already created).  Then we
 will add a login/connection form. <<span class="wip"|We will also
 ... //(dynamic services)//>>
@@ -29,8 +29,6 @@ The <<a_file src="tutorial.tar.gz"|full code>> of the program can be
 downloaded.
 
 == Services ==
-
-<<span class="wip"|titre>>
 
 === The main page ===
 
@@ -64,7 +62,7 @@ the site.
 
 === Adding a page for each user ===
 
-<<div class="concepts"|
+<<concepts|
 
 Services with parameters\\
 Using parts of the path as parameters
@@ -88,9 +86,7 @@ Add these lines to the same file, compile, start the server and verify
 that everything is working by trying, for example:
 {{{http://localhost:8080/?name=toto}}}.
 
-<<div class="encadre"|
-
-==== Paths ====
+<<concept title="Paths" |
 
 Note that we are using the same path as the first service.  Eliom will
 automatically call the right service according to the parameters given
@@ -98,9 +94,7 @@ in the request.
 
 >>
 
-<<div class="encadre"|
-
-==== Services with parameters ====
+<<concept title="Services with parameters" |
 
 To define a service that accepts parameters in the URL (GET
 parameters), just add a description of the parameters you want in the
@@ -160,9 +154,7 @@ let user_service =
 The user pages are now available at URLs <<span
 class="code"|~http:~//localhost:8080/users~///username//>>.
 
-<<div class="encadre"|
-
-==== Using parts of the path as page parameters ====
+<<concept title="Using parts of the path as page parameters" |
 
 The module <<a_api project="eliom" | module Eliom_parameters >> makes
 it possible to use parts of the path as service (GET) parameters.
@@ -187,7 +179,7 @@ redirected towards the suffix version).
 
 === Links ===
 
-<<div class="concepts"|
+<<concepts|
 Links \\
 Database libraries
 >>
@@ -205,9 +197,7 @@ Change the handler of {{{user_service}}} into:
                        p [Eliom_output.Html5.a ~service:main_service [pcdata "Home"] ()]])))
 >>
 
-<<div class="encadre"|
-
-==== Creating hyperlinks ====
+<<concept title="Creating hyperlinks" |
 
 To create a link, one could use the function {{{HTML5.M.a}}}, but this
 requires us to provide the text of the URL to put in the {{{href}}}
@@ -281,9 +271,7 @@ let _ =
                               p [Eliom_output.Html5.a ~service:main_service [pcdata "Home"] ()]])))
 >>
 
-<<div class="encadre"|
-
-==== Mutually recursive services ====
+<<concept title="Mutually recursive services" |
 
 As my two services are mutually recursive (the first one contains
 links towards the second one and vice versa), we split the
@@ -298,9 +286,7 @@ The function {{{register_service}}} is just a shortcut for these two functions.
 
 >>
 
-<<div class="encadre"|
-
-==== Database libraries ====
+<<concept title="Database libraries" |
 
 Ultimately we'll want to use a more sophisticated database module for
 managing user information, which we will write later in this tutorial.
@@ -326,7 +312,7 @@ executed by a separate preemptive thread.
 
 === Connection service ===
 
-<<div class="concepts"|
+<<concepts|
 
 Services with hidden (POST) parameters\\
 Fallback service
@@ -347,9 +333,7 @@ let connection_service =
     ()
 >>
 
-<<div class="encadre"|
-
-==== Hidden (POST) services ====
+<<concept title="Hidden (POST) services" |
 
 Services using the POST HTTP method are created using the function
 <<a_api project="eliom" version="dev" | val
@@ -370,7 +354,7 @@ possible to mix GET and POST parameters in the same form.
 
 >>
 
-<<div class="encadre" |
+<<concept |
 
 ==== POST or GET? ====
 
@@ -416,7 +400,7 @@ let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> fals
 
 === Connection form ===
 
-<<div class="concepts"|
+<<concepts|
 
 Forms
 
@@ -444,9 +428,7 @@ let connection_box () =
 Now, add a call to this function in the handler of the main service
 (for example just before the user links).
 
-<<div class="encadre"|
-
-==== Forms ====
+<<concept title="Forms" |
 
 Form creation is very similar to link creation, using the functions
 <<a_api project="eliom" version="dev" | val
@@ -477,7 +459,7 @@ Eliom_output.Html5.int_input >> as it is a name for a string.  >>
 
 === Opening a session ===
 
-<<div class="concepts"|
+<<concepts|
 
 Session data, Eliom references
 
@@ -543,9 +525,7 @@ let connection_box () =
                      user_links ()])))
 >>
 
-<<div class="encadre"|
-
-==== More on Lwt ====
+<<concept title="More on Lwt" |
 
 Function {{{Eliom_references.get}}} has type {{{'a
 Eliom_references.eref -> 'a Lwt.t}}}.  The only way to use the result
@@ -607,9 +587,7 @@ functions can cause the entre server to hang!// Remember:
 
 >> <<| END "encadre" >>
 
-<<div class="encadre"|
-
-==== Eliom references ====
+<<concept title="Eliom references" |
 
 Eliom references are a type of references with scope limited to either
 a session (by default), a client-side process
@@ -632,7 +610,7 @@ restart. To do that, add the optional parameter {{{persistent}}} to
 the {{{eref}}} function, with a string value corresponding to the name
 of the table that will contain the values on disk.
 
-<<div class="wip"|
+<<wip|
 
 For now you need to rename this table every time you change the type
 of your Eliom reference, otherwise the server will crash (we are using
@@ -647,7 +625,7 @@ It is not possible to create Eliom references containing functions
 
 === Display the usual page after connection ===
 
-<<div class="concepts"|
+<<concepts|
 
 Actions
 
@@ -672,9 +650,7 @@ of the connection service by:
 
 Now the main page is displayed after connection.
 
-<<div class="encadre"|
-
-==== Actions ====
+<<concept title="Actions" |
 
 An //action// is a service that performs a side effect and redisplays
 the current page. The handler function returns {{{()}}}.
@@ -683,16 +659,14 @@ the current page. The handler function returns {{{()}}}.
 
 === Putting a connection form on each page ===
 
-<<div class="concepts"|
+<<concepts|
 
 Non-attached coservices\\
 Redirections
 
 >>
 
-<<div class="encadre"|
-
-==== Non-attached coservices ====
+<<concept title="Non-attached coservices" |
 
 With many Web programming frameworks, adding a connection form on each
 page of a site is complicated, and is approached in one of two ways:
@@ -748,9 +722,7 @@ let connection_service =
                               p [Eliom_output.Html5.a ~service:main_service [pcdata "Home"] ()]])));
 >>
 
-<<div class="encadre"|
-
-==== Altenative: register a redirection ====
+<<concept title="Altenative: register a redirection" |
 
 Usually, after sending a POST form, it is good practice to do a
 redirection.  This avoids reposting the data if the user reloads the
@@ -779,7 +751,7 @@ case), use the special service <<a_api project="eliom" version="dev" |
 val Eliom_services.void_coservice' >>, which is some kind of POST
 non-attached coservice without parameter at all.  >>
 
-<<div class="wip"| Proof-read this section and the previous one >>
+<<wip| Proof-read this section and the previous one >>
 
 === Disconnection ===
 
@@ -820,7 +792,7 @@ let connection_box () =
 
 === Basic registration form ===
 
-<<div class="concepts"|
+<<concepts|
 
 Attached coservice
 
@@ -884,9 +856,7 @@ let connection_box () =
             )
 >>
 
-<<div class="encadre"|
-
-==== Attached coservice ====
+<<concept title="Attached coservice" |
 
 Here I want to return to the main page after account creation.  I'm
 using an //attached coservice//, that is, a service that is identified
@@ -905,7 +875,7 @@ are made for.
 
 === Registration form with confirmation ===
 
-<<div class="concepts"|
+<<concepts|
 
 Dynamic registration of services\\
 Session services
@@ -953,9 +923,7 @@ Also remove the registration of the {{{create_account_service}}}
 service and modify the user creation form to make it points towards
 {{{account_confirmation_service}}}.
 
-<<div class="encadre"|
-
-==== Dynamic creation of services ====
+<<concept title="Dynamic creation of services" |
 
 In this example, we are dynamically creating a new service (here a
 coservice that does an action).  This is done by the same
@@ -1007,9 +975,7 @@ function.
 
 >> <<| END "encadre" >>
 
-<<div class="encadre"|
-
-==== Session services ====
+<<concept title="Session services" |
 
 Eliom also makes it possible to restrict the scope of services to a
 session, a group of sessions, or even a client side process (if you
@@ -1033,10 +999,8 @@ example when she logs in.
 
 === Displaying a "wrong password" message ===
 
-<<div class="concepts"|
-
-<<span class="wip"|todo>>
-
+<<concepts|
+Scope request
 >>
 
 In the current version, our Web site fails silently when the password
@@ -1094,7 +1058,7 @@ let connection_box () =
 
 === Sending 404 errors for non-existing users ===
 
-<<div class="concepts"|
+<<concepts|
 
 Sending 404\\
 {{{Eliom_output.Any}}}
@@ -1130,9 +1094,7 @@ Eliom_output.Eliom_appl >> to register the service {{{user_service}}}:
     );
 >>
 
-<<div class="encadre"|
-
-==== {{{Eliom_output.Any}}} ====
+<<concept title="{{{Eliom_output.Any}}}" |
 
 The module <<a_api project="eliom" version="dev" | module
 Eliom_output.Eliom_appl >> can be used to create services that are
@@ -1144,7 +1106,7 @@ response code (here, we choose to use 404) or to set HTTP headers.
 
 >>
 
-<<div class="wip"|
+<<wip|
 
 In the future, we may add functions like {{{set_http_code}}} or
 {{{set_http_header}}} to personalize the answer without using
@@ -1154,7 +1116,7 @@ In the future, we may add functions like {{{set_http_code}}} or
 
 === Using customized output module to simplify getting user data ===
 
-<<div class="concepts"|
+<<concepts|
 
 {{{Eliom_output.Customize}}}
 
