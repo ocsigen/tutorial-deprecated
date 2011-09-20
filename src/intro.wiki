@@ -4,7 +4,7 @@
 
 ==Overview of the tutorial==
 This tutorial is an overview of the main features of the Ocsigen framework.
-It explains how to program web sites and client-server web applications in
+It explains how to program Web sites and client-server Web applications in
 //OCaml// using //Eliom//, //Lwt//, //Js~_of~_ocaml// and the other
 software of the Ocsigen project.
 Read it to understand the basics, 
@@ -23,8 +23,8 @@ the problem to the package maintainers. We recommend to use the source
 packages only if you want to test unreleased features from development
 versions.
 
-The reminder of this introduction is an overview of the main projects
-we have. In the following chapters, we will show how to build
+The reminder of this introduction is an overview of our main
+software projects. In the following chapters, we will show how to build
 step by step a small client/server Web application.
 
 <<wip|
@@ -87,29 +87,31 @@ complex configurations of sites.
 ===Eliom===
             
 Eliom is an extension for //Ocsigen server//
-that allows the creation of client/server web applications (or traditional dynamic websites) in OCaml.
+that allows the creation of client/server Web applications (or traditional dynamic Websites) in OCaml.
 It implements many new concepts, and as a result, its approach to application development is very different 
-from all other web programming tools.
+from all other Web programming tools.
 
 ==== High level primitives ====
-Eliom enables the creation of complex web sites in very few lines of code, by providing high level programming primitives for many aspects of web programming: communication between the client and the server, implementation of complex web interaction, sessions, etc.
-<<span class="wip"|continuations?>>
+Eliom enables the creation of complex Web sites in very few lines of code, by providing high level programming primitives for many aspects of Web programming: communication between the client and the server, implementation of complex Web interaction, sessions, etc.
+<<wip-inline|continuations?>>
 
 ==== Static typing ====
-Eliom also improves the stability of your application by  making extensive use of OCaml's static typing. For example, the validity of pages (e.g. well-formed HTML) is checked at compile time!  Moreover, Eliom also statically checks, for example, that your web site does not contain broken links or that the parameters in a link or a form correspond to the service it leads to (and many other things).
+Eliom also improves the stability of your application by  making extensive use of OCaml's static typing. For example, the validity of pages (e.g. well-formed HTML) is checked at compile time!  Moreover, Eliom also statically checks, for example, that your Web site does not contain broken links or that the parameters in a link or a form correspond to the service it leads to (and many other things).
 
 ==== A client/server application in one piece of code! ====
-But one of the most significant features of Eliom is that it allows to program both sides of a web application as a single program. The client side parts are automatically extracted and compiled into Javascript to be executed in the browser. The communication between the server is straightforward (in both directions!), as you can use server side values in the client side code.
+But one of the most significant features of Eliom is that it allows to program both sides of a Web application as a single program. The client side parts are automatically extracted and compiled into Javascript to be executed in the browser. The communication between the server is straightforward (in both directions!), as you can use server side values in the client side code.
 
 Note that client side features can be mixed with traditional Web interaction
 (links, forms, bookmarks, back button ...)
 
 ==== Security ====
-Eliom helps you to make your web application secure by automatically addressing several common security issues (code injection, session fixation~ ...) and by providing features to implement very secure behaviours (avoiding for example "cross-site request forgery").\\
+Eliom helps you to make your Web application secure by automatically addressing several common security issues (code injection, session fixation~ ...) and by providing features to implement very secure behaviours (avoiding for example "cross-site request forgery").\\
 
 
 ===Lwt===
 //Lwt// is a cooperative thread library for OCaml.
+It is used by Ocsigen server and Eliom (and many external projects).
+All you're Web sites must be written in Lwt-compatible way!
 
 ===Js_of_ocaml===
 //Js_of_ocaml// is a compiler of OCaml bytecode to Javascript. It makes it possible to run Ocaml programs in a Web browser. Its key features are the following:
@@ -124,7 +126,7 @@ using comprehensions.
 
 ===O'Closure===
 //O'Closure// is a binding for the Google Closure Javascript widget library.
-It makes possible to write dynamic user interfaces for web pages in OCaml
+It makes possible to write dynamic user interfaces for Web pages in OCaml
 using Js_of_ocaml.
 
 

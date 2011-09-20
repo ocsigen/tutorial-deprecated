@@ -1,11 +1,7 @@
 <<header| = Writing a client/server Eliom application >>
 
-<<wip|
-
-The code of this tutorial has been tested against
-the 2.0-rc1 release of the Ocsigen bundle.
-
->>
+//The code of this tutorial has been tested against
+the 2.0 release of the Ocsigen framework.//
 
 This chapter and the two following ones are an overview of the
 features the Ocsigen framework brings to build Web applications.  They
@@ -56,7 +52,7 @@ application.  In this chapter, you will learn how to:
 * Add an Atom stream
 
 If you are not interested in client-side programming you can safely
-skip most of the first chapter (although I recommend you read at least
+skip most of the first chapter (although we recommend you read at least
 the first section, which explains the basics). Conversely, if you are
 not interested in standard Web interactions, with sessions links, and
 forms, you can skip the second chapter.
@@ -171,7 +167,7 @@ loaded, etc.), and something like:
 These instructions tell the server to:
 
 * serve files from the directory <<code-inline|
-  ~///path_to///graffiti >> if they exists,
+  ~///path_to///graffiti >> if they exist,
 * generate pages from service in the Eliom application
   {{{graffiti.cmo}}} otherwise.
 
@@ -189,7 +185,7 @@ version="dev"| module Eliom_output.Html5 >>. This module defines a
 construction function for each HTML5 tag.
 
 //Note that it is also possible to use <<a_manual project="eliom"
-chapter="xhtml" version="dev" | the usual HTML syntax>>.//
+chapter="xhtml" | the usual HTML syntax>>.//
 
 Typing of HTML with <<a_api project="tyxml" version="dev"| module
 HTML5.M >> and <<a_api project="tyxml" version="dev"| module XHTML.M
@@ -238,8 +234,8 @@ pages afterwards.//
 
 A more detailed introduction to <<code-inline|HTML5.M>> is
 available in the <<a_manual project="eliom" chapter="xhtml"
-version="dev" | eliom manual >> and <<a_api project="tyxml"
-text="TyXML reference API" version="dev" | module HTML5.M >>.
+| eliom manual >> and <<a_api project="tyxml"
+text="TyXML reference API" | module HTML5.M >>.
 
 >>
 
@@ -265,7 +261,7 @@ Compiling a Web application with server and client parts\\
 Calling Javascript methods with Js_of_ocaml
 >>
 
-To create our first service, we used the function <<a_api | val
+To create our first service, we used the function <<a_api project="eliom" | val
 Eliom_output.Html5.register_service>>, as we wanted to return HTML5.
 
 But actually we want our service to send an Eliom application.  To do
@@ -620,23 +616,23 @@ chapter="wrapping" | here >>.
 
 Eliom provides multiple ways for the server to send unsolicited datas
 to the client: * <<a_api project="eliom" subproject="server"
-version="dev" | type Eliom_bus.t >> are broadcasting channels where
+| type Eliom_bus.t >> are broadcasting channels where
 client and server can participate (see also <<a_api project="eliom"
-subproject="client" version="dev" | type Eliom_bus.t >> in the client
+subproject="client" | type Eliom_bus.t >> in the client
 api).
 
-* <<a_api project="eliom" subproject="server" version="dev" | module
+* <<a_api project="eliom" subproject="server" | module
   Eliom_react >> Allows to send
   [[http://erratique.ch/software/react/doc/React|React]] events from
   the server to the client and conversly.
-* <<a_api project="eliom" subproject="server" version="dev" | type
+* <<a_api project="eliom" subproject="server" | type
   Eliom_comet.Channels.t >> are one way communication channels
   allowing finer control. It allow sending <<a_api project="lwt" |
   module Lwt_stream >> to the client.  Eliom_react and Eliom_bus are
   implemented over it.
 
 It is possible to control the idle behaviour with <<a_api
-project="eliom" subproject="client" version="dev" | module
+project="eliom" subproject="client" | module
 Eliom_comet.Configuration >>
 
 >>
