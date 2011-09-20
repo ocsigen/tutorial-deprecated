@@ -17,8 +17,10 @@ HTML pages.
 
 We will create a simple Web site with one main page and a page for
 each user (assuming we have several users already created).  Then we
-will add a login/connection form. <<span class="wip"|We will also
-... //(dynamic services)//>>
+will add a login/connection form. We will also add a registration
+form, in order to learn how to create //dynamically// new services,
+and why it is very useful.
+
 
 On the following chapter, we will mix this site with the application
 of the previous chapter, and add a music. Finally, we will add an
@@ -294,7 +296,7 @@ You can use any OCaml database binding (for example
 [[http://developer.berlios.de/projects/pgocaml/|PGOcaml]] to program
 database queries). We will use our own database library called
 [[wiki(25):|Macaque]], which implements typed requests using
-//comprehensions//.  (See <<span class="wip"|???>>)
+//comprehensions//.
 
 //Just remember that your query functions must be cooperative with
 Lwt!// For example PGOcaml is now implemented in monadic way, which
@@ -354,9 +356,7 @@ possible to mix GET and POST parameters in the same form.
 
 >>
 
-<<concept |
-
-==== POST or GET? ====
+<<concept title="POST or GET?" |
 
 POST parameters are sent in the body of the HTTP request (whereas GET
 parameters are sent in the URL).  It is important to understand that
