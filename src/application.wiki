@@ -454,7 +454,7 @@ Mouse events with arrows
 >>
 
 We now want to catch mouse events to draw lines with the mouse.  To do
-that, we will use the <<wip-inline title=""|very experimental>>
+that, we will use the <<wip-inline title=""|experimental>>
 <<a_api project="js_of_ocaml"| module Event_arrows >> module from Js_of_ocaml's library.
 
 Add:
@@ -601,8 +601,8 @@ are drawn on both.
 
 Client side code can reference copies of server side values using the
 {{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} ( not available in top level client code {{{ {client{ }}
-}}} ).  Values sent that way are weakly type checked: the name of the
+{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
+}}}).  Values sent that way are weakly type checked: the name of the
 client side type must match the server side one: if data type are ment
 to be sent, declare them in {{{ {shared{ }} }}}.
 
@@ -671,7 +671,7 @@ headers of our page.
 You need to install some stylesheets and images to your static files
 directory.  They are available in the <<a_file src="tutorial.tar.gz"|
 static >> directory.  The file {{{graffiti_oclosure.js}}} is generated
-by the Makefile ( in the {{{ with_oclosure }}} directory ) according
+by the Makefile (in the {{{ with_oclosure }}} directory) according
 to the {{{graffiti.js}}} with the following command:
 
 {{{
@@ -809,11 +809,11 @@ the following lines just between the creation of the canvas and the
 creation of the slider:
 
 <<code language="ocaml"|
-           (* The initial image: *)
-           let img = Dom_html.createImg Dom_html.document in
-           img##alt <- Js.string "canvas";
-           img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:%imageservice ());
-           img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
+(* The initial image: *)
+let img = Dom_html.createImg Dom_html.document in
+img##alt <- Js.string "canvas";
+img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:%imageservice ());
+img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
 >>
 
 This new version of the {{{graffiti.cma}}} module now depends on

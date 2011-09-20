@@ -1,11 +1,9 @@
 =Implementing Web Interaction Using Eliom=
 
-<<div class="wip"|
+//The code of this tutorial has been tested against
+the 2.0 release of the Ocsigen framework.//
 
-**Work in progress** The code of this tutorial has been tested against
-the 2.0-rc1 release of the Ocsigen bundle.
-
->>
+<<outline>>
 
 This chapter is a tutorial explaining how to create a small Web site
 with several pages, users, sessions, etc. Then, to show that we can
