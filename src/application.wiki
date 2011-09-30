@@ -305,14 +305,14 @@ to the program:
 >>
 
 As you can see, we are using a syntax extension to distinguish between
-server and client code in the same file. Take the {{{Makefile}}} and
-{{{graffiti.conf}}} files provided in directory <<a_file
-src="tutorial.tar.gz"| chapter1/no_oclosure >>. You may want to adapt
-the configuration file to set some paths, especially the directory for
-static files. (To make things easier for the tutorial, you can use
-your source directory but keep in mind that it is not necessary (and
-sometimes dangerous) to put {{{.ml}}} and {{{.cma}}}/{{{.cmo}}} in the
-static files directory!)
+server and client code in the same file. Take the {{{Makefile}}},
+{{{graffiti.conf}}} and {{{.depend}}} files provided in directory
+<<a_file src="tutorial.tar.gz"| chapter1/no_oclosure >>. You may want
+to adapt the configuration file to set some paths, especially the
+directory for static files. (To make things easier for the tutorial,
+you can use your source directory but keep in mind that it is not
+necessary (and sometimes dangerous) to put {{{.ml}}} and
+{{{.cma}}}/{{{.cmo}}} in the static files directory!)
 
 The default {{{Makefile}}} recognizes files using Eliom's syntax extension by
 their extension {{{.eliom}}} (instead of {{{.ml}}}).
