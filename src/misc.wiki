@@ -302,7 +302,7 @@ And we finally register the service.
 We now need to change the makefile to adapt to these changes. First,
 we add the files to the list of files wich need to be compiled. The
 order is important, the makefile does not resolve dependencies.
-<<code language="Makefile"|
+<<code language="make"|
 SERVER_FILES := common.ml server.ml ${wildcard *.eliom}
 CLIENT_FILES := common.ml client.ml ${wildcard *.eliom}
 >>
@@ -313,7 +313,7 @@ add its package. It was not useful for compilation of
 {{{graffiti.eliom}}} file as the syntax of eliom files depends on the
 package {{{deriving-ocsigen.syntax}}}.
 >>
-<<| NOT NEEDED ANYMORE? code language="Makefile"|
+<<| NOT NEEDED ANYMORE? code language="make"|
 SERVER_PACKAGE := cairo, deriving-ocsigen.syntax
 CLIENT_PACKAGE := oclosure, deriving-ocsigen.syntax
 caml.
@@ -460,7 +460,7 @@ module Connected_translate =
 struct
   type page = string -> [ HTML5_types.body_content_fun ] HTML5.M.elt list Lwt.t
   let translate page =
-    Eliom_references.get username >>= function
+    Eliom_references.get username ~>>= function
       | None -> Lwt.return (create_page (default_content ()))
       | Some username -> page username >|= fun v -> 
         create_page ((disconnect_box ())::v)
@@ -512,18 +512,18 @@ database. For more information on how to set up and run it, see
 manual]].
 
 When the base is up and running, we create the base by running is a shell:
-<<code language="shell"| $ createdb testbase >>
+<<code language="sh"| $ createdb testbase >>
 
 Then we create the {{{users}}} table, by executing this sql script:
 
-<<code language="sql"| CREATE TABLE users ( 
+<<code language="sql"| CREATE TABLE users (
        login text NOT NULL,
        password text NOT NULL
 ); >>
 
 We save it under {{{create_table.sql}}} and run
 
-<<code language="shell"| $ psql -d testbase -f create_table.sql >>
+<<code language="sh"| $ psql -d testbase -f create_table.sql >>
 
 We will replace our basic user handling code:
 
