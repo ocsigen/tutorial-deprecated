@@ -205,8 +205,9 @@ let choose_drawing_form () =
 
 let graffiti_oclosure =
   unique (HTML5.M.script
-            ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js")
-               ] (HTML5.M.pcdata ""))
+            ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js");
+                HTML5.M.a_mime_type "application/javascript"]
+	    (HTML5.M.pcdata ""))
 
 let create_page content =
   (html
@@ -215,15 +216,19 @@ let create_page content =
         [
           HTML5.M.link ~rel:[ `Stylesheet ]
             ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
+            ~a:[HTML5.M.a_mime_type "text/css"]
             ();
           HTML5.M.link ~rel:[ `Stylesheet ]
             ~href:(HTML5.M.uri_of_string"./css/common.css")
+            ~a:[HTML5.M.a_mime_type "text/css"]
             ();
           HTML5.M.link ~rel:[ `Stylesheet ]
             ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
+            ~a:[HTML5.M.a_mime_type "text/css"]
             ();
           HTML5.M.link ~rel:[ `Stylesheet ]
             ~href:(HTML5.M.uri_of_string"./css/slider.css")
+            ~a:[HTML5.M.a_mime_type "text/css"]
             ();
           graffiti_oclosure
         ]
