@@ -653,8 +653,8 @@ let make_filename name number =
   dir ^ "/" ^ (string_of_int number) ^ ".png"
 
 let save image name number =
-  make_filename name number >>= fun file_name ->
-  Lwt_io.open_file ~mode:Lwt_io.output file_name >>= fun out_chan ->
+  make_filename name number ~>>= fun file_name ->
+  Lwt_io.open_file ~mode:Lwt_io.output file_name ~>>= fun out_chan ->
   Lwt_io.write out_chan image
 >>
 
@@ -675,9 +675,9 @@ The first integer is the name under wich will be saved the image, the first time
   Lwt.catch
     (fun () -> Ocsipersist.find image_info_table username)
     (function Not_found -> Lwt.return (0,now,[]) | e -> Lwt.fail e )
-  >>= fun (number,_,list) ->
+  ~>>= fun (number,_,list) ->
   Ocsipersist.add image_info_table username (number+1,now,(number,now)::list)
-  >>= fun () ->
+  ~>>= fun () ->
   let (_,image_string) = Hashtbl.find graffiti_info username in
   save (image_string ()) username number
 
