@@ -23,6 +23,7 @@ variable, like the bus, in local ones.
 Download the <<a_file src="tutorial.tar.gz"|full code>> of the example.
 
 ===Split application into multiple files===
+<<concepts| Complex eliom project\\Unique elements>>
 
 When an application grows, it start being useful to split it in
 multiple files. For sake of example, we will split graffiti into 4
@@ -46,7 +47,7 @@ let height = 400>>
 
 It is almost the same code as what was enclosed in {{{ {client{ ... }} }}}
 with the difference that what was previously in
-{{{ Eliom_services.onload {{ }} }}} is now in the function, {{{ launch_client_canvas }}}.
+{{{ Eliom_services.onload {{ }} }}} is now in the function, {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|open Eliom_pervasives
 open Common
@@ -66,21 +67,19 @@ document as it would then stay at the bottom of the page after page
 change. We now append it to an element of the page that is newly
 generated: {{{canvas_box}}}.
 
-<<wip|Better: use a unique node for this!>>
-
-<<code language="ocaml"|let launch_client_canvas bus imageservice canvas_box =
-  let canvas = Dom_html.createCanvas Dom_html.document in
+<<code language="ocaml"|
+let launch_client_canvas bus imageservice canvas_elt =
+  let canvas = Eliom_client.Html5.of_canvas canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
-  canvas##width <- width; canvas##height <- height;
   ctx##lineCap <- Js.string "round";
 
   (* The initial image: *)
   let img = Dom_html.createImg Dom_html.document in
   img##alt <- Js.string "canvas";
-  img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:imageservice ());
-  img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
-
-  Dom.appendChild canvas_box canvas;
+  img##src <- Js.string
+    (Eliom_output.Html5.make_string_uri ~service:imageservice ());
+  img##onload <- Dom_html.handler
+    (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
 
   (* Size of the brush *)
   let slider = jsnew Goog.Ui.slider(Js.null) in
@@ -88,10 +87,17 @@ generated: {{{canvas_box}}}.
   slider##setMaximum(80.);
   slider##setValue(10.);
   slider##setMoveToPointEnabled(Js._true);
-  slider##render(Js.some canvas_box);
-  
+  slider##render(Js.some Dom_html.document##body);
+
   (* The color palette: *)
-  let pSmall = 
+  let pSmall =
+    jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
+                             Js.some (Js.string "goog-hsv-palette-sm"))
+  in
+  pSmall##render(Js.some Dom_html.document##body);
+
+  (* The color palette: *)
+  let pSmall =
     jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
                              Js.some (Js.string "goog-hsv-palette-sm"))
   in
@@ -101,7 +107,7 @@ generated: {{{canvas_box}}}.
   let set_coord ev =
     let x0, y0 = Dom_html.elementClientPosition canvas in
     x := ev##clientX - x0; y := ev##clientY - y0 in
-  let compute_line ev = 
+  let compute_line ev =
     let oldx = !x and oldy = !y in
     set_coord ev;
     let color = Js.to_string (pSmall##getColor()) in
@@ -115,9 +121,10 @@ generated: {{{canvas_box}}}.
   in
   let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   ignore (run (mousedowns canvas
-		 (arr (fun ev -> set_coord ev; line ev)
-			      >~>> first [mousemoves Dom_html.document (arr line);
-					 mouseup Dom_html.document >~>> (arr line)])) ())
+                 (arr (fun ev -> set_coord ev; line ev)
+                          >~>> first [mousemoves Dom_html.document (arr line);
+                                      mouseup Dom_html.document >~>>
+                                        (arr line)])) ())
 >>
 
 ===={{{server.ml}}}====
@@ -134,16 +141,19 @@ module My_appl =
     end)
 
 let rgb_from_string color = (* color is in format "#rrggbb" *)
-  let get_color i = (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255. in
+  let get_color i =
+    (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255.
+  in
   try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
 >>
 
 The main difference is that the bus and the {{{image_string}}} are now local.
 <<code language="ocaml"|let launch_server_canvas () =
   let bus = Eliom_bus.create Json.t<messages> in
-  
+
   let draw_server, image_string =
-    let surface = Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height in
+    let surface = Cairo.image_surface_create
+      Cairo.FORMAT_ARGB32 ~width ~height in
     let ctx = Cairo.create surface in
     ((fun ((color : string), size, (x1, y1), (x2, y2)) ->
 
@@ -157,7 +167,7 @@ The main difference is that the bus and the {{{image_string}}} are now local.
       Cairo.move_to ctx (float x1) (float y1) ;
       Cairo.line_to ctx (float x2) (float y2) ;
       Cairo.close_path ctx ;
-      
+
       (* Apply the ink *)
       Cairo.stroke ctx ;
      ),
@@ -189,10 +199,11 @@ formulary to choose to wich drawing you want to go. The application is
 launched by the {{{multigraffiti_service}}} service. It is registered
 in {{{graffiti.eliom}}}.
 
-<<code language="ocaml"|let main_service = Eliom_services.service ~path:[""]
+<<code language="ocaml"|
+let main_service = Eliom_services.service ~path:[""]
   ~get_params:(Eliom_parameters.unit) ()
-let multigraffiti_service = Eliom_services.coservice ~fallback:main_service
-  ~get_params:(Eliom_parameters.string "name") ()
+let multigraffiti_service = Eliom_services.service ~path:[""]
+  ~get_params:(Eliom_parameters.suffix (Eliom_parameters.string "name")) ()
 
 let choose_drawing_form () =
   Eliom_output.Html5.get_form ~service:multigraffiti_service
@@ -203,44 +214,59 @@ let choose_drawing_form () =
           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Go" ()
          ]])
 
-let graffiti_oclosure =
-  unique (HTML5.M.script
-            ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js");
-                HTML5.M.a_mime_type "application/javascript"]
-	    (HTML5.M.pcdata ""))
+let oclosure_script =
+    HTML5.M.unique
+      (Eliom_output.Html5_forms.js_script
+         ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ())
 
-let create_page content =
-  (html
-     (head
-	(title (pcdata "Graffiti"))
-        [
-          HTML5.M.link ~rel:[ `Stylesheet ]
-            ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
-            ~a:[HTML5.M.a_mime_type "text/css"]
-            ();
-          HTML5.M.link ~rel:[ `Stylesheet ]
-            ~href:(HTML5.M.uri_of_string"./css/common.css")
-            ~a:[HTML5.M.a_mime_type "text/css"]
-            ();
-          HTML5.M.link ~rel:[ `Stylesheet ]
-            ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
-            ~a:[HTML5.M.a_mime_type "text/css"]
-            ();
-          HTML5.M.link ~rel:[ `Stylesheet ]
-            ~href:(HTML5.M.uri_of_string"./css/slider.css")
-            ~a:[HTML5.M.a_mime_type "text/css"]
-            ();
-          graffiti_oclosure
-        ]
-     )
-     (body content))
+let make_page body =
+  Lwt.return
+    (HTML5.M.html
+       (HTML5.M.head
+	  (HTML5.M.title (HTML5.M.pcdata "Graffiti"))
+ 	  [
+            HTML5.M.link ~rel:[ `Stylesheet ]
+              ~href:(HTML5.M.uri_of_string"./css/closure/common.css")
+              ();
+            HTML5.M.link ~rel:[ `Stylesheet ]
+              ~href:(HTML5.M.uri_of_string"./css/closure/hsvpalette.css")
+              ();
+            HTML5.M.link ~rel:[ `Stylesheet ]
+              ~href:(HTML5.M.uri_of_string"./css/slider.css")
+              ();
+            oclosure_script;
+	    HTML5.M.link ~rel:[ `Stylesheet ]
+	      ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
+              ();
+          ])
+       (HTML5.M.body body))
 
 let () = My_appl.register ~service:main_service
   (fun () () ->
-    Lwt.return (create_page [h1 [pcdata "Welcome to Multigraffiti"];
-	                     choose_drawing_form ()]))
+    make_page [h1 [pcdata "Welcome to Multigraffiti"];
+	       choose_drawing_form ()])
 >>
 
+<<concept title="Unique scripts" |
+
+  Sometimes we need to control when a script is loaded and reloaded on
+  page change.  Since clicking on links in eliom application do not
+  reload the entire page, already loaded libraries stay loaded. Adn we
+  usualy don't want a libray to be loaded multiple times.
+
+  Using <<a_api project="eliom" | val Eliom_pervasives.HTML5.M.unique>>
+  we can create an xml node manipulated 'by reference'. If a reference
+  to a script node is included in a page, it will only be loaded
+  loaded the first time it appears in the header. Such a node can
+  be created that way:
+
+  <<code language="ocaml"|
+  let oclosure_script =
+    HTML5.M.unique (Eliom_output.Html5_forms.js_script
+      ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ())
+  >>
+
+>>
 ===={{{graffiti.eliom}}}====
 
 Here is the code that mix client and server parts.
@@ -258,7 +284,8 @@ application.
 open Server
 >>
 
-<<code language="ocaml"|let include_canvas (name:string) (canvas_box:[ HTML5_types.div ] HTML5.M.elt) =
+<<code language="ocaml"|
+let start_drawing name canvas =
 
   let bus,image_string = get_bus_image name in
 
@@ -272,10 +299,7 @@ open Server
   in
 
   Eliom_services.onload
-    {{
-      launch_client_canvas
-        %bus %imageservice (Eliom_client.Html5.of_div %canvas_box)
-    }}
+    {{ launch_client_canvas %bus %imageservice %canvas }}
 >>
 
 {{{imageservice}}} is now a new service each time the page is loaded
@@ -287,14 +311,16 @@ coservice, we can force it to reload the image.
 
 And we finally register the service.
 
-<<code language="ocaml"|let () = My_appl.register ~service:multigraffiti_service
+<<code language="ocaml"|
+let () = My_appl.register ~service:multigraffiti_service
   ( fun name () ->
-    (* the page element in wich we will include the canvas *)
-    let canvas_box = unique (div []) in
-    include_canvas name canvas_box;
-    Lwt.return (Server.create_page [h1 [pcdata name];
-                                    choose_drawing_form ();
-                                    canvas_box]))
+    let canvas = unique (canvas ~a:[ a_width width; a_height height ]
+			   [pcdata "your browser doesn't support canvas"]) in
+    start_drawing name canvas;
+    make_page
+      [h1 [pcdata name];
+       choose_drawing_form ();
+       canvas;])
 >>
 
 ==== {{{Makefile}}} ====
@@ -349,7 +375,7 @@ let stop_drawing { drawing_thread; drawing_arrow } =
   <<a_manual project="lwt" | Lwt programming guide >> and
   <<a_api project="eliom" subproject="client" version="dev" | module Eliom_bus >>.
 
-Also replace 
+Also replace
 <<code language="ocaml"|  let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   ignore (run (mousedowns canvas
 		 (arr (fun ev -> set_coord ev; line ev)
@@ -377,7 +403,7 @@ In {{{graffiti.eliom}}} replace
 by
 <<code language="ocaml"|  Eliom_services.onload
     {{
-      let canceller = 
+      let canceller =
         launch_client_canvas
           %bus %imageservice (Eliom_client.Html5.of_div %canvas_box)
       in
@@ -398,7 +424,7 @@ From the previous chapter, we copy the code handling users to {{{server.ml}}}:
   Eliom_services.post_coservice' ~post_params:
     (let open Eliom_parameters in (string "name" ** string "password")) ()
 let disconnection_service = Eliom_services.post_coservice' ~post_params:Eliom_parameters.unit ()
-let create_account_service = 
+let create_account_service =
   Eliom_services.post_coservice ~fallback:main_service ~post_params:
   (let open Eliom_parameters in (string "name" ** string "password")) ()
 
@@ -442,11 +468,9 @@ let login_name_form service button_text =
          ]]) ()
 >>
 
-<<wip| disconnection does not work yet: it also closes the application >>
-
 We make a customized registration module such that disconnected users
 (those for which the username reference is not set), are automaticaly
-show a connection. That way the other pages can assume that the
+shown a connection box. That way the other pages can assume that the
 username is always available.
 
 <<code language="ocaml"|let default_content () =
@@ -462,21 +486,21 @@ struct
   let translate page =
     Eliom_references.get username ~>>= function
       | None -> Lwt.return (create_page (default_content ()))
-      | Some username -> page username >|= fun v -> 
+      | Some username -> page username >|= fun v ->
         create_page ((disconnect_box ())::v)
 end
 
 module Connected =
   Eliom_output.Customize (struct
     type options = Eliom_output.appl_service_options
-    type return = My_appl.return 
+    type return = My_appl.return
     type page = Eliom_output.Html5.page
     type result = My_appl.result
   end) (My_appl) (Connected_translate)
 
 let ( !% ) f = fun a b -> return (fun c -> f a b c)
 
-let () = Connected.register ~service:main_service 
+let () = Connected.register ~service:main_service
   !% (fun () () username ->
     Lwt.return [h1 [pcdata ("Welcome to Multigraffiti " ^ username)];
 		choose_drawing_form ()])
@@ -712,7 +736,7 @@ let rec entries name list = function
       | [] -> []
       | (n,saved)::q ->
 	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
-	let uri = 
+	let uri =
 	  Eliom_uri.make_string_uri ~absolute:true ~service:(Eliom_services.static_dir ())
 	    (local_filename name n)
 	in
