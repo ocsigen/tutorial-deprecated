@@ -3,13 +3,13 @@
 
 APP_NAME := graffiti
 
-## Package required to build the server part of the application
+## Packages required to build the server part of the application
 
-SERVER_PACKAGE := cairo
+SERVER_PACKAGES := cairo
 
-## Package to be linked in the client part
+## Packages to be linked in the client part
 
-CLIENT_PACKAGE := oclosure
+CLIENT_PACKAGES := oclosure
 
 ## Source files for the server part
 
@@ -19,7 +19,7 @@ SERVER_FILES := common.ml server.ml ${wildcard *.eliom}
 
 CLIENT_FILES := common.ml client.ml ${wildcard *.eliom}
 
-## Needed binaries
+## Required binaries
 
 ELIOMC       := eliomc
 ELIOMOPT     := eliomopt
@@ -45,7 +45,7 @@ opt:: ${APP_NAME}.cmxs ${APP_NAME}.js ${APP_NAME}_oclosure.js
 
 #### Server side compilation #######
 
-SERVER_INC  := ${addprefix -package ,${SERVER_PACKAGE}}
+SERVER_INC  := ${addprefix -package ,${SERVER_PACKAGES}}
 
 SERVER_OBJS := $(patsubst %.eliom,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_FILES})
 SERVER_OBJS := $(patsubst %.ml,${ELIOM_SERVER_DIR}/%.cmo, ${SERVER_OBJS})
@@ -76,8 +76,8 @@ ${ELIOM_SERVER_DIR}/%.cmx: %.eliom
 
 ##### Client side compilation ####
 
-CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGE}}
-CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGE}}
+CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
+CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
 
 CLIENT_OBJS := $(patsubst %.eliom,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_FILES})
 CLIENT_OBJS := $(patsubst %.ml,${ELIOM_CLIENT_DIR}/%.cmo, ${CLIENT_OBJS})

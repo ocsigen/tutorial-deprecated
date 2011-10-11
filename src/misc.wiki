@@ -11,6 +11,9 @@ To do:
 * The first section must split the program without change
 * Introduce {{{unique}}} and {{{Eliom_client.Html5}}}
   (unique for div and for page headers)
+* proof-read everything
+
+Help appreciated.
 >>
 
 == Multi-user collaborative drawing application ==
@@ -771,8 +774,8 @@ that appear only if the user own the page.
 >>
 
 Before running, add the {{{graffiti_saved}}} directory in your
-directory containing static contents and edit {{{let static_dir =
-"/tmp/static/"}}} to adapt to your configuration.
+directory containing static contents and edit 
+{{{let static_dir = "/tmp/static/"}}} to adapt to your configuration.
 
 <<concept title=""|
 >>
