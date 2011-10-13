@@ -262,7 +262,7 @@ the <<a_manual project="lwt"|Lwt programming guide>>.
 Service sending an application\\
 Client and server code\\
 Compiling a Web application with server and client parts\\
-Calling Javascript methods with Js_of_ocaml\\
+Calling Javascript methods with Js_of_ocaml
 >>
 
 To create our first service, we used the function <<a_api project="eliom" | val
@@ -382,81 +382,9 @@ Js_of_ocaml's manual >>.
 
 >>
 
-=== Accessing server side variables on client side code ===
-<<concepts|Sharing server side values\\Manipulating HTML 'by reference'>>
-
-The client side processe is not really separated from the server side.
-
-<<code language="ocaml"|
-let count = ref 0
->>
-
-<<code language="ocaml"|
-let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
-    (fun () () ->
-      let count = incr count; !count in
-      Eliom_services.onload {{
-        Dom_html.window##alert(Js.string
-	  (Printf.sprintf "You came %i times to this page" %count))
-      }}
-      Lwt.return
-        (html
-           (head (title (pcdata "Graffiti")) [])
-           (body [h1 [pcdata "Graffiti"]]) ) )
->>
-
-<<concept title="Antiquotations: Using server side values in client code"|
-Client side code can reference copies of server side values using the
-{{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
-}}}).  Values sent that way are weakly type checked: the name of the
-client side type must match the server side one: if data type are ment
-to be sent, declare them in {{{ {shared{ }} }}}.
-
-For more information, see <<a_manual project="eliom" chapter="client" fragment="syntax%" | here >>.
->>
-
-<<wip| Add some part about dom manipulation before that and conversion from xml tree to dom objects ? >>
-
-It is possible to send almost any type of values that way, but we need
-to keep in mind that sent values are copies of server side ones. For
-HTML elements, this is not always the expected behaviour.
-
-<<code language="ocaml"|
-let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
-    (fun () () ->
-      let container = body [h1 [pcdata "Graffiti"]] in
-      Eliom_services.onload {{
-        Dom.appendChild (Eliom_client.Html5.of_body %container)
-	  (Eliom_client.Html5.of_div (div [pcdata "some text"]));
-      }}
-      Lwt.return
-        (html
-           (head (title (pcdata "Graffiti")) [])
-           (container) ) )
->>
-
-This code won't do anything noticeable because we added the div with
-{{{"some text"}}} to a copy of the body element. Hence the original
-was not modified. To be able to modify the original, we need to
-manipulate elements 'by reference'.
-
-To explicitely tell that we want to manipulate the original body, we
-annotate it that way.
-<<code language="ocaml"|
-  let container = unique (body [h1 [pcdata "Graffiti"]]) in
->>
-
-<<concept title="Unique elements"|
-  For more information, see <<a_manual project="eliom" chapter="client" fragment="unique" | here >>.
-  <<wip| Write this >>
->>
-
 ==@@id="graffiti"@@ Collaborative drawing application ==
 
-=== Drawing on a canvas ===
+===Drawing on a canvas===
 
 <<concepts|
 
@@ -683,9 +611,10 @@ are drawn on both.
 <<concept title="Antiquotations: Using server side values in client code"|
 
 Client side code can reference copies of server side values using the
-{{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
-}}}).  Values sent that way are weakly type checked: the name of the
+{{{%variable}}} syntax.  It is currently limited to code included in
+{{{ {{ }} }}} (not available in top level client code
+{{{ {client{ }} }}}).
+Values sent that way are weakly type checked: the name of the
 client side type must match the server side one: if data type are ment
 to be sent, declare them in {{{ {shared{ }} }}}.
 
