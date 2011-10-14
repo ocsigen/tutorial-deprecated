@@ -845,12 +845,11 @@ Finally we call {{{launch_music}}} in the page handler.
 To run this example, you will need to add an ogg file in the static directory. If you can't find one, there are some [[http://www.gnu.org/music/free-software-song.html|here]]
 
 
-===???===
+===Misc===
 <<concepts|Other features: Client side service calls ...\\
-Client side forms ...\\
-**LWT** -> où ????????????,>>
-bla\\bla\\bla\\bla\\
+Client side forms\\ ...>>
 
+<<wip|To do>>
 <<code language="ocaml"|
 >>
 

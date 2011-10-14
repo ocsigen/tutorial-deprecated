@@ -3,7 +3,7 @@
 <<|outline target="documentation">>
 
 //The code of this tutorial has been tested against
-the 2.0 release of the Ocsigen framework.//
+the 2.0 release of the Ocsigen framework.//\\
 
 This chapter and the two following ones are an overview of the
 features the Ocsigen framework brings to build Web applications.  They
@@ -16,7 +16,7 @@ towards other chapters are made all along the text, so that you can
 learn the concepts in detail if you want to.
 
 We assume the reader has a good knowledge of the Objective Caml
-language.
+language.\\
 
 The present chapter is a tutorial for writing a small client/server
 [[site:graffiti/|collaborative drawing application]]. You will learn
@@ -50,7 +50,7 @@ application.  In this chapter, you will learn how to:
 * Use //Macaque// for safe database interaction
 * Add //sounds or videos// to your application
 * Change pages //without stopping the client side program//
-* Connect with external accounts (//openID//) <<wip-inline| !!! >>
+* Connect with external accounts (//openID//)
 * Add an Atom stream
 
 If you are not interested in client-side programming you can safely
@@ -104,11 +104,14 @@ The same, written with fully qualified names (without {{{open}}}):
 
 <<code language="ocaml"|
 let main_service =
-  Eliom_output.Html5.register_service ~path:["graff"] ~get_params:Eliom_parameters.unit
+  Eliom_output.Html5.register_service
+    ~path:["graff"] 
+    ~get_params:Eliom_parameters.unit
     (fun () () ->
       Lwt.return
-        (HTML5.M.html (HTML5.M.head (HTML5.M.title (HTML5.M.pcdata "")) [])
-                       (HTML5.M.body [HTML5.M.h1 [HTML5.M.pcdata "Graffiti"]])))
+        (HTML5.M.html
+          (HTML5.M.head (HTML5.M.title (HTML5.M.pcdata "")) [])
+          (HTML5.M.body [HTML5.M.h1 [HTML5.M.pcdata "Graffiti"]])))
 >>
 
 Copy one of the two pieces of code above in a file {{{graffiti.ml}}},
@@ -186,8 +189,8 @@ second solution, using the module <<a_api project="eliom"
 version="dev"| module Eliom_output.Html5 >>. This module defines a
 construction function for each HTML5 tag.
 
-//Note that it is also possible to use <<a_manual project="eliom"
-chapter="xhtml" | the usual HTML syntax>>.//
+//Note that it is also possible to use the usual HTML syntax (see
+ <<a_api project="tyxml" | module Pa_tyxml >>).//
 
 Typing of HTML with <<a_api project="tyxml" version="dev"| module
 HTML5.M >> and <<a_api project="tyxml" version="dev"| module XHTML.M
@@ -200,7 +203,7 @@ limitations). For example if you write:
    (body [pcdata "Hallo"]))
 >>
 
-You will get the following error message:
+You will get the following error message, referring at the end of line 2:
 
 {{{
 Error: This expression has type ([> `PCDATA ] as 'a) HTML5.M.elt
@@ -217,11 +220,11 @@ Error: This expression has type ([> `PCDATA ] as 'a) HTML5.M.elt
 }}}
 
 <<code-inline|HTML5_types.head_content_fun>> is the type of
-content allowed inside <<code-inline| <head> >>.  You see that
+content allowed inside <<code-inline| <head> >>({{{<base>}}}, {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.).  You see that
 {{{`PCDATA}}} (i.e. raw text) is not in this polymorphic variant type.
 
 **Another example:** In HTML5, some tags cannot be empty. For example
-<<code-inline| <table> >> must contain at least one row.  To
+<<code-inline| <table> >>must contain at least one row.  To
 enforce this, the <<a_api project="tyxml" version="dev"|
 val HTML5.M.table >> function takes two parameters: the first one is
 the first row, the second one is a list containing all the other rows.
@@ -235,9 +238,8 @@ debugging time as you will never have to bother about the validity of
 pages afterwards.//
 
 A more detailed introduction to <<code-inline|HTML5.M>> is
-available in the <<a_manual project="eliom" chapter="xhtml"
-| eliom manual >> and <<a_api project="tyxml"
-text="TyXML reference API" | module HTML5.M >>.
+available in the
+<<a_api project="tyxml" text="TyXML reference API" | module HTML5.M >>.
 
 >>
 
@@ -305,14 +307,15 @@ to the program:
 >>
 
 As you can see, we are using a syntax extension to distinguish between
-server and client code in the same file. Take the {{{Makefile}}},
+server and client code in the same file.
+
+Take the {{{Makefile}}},
 {{{graffiti.conf}}} and {{{.depend}}} files provided in directory
 <<a_file src="tutorial.tar.gz"| chapter1/no_oclosure >>. You may want
 to adapt the configuration file to set some paths, especially the
-directory for static files. (To make things easier for the tutorial,
-you can use your source directory but keep in mind that it is not
-necessary (and sometimes dangerous) to put {{{.ml}}} and
-{{{.cma}}}/{{{.cmo}}} in the static files directory!)
+directory for static files. It is not necessary (and even not a good idea,
+for security reasons) to put {{{.ml}}} and
+{{{.cma}}}/{{{.cmo}}} in the static files directory!
 
 The default {{{Makefile}}} recognizes files using Eliom's syntax extension by
 their extension {{{.eliom}}} (instead of {{{.ml}}}).
@@ -326,13 +329,13 @@ make
 This will generate a file called {{{graffiti.cma}}}
 and another one called {{{graffiti.js}}}.
 The latter //must be placed in the
-static file directory//. type
+static file directory//. Type:
 
 {{{
 make install
 }}}
 
-to copy it to its rightfull place.
+to copy it to its rightful place.
 
 Now run Ocsigen server:
 
@@ -374,7 +377,7 @@ with parameters {{{(a, b, c)}}}
 * {{{obj##m <- e}}} to set a property
 * {{{jsnew constr (e1, ..., en)}}} to call a Javascript constructor
 
-Find more information in the <<a_manual project="js_of_ocaml" |
+Find more information in <<a_manual project="js_of_ocaml" |
 Js_of_ocaml's manual >>.
 
 >>
@@ -462,38 +465,39 @@ that, we will use the <<wip-inline title=""|experimental>>
 Add:
 
 <<code language="ocaml"|
-          open Event_arrows
+open Event_arrows
 >>
 
 in client side code (for example just before the draw function) and
 replace the line:
 
 <<code language="ocaml"|
-          draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
+draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
 >>
 
 by the following piece of code:
 
 <<code language="ocaml"|
-          let x = ref 0 and y = ref 0 in
-          let set_coord ev =
-            let x0, y0 = Dom_html.elementClientPosition canvas in
-            x := ev##clientX - x0; y := ev##clientY - y0 in
-          let compute_line ev =
-            let oldx = !x and oldy = !y in
-            set_coord ev;
-            ("#ff9933", 5, (oldx, oldy), (!x, !y))
-          in
-          let line ev = draw ctx (compute_line ev) in
-          ignore (run (mousedowns canvas
-                         (arr (fun ev -> set_coord ev; line ev)
-                          >~>> first [mousemoves Dom_html.document (arr line);
-                                     mouseup Dom_html.document >~>> (arr line)])) ());
+let x = ref 0 and y = ref 0 in
+let set_coord ev =
+  let x0, y0 = Dom_html.elementClientPosition canvas in
+  x := ev##clientX - x0; y := ev##clientY - y0
+in
+let compute_line ev =
+  let oldx = !x and oldy = !y in
+  set_coord ev;
+  ("#ff9933", 5, (oldx, oldy), (!x, !y))
+in
+let line ev = draw ctx (compute_line ev) in
+ignore (run (mousedowns canvas
+               (arr (fun ev -> set_coord ev; line ev) >~>>
+                first [mousemoves Dom_html.document (arr line);
+                       mouseup Dom_html.document >~>> (arr line)])) ());
 >>
 
 Compile, run the program and draw!
 
-We use to references {{{x}}} and {{{y}}} to record the last mouse
+We use two references {{{x}}} and {{{y}}} to record the last mouse
 position.  The function {{{set_coord}}} updates these references from
 mouse event data.  The function {{{compute_line}}} computes the
 coordinates of a line from the initial (old) coordinates to the new
@@ -541,17 +545,21 @@ Event_arrows.cancel c
 }}}
 
 The combinator {{{first}}} takes a list of arrows and behaves as the first
-to terminate. All the other arrows in the list are cancelled.
+to terminate. All the other arrows in the list are cancelled.\\
+
+You are not forced to use event arrows. If you prefer you can use
+the more traditional (but much more verbose)
+<<a_api project="js_of_ocaml" | val Dom_html.addEventListener>> function.
 
 >>
 
-<<wip|**Warning** Event arrows will evolve in the near future.>>
+<<wip|**Warning** Event arrows will probably evolve in the near future.>>
 
 === Collaborative drawing application ===
 
 <<concepts|Client server communication >>
 
-We now want to do the following:
+In order to see what other users are drawing, we now want to do the following:
 
 * Send the coordinates to the server when the user draw a line, then
 * Dispatch the coordinates to all connected users.
@@ -561,13 +569,15 @@ drawn lines.
 
 <<code language="ocaml"|
 {shared{
-type messages = (string * int * (int * int) * (int * int)) deriving (Json)
+  type messages = (string * int * (int * int) * (int * int))
+    deriving (Json)
 }}
 >>
 
 We annotate with {{{deriving (Json)}}} to allow safe deserialization
-of this type. This is defined in the Deriving syntax extension. This
-annotation can only be added on types containing exclusively basics
+of this type. This is defined in the Deriving syntax extension. 
+You need to do that for each type of data sent by the client to the server.
+This annotation can only be added on types containing exclusively basics
 type or other types annotated with deriving. For more information, see
 <<a_api project="js_of_ocaml" | module Deriving_Json >>
 
@@ -582,18 +592,17 @@ To send the coordinates to the server, we just replace the function
 {{{line}}} by:
 
 <<code language="ocaml"|
-           let line ev =
-             let v = compute_line ev in
-             let _ = Eliom_bus.write %bus v in
-             draw ctx v
-           in
+let line ev =
+  let v = compute_line ev in
+  let _ = Eliom_bus.write %bus v in
+  draw ctx v
 >>
 
-And finaly we draw the lines received by adding the following just
+And finally we draw the lines received by adding the following just
 between the previous definition and the "arrow event handler".
 
 <<code language="ocaml"|
-           let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
+let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
 >>
 
 Now you can try the program using two browser windows to see that the lines
@@ -602,9 +611,10 @@ are drawn on both.
 <<concept title="Antiquotations: Using server side values in client code"|
 
 Client side code can reference copies of server side values using the
-{{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
-}}}).  Values sent that way are weakly type checked: the name of the
+{{{%variable}}} syntax.  It is currently limited to code included in
+{{{ {{ }} }}} (not available in top level client code
+{{{ {client{ }} }}}).
+Values sent that way are weakly type checked: the name of the
 client side type must match the server side one: if data type are ment
 to be sent, declare them in {{{ {shared{ }} }}}.
 
@@ -616,13 +626,14 @@ chapter="wrapping" | here >>.
 
 <<concept title="Communication channels"|
 
-Eliom provides multiple ways for the server to send unsolicited datas
-to the client: * <<a_api project="eliom" subproject="server"
-| type Eliom_bus.t >> are broadcasting channels where
-client and server can participate (see also <<a_api project="eliom"
-subproject="client" | type Eliom_bus.t >> in the client
-api).
+Eliom provides multiple ways for the server to send unsolicited data
+to the client:
 
+* <<a_api project="eliom" subproject="server"
+  | type Eliom_bus.t >> are broadcasting channels where
+  client and server can participate (see also <<a_api project="eliom"
+  subproject="client" | type Eliom_bus.t >> in the client
+  api).
 * <<a_api project="eliom" subproject="server" | module
   Eliom_react >> Allows to send
   [[http://erratique.ch/software/react/doc/React|React]] events from
@@ -633,7 +644,7 @@ api).
   module Lwt_stream >> to the client.  Eliom_react and Eliom_bus are
   implemented over it.
 
-It is possible to control the idle behaviour with <<a_api
+It is possible to control the idle behaviour with module <<a_api
 project="eliom" subproject="client" | module
 Eliom_comet.Configuration >>
 
@@ -648,31 +659,31 @@ widget library. We need to add some stylesheets and one JS file in the
 headers of our page.
 
 <<code language="ocaml"|
-      Lwt.return
-        (html
-           (head
-              (title (pcdata "Graffiti"))
-              [HTML5.M.link ~rel:[ `Stylesheet ]
-                 ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
-                 ~a:[HTML5.M.a_mime_type "text/css"]
-                 ();
-               HTML5.M.link ~rel:[ `Stylesheet ]
-                 ~href:(HTML5.M.uri_of_string"./css/common.css")
-                 ~a:[HTML5.M.a_mime_type "text/css"]
-                 ();
-               HTML5.M.link ~rel:[ `Stylesheet ]
-                 ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
-                 ~a:[HTML5.M.a_mime_type "text/css"]
-                 ();
-               HTML5.M.link ~rel:[ `Stylesheet ]
-                 ~href:(HTML5.M.uri_of_string"./css/slider.css")
-                 ~a:[HTML5.M.a_mime_type "text/css"]
-                 ();
-               HTML5.M.script
-                 ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js");
-                     HTML5.M.a_mime_type "application/javascript"]
-                 (HTML5.M.pcdata "");])
-           (body [h1 [pcdata "Graffiti"]]) ) )
+Lwt.return
+   (html
+     (head
+        (title (pcdata "Graffiti"))
+        [HTML5.M.link ~rel:[ `Stylesheet ]
+           ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
+           ~a:[HTML5.M.a_mime_type "text/css"]
+           ();
+         HTML5.M.link ~rel:[ `Stylesheet ]
+           ~href:(HTML5.M.uri_of_string"./css/common.css")
+           ~a:[HTML5.M.a_mime_type "text/css"]
+           ();
+         HTML5.M.link ~rel:[ `Stylesheet ]
+           ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
+           ~a:[HTML5.M.a_mime_type "text/css"]
+           ();
+         HTML5.M.link ~rel:[ `Stylesheet ]
+           ~href:(HTML5.M.uri_of_string"./css/slider.css")
+           ~a:[HTML5.M.a_mime_type "text/css"]
+           ();
+         HTML5.M.script
+           ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js");
+               HTML5.M.a_mime_type "application/javascript"]
+           (HTML5.M.pcdata "");])
+     (body [h1 [pcdata "Graffiti"]]) ) )
 >>
 
 You need to install some stylesheets and images to your static files
@@ -690,28 +701,27 @@ following code in the {{{onload}}} event handler, immediatly after
 appending the canvas to the page:
 
 <<code language="ocaml"|
-          (* Size of the brush *)
-          let slider = jsnew Goog.Ui.slider(Js.null) in
-          slider##setMinimum(1.);
-          slider##setMaximum(80.);
-          slider##setValue(10.);
-          slider##setMoveToPointEnabled(Js._true);
-          slider##render(Js.some Dom_html.document##body);
-
-          (* The color palette: *)
-          let pSmall =
-            jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
-				     Js.some (Js.string "goog-hsv-palette-sm"))
-          in
-          pSmall##render(Js.some Dom_html.document##body);
+(* Size of the brush *)
+let slider = jsnew Goog.Ui.slider(Js.null) in
+slider##setMinimum(1.);
+slider##setMaximum(80.);
+slider##setValue(10.);
+slider##setMoveToPointEnabled(Js._true);
+slider##render(Js.some Dom_html.document##body);
+(* The color palette: *)
+let pSmall =
+  jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
+                           Js.some (Js.string "goog-hsv-palette-sm"))
+in
+pSmall##render(Js.some Dom_html.document##body);
 >>
 
-Finally, replace last line of the function {{{compute_line}}} by;
+Finally, replace last line of the function {{{compute_line}}} by:
 
 <<code language="ocaml"|
-            let color = Js.to_string (pSmall##getColor()) in
-            let size = int_of_float (Js.to_float (slider##getValue())) in
-            (color, size, (oldx, oldy), (!x, !y))
+let color = Js.to_string (pSmall##getColor()) in
+let size = int_of_float (Js.to_float (slider##getValue())) in
+(color, size, (oldx, oldy), (!x, !y))
 >>
 
 Using the Makefile from {{{ with_oclosure }}} directory,
@@ -727,7 +737,8 @@ will copy the needed css and images to your static files directory.
 OClosure is a Js_of_ocaml binding for the Google Closure widget
 library (used for example in GMail, Google calendar or Google Maps).
 You can use it for building complex user interfaces for your Eliom
-application. The full documentation is available [[wiki(33):|here]].
+application. The full documentation is available
+[[wiki(33):|on the project's site]].
 
 >>
 
@@ -737,7 +748,8 @@ application. The full documentation is available [[wiki(33):|here]].
 
 To finish, we want to save the current drawing on server side and send
 the current image when a new user arrives. To do that, we will use the
-[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml.
+[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml
+(you must have it installed for this section).
 
 The {{{draw_server}}} function below is the equivalent of the
 {{{draw}}} function on the server side (in an ideal world, we would
@@ -746,11 +758,15 @@ The {{{image_string}}} function outputs the PNG image in a string.
 
 <<code language="ocaml"|
 let rgb_from_string color = (* color is in format "#rrggbb" *)
-  let get_color i = (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255. in
+  let get_color i =
+    (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255.
+  in
   try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
 
 let draw_server, image_string =
-  let surface = Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height in
+  let surface =
+    Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height
+  in
   let ctx = Cairo.create surface in
   ((fun ((color : string), size, (x1, y1), (x2, y2)) ->
 
@@ -819,13 +835,14 @@ creation of the slider:
 (* The initial image: *)
 let img = Dom_html.createImg Dom_html.document in
 img##alt <- Js.string "canvas";
-img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:%imageservice ());
-img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
+img##src <- Js.string (Eliom_output.Html5.make_string_uri
+                         ~service:%imageservice ());
+img##onload <- Dom_html.handler
+                (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
 >>
 
 This new version of the {{{graffiti.cma}}} module now depends on
-{{{cairo}}}. It is not linked at compile time since we are doing
-plugins, hence we must ask {{{ocsigenserver}}} to load {{{cairo}}}
+{{{cairo}}}. We must ask {{{ocsigenserver}}} to load {{{cairo}}}
 before loading {{{graffiti.cma}}}. This is done by adding the
 following line in the configuration file.
 
@@ -844,7 +861,9 @@ The first version of the program is now complete. Download the code
   image and save it to the hard disk (reuse the service
   {{{imageservice}}}).
 * Add an OClosure button with a color picker to select a color from
-  the drawing.  (Modify mouse events and use the function
-  {{{Dom_html.pixel_get}}}).
+  the drawing. Pressing the button changes the mouse cursor, and disables
+  current mouse events until the next mouse click event on the document.
+  Then the color palette changes to the color of the pixel clicked.
+  (Use the function {{{Dom_html.pixel_get}}}).
 
 >>
