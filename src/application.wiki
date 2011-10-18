@@ -385,7 +385,9 @@ Js_of_ocaml's manual >>.
 === Accessing server side variables on client side code ===
 <<concepts|Sharing server side values\\Manipulating HTML 'by reference'>>
 
-The client side processe is not really separated from the server side.
+The client side processe is not really separated from the server side,
+we can access some server variables from client code.\\
+For instance:
 
 <<code language="ocaml"|
 let count = ref 0
@@ -406,18 +408,22 @@ let main_service =
            (body [h1 [pcdata "Graffiti"]]) ) )
 >>
 
+Here, we are increasing a {{{count}}} each time the page is accessed
+and when the page is loaded the client execute the code declared by
+<<a_api project="eliom" subproject="server" | val
+Eliom_services.onload >>. This client side code access to the counter
+using the syntax extension {{{%count}}}, and displays it in a message box.
+
 <<concept title="Antiquotations: Using server side values in client code"|
 Client side code can reference copies of server side values using the
 {{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
-}}}).  Values sent that way are weakly type checked: the name of the
+{{{ {{ }} }}} ( not available in top level client code {{{ {client{ }} }}}).
+Values sent that way are weakly type checked: the name of the
 client side type must match the server side one: if data type are ment
 to be sent, declare them in {{{ {shared{ }} }}}.
 
 For more information, see <<a_manual project="eliom" chapter="client" fragment="syntax%" | here >>.
 >>
-
-<<wip| Add some part about dom manipulation before that and conversion from xml tree to dom objects ? >>
 
 It is possible to send almost any type of values that way, but we need
 to keep in mind that sent values are copies of server side ones. For
@@ -449,10 +455,15 @@ annotate it that way.
   let container = unique (body [h1 [pcdata "Graffiti"]]) in
 >>
 
-<<concept title="Unique elements"|
-  For more information, see <<a_manual project="eliom" chapter="client" fragment="unique" | here >>.
-  <<wip| Write this >>
->>
+<<concept title="Unique elements"| Unique nodes are nodes created on
+  server side, but meant to be manipulated on client side. They can be
+  seen as pointers to the node. This is necessary because values sent
+  to the client are copies of server side ones. This allows reading
+  informations of nodes, like the content of a formulary, or modifying
+  them. Also, unique nodes are still valid after changing pages.
+
+  For more information, see <<a_manual project="eliom"
+  chapter="client" fragment="unique" | here >>.  >>
 
 ==@@id="graffiti"@@ Collaborative drawing application ==
 
@@ -466,8 +477,7 @@ Canvas
 
 To draw something on the page, we will use an HTML5 canvas.
 We define a client-side function called {{{draw}}} to draw a line.
-Then when the service is called, we want to add dynamically a canvas
-to the page, and draw a line.
+Then when the service is called, we want to draw a line.
 
 Here is the (full) new version of the program:
 
@@ -498,21 +508,22 @@ module My_appl =
 let main_service =
   My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
     (fun () () ->
+      let canvas_elt = unique
+        (canvas ~a:[ a_width width; a_height height ]
+           [pcdata "your browser doesn't support canvas"]) in
        Eliom_services.onload
          {{
-           let canvas = Dom_html.createCanvas Dom_html.document in
+	   let canvas = Eliom_client.Html5.of_canvas %canvas_elt in
            let ctx = canvas##getContext (Dom_html._2d_) in
-           canvas##width <- width; canvas##height <- height;
            ctx##lineCap <- Js.string "round";
-
-           Dom.appendChild Dom_html.document##body canvas;
 
            draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
          }};
       Lwt.return
         (html
            (head (title (pcdata "Graffiti")) [] )
-           (body [h1 [pcdata "Graffiti"]]) ) )
+           (body [h1 [pcdata "Graffiti"];
+	          canvas_elt]) ) )
 >>
 
 Since we want to draw the canvas only on that page and not on the other (future)
@@ -680,21 +691,6 @@ let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
 Now you can try the program using two browser windows to see that the lines
 are drawn on both.
 
-<<concept title="Antiquotations: Using server side values in client code"|
-
-Client side code can reference copies of server side values using the
-{{{%varible}}} syntax.  It is currently limited to code included in
-{{{ {{ }} }}} (not available in top level client code {{{ {client{ }}
-}}}).  Values sent that way are weakly type checked: the name of the
-client side type must match the server side one: if data type are ment
-to be sent, declare them in {{{ {shared{ }} }}}.
-
-It is not possible to send function, objects and not forced lazy
-values.  For more information, see <<a_manual project="eliom"
-chapter="wrapping" | here >>.
-
->>
-
 <<concept title="Communication channels"|
 
 Eliom provides multiple ways for the server to send unsolicited data
@@ -734,27 +730,17 @@ Lwt.return
    (html
      (head
         (title (pcdata "Graffiti"))
-        [HTML5.M.link ~rel:[ `Stylesheet ]
-           ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
-           ~a:[HTML5.M.a_mime_type "text/css"]
-           ();
-         HTML5.M.link ~rel:[ `Stylesheet ]
-           ~href:(HTML5.M.uri_of_string"./css/common.css")
-           ~a:[HTML5.M.a_mime_type "text/css"]
-           ();
-         HTML5.M.link ~rel:[ `Stylesheet ]
-           ~href:(HTML5.M.uri_of_string"./css/hsvpalette.css")
-           ~a:[HTML5.M.a_mime_type "text/css"]
-           ();
-         HTML5.M.link ~rel:[ `Stylesheet ]
-           ~href:(HTML5.M.uri_of_string"./css/slider.css")
-           ~a:[HTML5.M.a_mime_type "text/css"]
-           ();
-         HTML5.M.script
-           ~a:[HTML5.M.a_src (HTML5.M.uri_of_string "./graffiti_oclosure.js");
-               HTML5.M.a_mime_type "application/javascript"]
-           (HTML5.M.pcdata "");])
-     (body [h1 [pcdata "Graffiti"]]) ) )
+        [ Eliom_output.Html5_forms.css_link
+            ~uri:(HTML5.M.uri_of_string"./css/closure/common.css") ();
+          Eliom_output.Html5_forms.css_link
+            ~uri:(HTML5.M.uri_of_string"./css/closure/hsvpalette.css") ();
+          Eliom_output.Html5_forms.css_link
+            ~uri:(HTML5.M.uri_of_string"./css/slider.css") ();
+          Eliom_output.Html5_forms.css_link
+            ~uri:(HTML5.M.uri_of_string"./css/graffiti.css") ();
+          Eliom_output.Html5_forms.js_script
+            ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ();])
+     (body [h1 [pcdata "Graffiti"]; canvas_elt]) )
 >>
 
 You need to install some stylesheets and images to your static files
