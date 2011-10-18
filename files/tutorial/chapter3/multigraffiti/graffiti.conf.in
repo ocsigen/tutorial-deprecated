@@ -21,7 +21,6 @@
 
     <extension findlib-package="eliom.server"/>
     <extension findlib-package="cairo"/>
-    <extension findlib-package="macaque"/>
 
     <host hostfilter="*">
       <followsymlinks value="always" />

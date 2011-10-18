@@ -23,7 +23,8 @@ refactor some parts. In particular, we need to be able to handle
 separately different drawings. To do this, we will turn all global
 variable, like the bus, in local ones.
 
-Download the <<a_file src="tutorial.tar.gz"|full code>> of the example.
+Download the <<a_file src="tutorial.tar.gz"|full code>> of the examples
+or browse it [[http://ocsigen.org/darcs/tutorial/files/tutorial/chapter3/multigraffiti|here]]
 
 ===Split application into multiple files===
 <<concepts| Complex eliom project\\Unique elements>>
@@ -135,7 +136,7 @@ let rgb_from_string color = (* color is in format "#rrggbb" *)
   try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
 >>
 
-The main difference is that the bus and the {{{image_string}}} are now local.
+The main difference is that the bus in now local.
 <<code language="ocaml"|let launch_server_canvas () =
   let bus = Eliom_bus.create Json.t<messages> in
 
@@ -171,15 +172,31 @@ The main difference is that the bus and the {{{image_string}}} are now local.
 
 let graffiti_info = Hashtbl.create 0
 
-let get_bus_image (name:string) =
+let imageservice =
+  Eliom_output.Text.register_service
+    ~path:["image"]
+    ~headers:Http_headers.dyn_headers
+    ~get_params:(let open Eliom_parameters in string "name" ** int "q")
+    (* we add another parameter for the browser not to cache: at least
+       for chrome, there is no way to force the browser to reload the
+       image without leaving the application *)
+    (fun (name,_) () ->
+      try_lwt
+        let _ ,image_string = Hashtbl.find graffiti_info name in
+	Lwt.return (image_string (), "image/png")
+      with
+	| Not_found -> raise_lwt Eliom_common.Eliom_404)
+
+let get_bus (name:string) =
   (* create a new bus and image_string function only if it did not exists *)
   try
-    Hashtbl.find graffiti_info name
+    fst (Hashtbl.find graffiti_info name)
   with
     | Not_found ->
       let bus,image_string = launch_server_canvas () in
       Hashtbl.add graffiti_info name (bus,image_string);
-      (bus,image_string)
+      bus
+
 >>
 
 The main page now does launch the application. It only contains a
@@ -238,9 +255,10 @@ let () = My_appl.register ~service:main_service
 <<concept title="Unique scripts" |
 
   Sometimes we need to control when a script is loaded and reloaded on
-  page change.  Since clicking on links in eliom application do not
-  reload the entire page, already loaded libraries stay loaded. Adn we
-  usualy don't want a libray to be loaded multiple times.
+  page change. Since clicking on links in eliom application do not
+  reload the entire page, already loaded libraries stay loaded. But if
+  we simply add a script to each page, it will be loaded each time.
+  We usualy don't want that.
 
   Using <<a_api project="eliom" | val Eliom_pervasives.HTML5.M.unique>>
   we can create an xml node manipulated 'by reference'. If a reference
@@ -272,39 +290,36 @@ application.
 open Server
 >>
 
+And then we define the function adding the {{{onload}}} handler.
+
 <<code language="ocaml"|
-let start_drawing name canvas =
-
-  let bus,image_string = get_bus_image name in
-
-  let imageservice =
-    Eliom_output.Text.register_coservice'
-      ~timeout:10.
-      (* the service is available fo 10 seconds only, but it is long
-	 enouth for the browser to do its request. *)
-      ~get_params:Eliom_parameters.unit
-      (fun () () -> Lwt.return (image_string (), "image/png"))
-  in
-
+let start_drawing name image canvas =
+  let bus = get_bus name in
   Eliom_services.onload
-    {{ launch_client_canvas %bus %imageservice %canvas }}
+    {{
+      let canceller = launch_client_canvas %bus %image %canvas in
+      Eliom_client.on_unload (fun () -> stop_drawing canceller)
+    }}
 >>
 
-{{{imageservice}}} is now a new service each time the page is loaded
-as we need to be able to request several times the same image (if we
-go to the same page several times during the life of the application),
-but its content can change. If we use the same get request each time,
-the browser use its cache and show the same contents. By using a
-coservice, we can force it to reload the image.
-
-And we finally register the service.
+And we finally register the main service.
 
 <<code language="ocaml"|
+let counter = ref 0
+
 let () = My_appl.register ~service:multigraffiti_service
   ( fun name () ->
-    let canvas = unique (canvas ~a:[ a_width width; a_height height ]
-			   [pcdata "your browser doesn't support canvas"]) in
-    start_drawing name canvas;
+    (* Some browsers won't reload the image, so we force
+       them by changing the url each time. *)
+    incr counter;
+    let image = unique (img ~alt:name
+      ~src:(Eliom_output.Html5.make_string_uri
+      ~service:imageservice (name,!counter)) ()) in
+    let canvas = unique
+      (canvas ~a:[ a_width width; a_height height ]
+      	      [pcdata "your browser doesn't support canvas"; br ();
+	       image]) in
+    start_drawing name image canvas;
     make_page
       [h1 [pcdata name];
        choose_drawing_form ();
@@ -363,32 +378,21 @@ let stop_drawing { drawing_thread; drawing_arrow } =
   <<a_manual project="lwt" | Lwt programming guide >> and
   <<a_api project="eliom" subproject="client" version="dev" | module Eliom_bus >>.
 
-Also replace
-<<code language="ocaml"|  let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
-  ignore (run (mousedowns canvas
-		 (arr (fun ev -> set_coord ev; line ev)
-			      >~>> first [mousemoves Dom_html.document (arr line);
-					 mouseup Dom_html.document >~>> (arr line)])) ())
->>
-by
+We now need to keep the event arrow and the thread receiving data to build the
+{{{drawing_canceller}}}. We replace their delarations in {{{client.ml}}} by:
+
 <<code language="ocaml"|  let t = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   let drawing_arrow =
     run (mousedowns canvas
            (arr (fun ev -> set_coord ev; line ev)
-			   >~>> first [mousemoves Dom_html.document (arr line);
-				      mouseup Dom_html.document >~>> (arr line)])) () in
+                   >~>> first [mousemoves Dom_html.document (arr line);
+                   mouseup Dom_html.document >~>> (arr line)])) () in
   { drawing_thread = t;
     drawing_arrow = drawing_arrow }
 >>
 
-In {{{graffiti.eliom}}} replace
-<<code language="ocaml"|  Eliom_services.onload
-    {{
-      launch_client_canvas
-        %bus %imageservice (Eliom_client.Html5.of_div %canvas_box)
-    }}
->>
-by
+And keep it in {{{graffiti.eliom}}}:
+
 <<code language="ocaml"|  Eliom_services.onload
     {{
       let canceller =
@@ -399,8 +403,9 @@ by
     }}
 >>
 
-The function registered by {{{Eliom_client.on_unload}}} will be called
-when the page change inside the application.
+The function registered by <<a_api project="eliom" subproject="server"
+| val Eliom_services.on_unload >> will be called when the page change
+inside the application.
 
 ===Mixing client/server application with traditional Web interaction===
 
@@ -411,14 +416,17 @@ From the previous chapter, we copy the code handling users to {{{server.ml}}}:
 <<code language="ocaml"|let connection_service =
   Eliom_services.post_coservice' ~post_params:
     (let open Eliom_parameters in (string "name" ** string "password")) ()
-let disconnection_service = Eliom_services.post_coservice' ~post_params:Eliom_parameters.unit ()
+let disconnection_service = Eliom_services.post_coservice'
+  ~post_params:Eliom_parameters.unit ()
 let create_account_service =
   Eliom_services.post_coservice ~fallback:main_service ~post_params:
   (let open Eliom_parameters in (string "name" ** string "password")) ()
 
 let username = Eliom_references.eref ~scope:`Session None
-let users = ref ["titi","tata";"test","test"]
-let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> false
+let users = ref ["user","password";"test","test"]
+let check_pwd name pwd =
+ try Lwt.return (List.assoc name !users = pwd) with
+   | Not_found -> Lwt.return false
 
 let () = Eliom_output.Action.register
   ~service:create_account_service
@@ -429,9 +437,9 @@ let () = Eliom_output.Action.register
 let () = Eliom_output.Action.register
   ~service:connection_service
   (fun () (name, password) ->
-    if check_pwd name password
-    then Eliom_references.set username (Some name)
-    else Lwt.return ())
+    match_lwt check_pwd name password with
+      | true -> Eliom_references.set username (Some name)
+      | false -> Lwt.return ())
 
 let () =
   Eliom_output.Action.register
@@ -470,7 +478,8 @@ username is always available.
 
 module Connected_translate =
 struct
-  type page = string -> [ HTML5_types.body_content_fun ] HTML5.M.elt list Lwt.t
+  type page = string ->
+    [ HTML5_types.body_content_fun ] HTML5.M.elt list Lwt.t
   let translate page =
     Eliom_references.get username ~>>= function
       | None -> Lwt.return (create_page (default_content ()))
@@ -501,19 +510,18 @@ to use that, in {{{graffiti.eliom}}} we just replace
 >>
 by
 <<code language="ocaml"|let () = Connected.register ~service:multigraffiti_service
-  !% (fun (name : string) () username ->
-       (* the page element in wich we will include the canvas *)
-    let canvas_box = unique (div []) in
-    include_canvas name canvas_box;
-    Lwt.return [h1 [pcdata name];
-                choose_drawing_form ();
-                canvas_box])
-
+  !% (fun name () username -> ...
 >>
 
-===Type safe database requests using Macaque===
+=== Type safe database requests using Macaque===
 
-In this section, we will implement our database access function using
+<<concepts|Type safe database requests>>
+
+In this section we will replace our dumb user handling code
+({{{check_pwd}}} and {{{create_account_service}}}) by one using a real
+database backend.
+
+We will implement our database access function using
 the Macaque library, that allows easy manipulation of Postgresql
 database fully compatible with Lwt. ( For more information see
 [[wiki(25):| Macaque manual]] )
@@ -537,27 +545,7 @@ We save it under {{{create_table.sql}}} and run
 
 <<code language="sh"| $ psql -d testbase -f create_table.sql >>
 
-We will replace our basic user handling code:
-
-<<code language="ocaml"|let username = Eliom_references.eref ~scope:Eliom_common.session None
-let users = ref ["titi","tata";"test","test"]
-let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> false
-
-let () = Eliom_output.Action.register
-  ~service:create_account_service
-  (fun () (name, pwd) ->
-    users := (name, pwd)::!users;
-    Lwt.return ())
-
-let () = Eliom_output.Action.register
-  ~service:connection_service
-  (fun () (name, password) ->
-    if check_pwd name password
-    then Eliom_references.set username (Some name)
-    else Lwt.return ())
->>
-
-Macaque can use any thread library if it provides a monadic
+Macaque can use any thread library that provides a monadic
 interface. The default one provides simple blocking access to the
 database. It isn't good for us because an access to the base by one
 user will prevent the server from handling anything else until the
@@ -622,24 +610,54 @@ check for the presence of an account before creating it.
       (function
 	| [] -> insert name pwd
 	| _ -> Lwt.return ()) )
+>>
+
+We need to add {{{macaque.syntax}}} in the makefile and
+{{{<extension findlib-package="macaque"/>}}} in graffiti.conf
+
+=== Lightweight database using Ocsipersist ===
+<<concepts|Persistent tables with Ocsipersist>>
+
+For maintaining the list of user and password, we do not need the full
+power of a SQL database, a key/value table is sufficient. Ocsigen has
+such a simple table mechanism directly integrated: Ocsipersist.
+
+We first create a table holding ocaml values:
+<<code language="ocaml"|
+let user_table = Ocsipersist.open_table "user_table"
+>>
+
+Then we can easilly replace the user management code.
+
+<<code language="ocaml"|
+let check_pwd name pwd =
+  try_lwt
+    lwt saved_password = Ocsipersist.find user_table name in
+    Lwt.return ( pwd = saved_password )
+  with
+    Not_found -> Lwt.return false
+
+let () = Eliom_output.Action.register
+  ~service:create_account_service
+  (fun () (name, pwd) -> Ocsipersist.add user_table name pwd)
 
 let () = Eliom_output.Action.register
   ~service:connection_service
   (fun () (name, password) ->
-    check_pwd name password ~>>=
-      ( function
-	| true -> Eliom_references.set username (Some name)
-	| false -> Lwt.return () ) )
+    match_lwt check_pwd name password with
+      | true -> Eliom_references.set username (Some name)
+      | false -> Lwt.return ())
 >>
 
-We need to add {{{-package macaque.syntax}}} in the makefile and
-{{{<extension findlib-package="macaque"/>}}} in graffiti.conf
+<<concept title="Ocsipersist"|
+ Ocsipersist provides simple typed key/value tables. It provides different backends
+ ( currently sqlite and dbm ) and can be extended.
+ For more informations see <<a_api project="ocsigenserver" | type Ocsipersist.table >>.
+>>
 
-Download the current versions of the <<a_file src="tutorial.tar.gz"|files>>.
 
-===Saving favorite pictures===
-<<concepts|Persistent tables with Ocsipersist\\
-Atom feed>>
+=== Saving favorite pictures===
+<<concepts|Atom feed>>
 
 We will now add a button to the application to save the current
 image. The images will be saved to the filesystem using the module
@@ -651,45 +669,45 @@ under the directory {{{graffiti_saved/username}}}. The {{{username}}}
 directory is created if needed. If it already exists {{{mkdir}}} fail
 and we do nothing.
 
+We will add this code in a new file:
+===={{{feed.ml}}}====
 <<code language="ocaml"|let static_dir = "/tmp/static/"
 
 let image_dir name =
   let dir = static_dir ^ "/graffiti_saved/" ^ (Url.encode name) in
-  Lwt.catch
-    (fun () -> Lwt_unix.mkdir dir 0o777)
-    (fun exn -> Lwt.return ())
-  >|= fun () -> dir
+  (try_lwt Lwt_unix.mkdir dir 0o777 with
+    | _ -> debug "could not create the directory %s" dir; Lwt.return ())
+  >|= (fun () -> dir)
 
 let make_filename name number =
   image_dir name >|= fun dir ->
   dir ^ "/" ^ (string_of_int number) ^ ".png"
 
 let save image name number =
-  make_filename name number ~>>= fun file_name ->
-  Lwt_io.open_file ~mode:Lwt_io.output file_name ~>>= fun out_chan ->
+  lwt file_name = make_filename name number in
+  lwt out_chan = Lwt_io.open_file ~mode:Lwt_io.output file_name in
   Lwt_io.write out_chan image
 >>
 
 We number images and associate to each image the time of creation. It
 is stocked in an <<a_api project="eliom" | module Ocsipersist >>
-table. These are string indexed tables, that can contain arbitrary
-ocaml value.
-
-This open the table and create it if it doesn't exists.
+table.
 <<code language="ocaml"|let image_info_table = Ocsipersist.open_table "image_info_table">>
 
 For each user, we stock a value of type
-{{{ int * CalendarLib.Calendar.t * ( (int * CalendarLib.Calendar.t) list ) }}}.
+{{{ int * CalendarLib.Calendar.t * ( (int * CalendarLib.Calendar.t) list )}}}.
 The first integer is the name under wich will be saved the image, the first time is the last update for that user and the list is the name and time of old images. We need those time to timestamp the entries of the feed.
 
-<<code language="ocaml"|let save_image username =
+<<code language="ocaml"|
+let save_image username =
   let now = CalendarLib.Calendar.now () in
-  Lwt.catch
-    (fun () -> Ocsipersist.find image_info_table username)
-    (function Not_found -> Lwt.return (0,now,[]) | e -> Lwt.fail e )
-  ~>>= fun (number,_,list) ->
-  Ocsipersist.add image_info_table username (number+1,now,(number,now)::list)
-  ~>>= fun () ->
+  lwt number,_,list =
+    try_lwt Ocsipersist.find image_info_table username with
+      | Not_found -> Lwt.return (0,now,[])
+      | e -> Lwt.fail e
+  in
+  lwt () = Ocsipersist.add image_info_table
+    username (number+1,now,(number,now)::list) in
   let (_,image_string) = Hashtbl.find graffiti_info username in
   save (image_string ()) username number
 
@@ -705,10 +723,9 @@ let save_image_box name =
              ~input_type:`Submit ~value:"save" ()]]) ()
 >>
 
-We find the url of the images with << a_api project="eliom" | val
-Eliom_services.static_dir >>. It is a service taking file path as
-parameter, serving the content of the static directory. We use <<
-a_api project="eliom" | val Eliom_uri.make_string_uri >> to get the
+We find the url of the images with <<a_api project="eliom" subproject="server" | val Eliom_services.static_dir >>.
+It is a service taking file path as
+parameter, serving the content of the static directory. We use <<a_api project="eliom" | val Eliom_uri.make_string_uri >> to get the
 url as a string.
 
 <<code language="ocaml"|let feed_service = Eliom_services.service ~path:["feed"]
@@ -723,9 +740,11 @@ let rec entries name list = function
     match list with
       | [] -> []
       | (n,saved)::q ->
-	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
+	let title = Atom_feed.plain
+	  ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_uri.make_string_uri ~absolute:true ~service:(Eliom_services.static_dir ())
+	  Eliom_uri.make_string_uri ~absolute:true
+	    ~service:(Eliom_services.static_dir ())
 	    (local_filename name n)
 	in
 	let entry =
@@ -734,15 +753,18 @@ let rec entries name list = function
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = Eliom_uri.make_string_uri ~absolute:true ~service:feed_service name in
+  let id = Eliom_uri.make_string_uri ~absolute:true
+    ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
-  Lwt.catch
-    (fun () -> Ocsipersist.find image_info_table name >|=
-	(fun (number,updated,list) -> Atom_feed.feed ~id ~updated ~title (entries name list 10)))
-    ( function Not_found ->
+  try_lwt
+    Ocsipersist.find image_info_table name >|=
+      (fun (number,updated,list) ->
+	Atom_feed.feed ~id ~updated ~title (entries name list 10))
+  with
+    | Not_found ->
       let now = CalendarLib.Calendar.now () in
       Lwt.return (Atom_feed.feed ~id ~updated:now ~title [])
-      | e -> Lwt.fail e )
+    | e -> Lwt.fail e
 
 let () = Eliom_atom.Reg.register ~service:feed_service feed
 
@@ -761,9 +783,6 @@ that appear only if the user own the page.
 Before running, add the {{{graffiti_saved}}} directory in your
 directory containing static contents and edit 
 {{{let static_dir = "/tmp/static/"}}} to adapt to your configuration.
-
-<<concept title=""|
->>
 
 ===Connection with external accounts===
 <<concepts|openID>>

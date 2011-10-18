@@ -1,6 +1,6 @@
 
 APP_NAME := graffiti
-SERVER_PACKAGE := cairo,unix,macaque.syntax
+SERVER_PACKAGE := cairo,unix
 CLIENT_PACKAGE :=
 
 SERVER_FILES = common.ml server.ml feed.ml ${wildcard *.eliom}
