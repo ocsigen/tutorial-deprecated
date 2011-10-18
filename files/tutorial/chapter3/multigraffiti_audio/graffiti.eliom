@@ -1,61 +1,47 @@
 {shared{
-  open XHTML5.M
+  open Eliom_pervasives
+  open HTML5.M
   open Common
 }}
 {client{
   open Client
 }}
 open Server
+open Feed
 
-let include_canvas (name:string) (canvas_box:[ Xhtml5types.div ] XHTML5.M.elt) =
-
-  let bus,image_string = launch_server_canvas name in
-
-  let imageservice =
-    Eliom_output.Text.register_coservice'
-      ~timeout:10.
-      (* the service is available fo 10 seconds only, but it is long
-	 enouth for the browser to do its request. *)
-      ~get_params:Eliom_parameters.unit
-      (fun () () -> Lwt.return (image_string (), "image/png"))
-  in
-
+let start_drawing name image canvas =
+  let bus = get_bus name in
   Eliom_services.onload
     {{
-      let canceller = launch_client_canvas %bus %imageservice %canvas_box in
-      Eliom_client.on_unload (fun () -> stop_drawing canceller; Lwt.return ())
+      let canceller = launch_client_canvas %bus %image %canvas in
+      Eliom_client.on_unload (fun () -> stop_drawing canceller)
     }}
 
-{client{
-  let music = ref false
-}}
+let counter = ref 0
 
-let launch_music () =
-  (Eliom_services.onload
-     {{
-       if not !music then
-	 begin
-	   let box = %audio_box in
-	   Dom.appendChild box
-             ( XHTML5.M.toelt
-	       (audio
-		  ~srcs:(XHTML5.M.uri_of_string "music.ogg",[])
-		  ~a:[a_autoplay (`Autoplay);a_controls (`Controls)] []));
-	   music := true
-	 end
-     }})
+let player = unique (audio
+		       ~srcs:(HTML5.M.uri_of_string "music.ogg",[])
+		       ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
+		       [pcdata "Your browser does not support audio element" ])
 
 let () = Connected.register ~service:multigraffiti_service
   !% ( fun name () username ->
-    (* the page element in wich we will include the canvas *)
-    let canvas_box = div [] in
-    include_canvas name canvas_box;
-    launch_music ();
-    Lwt.return ([
-      h1 [pcdata name];
-      choose_drawing_form ();
-      My_appl.a feed_service [pcdata "atom feed"] name;
-      div ( if name = username
-	then [save_image_box name]
-	else [pcdata "no saving"] );
-      canvas_box;]))
+    (* Some browsers won't reload the image, so we force
+       them by changing the url each time. *)
+    incr counter;
+    let image = unique (img ~alt:name ~src:(Eliom_output.Html5.make_string_uri
+					      ~service:imageservice (name,!counter)) ()) in
+    let canvas = unique (canvas ~a:[ a_width width; a_height height ]
+			   [pcdata "your browser doesn't support canvas"; br (); image]) in
+    start_drawing name image canvas;
+    make_page
+      [h1 [pcdata name];
+       disconnect_box ();
+       choose_drawing_form ();
+       Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
+       div ( if name = username
+	 then [save_image_box name]
+	 else [pcdata "no saving"] );
+       canvas;
+       player])
+
