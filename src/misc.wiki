@@ -774,15 +774,46 @@ let () = Eliom_atom.Reg.register ~service:feed_service feed
 In {{{graffiti.eliom}}}, we add a link to the feed and a save button
 that appear only if the user own the page.
 
-<<code language="ocaml"|                Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
-                div ( if name = username
-	          then [save_image_box name]
-	          else [pcdata "no saving"] );
+<<code language="ocaml"|
+  Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
+    div ( if name = username
+      then [save_image_box name]
+      else [pcdata "no saving"] );
 >>
 
 Before running, add the {{{graffiti_saved}}} directory in your
-directory containing static contents and edit 
+directory containing static contents and edit
 {{{let static_dir = "/tmp/static/"}}} to adapt to your configuration.
+
+=== Custom configuration options ===
+<<concepts|Custom configuration options>>
+
+It is not convenient to have to edit the code to change some
+configurations, like the location where are saved the favorite
+images. Fortunately Ocsigen provides a mechanism to extend its
+configuration file.
+
+<<code language="ocaml"|
+let static_dir =
+  match Eliom_config.get_config () with
+    | [Simplexmlparser.Element
+     ("staticdir", [], [Simplexmlparser.PCData dir])] ->
+        dir
+    | [] ->
+      raise (Ocsigen_extensions.Error_in_config_file
+               ("staticdir must be configured"))
+    | _ ->
+      raise (Ocsigen_extensions.Error_in_config_file
+               ("Unexpected content inside graffiti config"))
+>>
+
+This will add a mandatory child to the eliom tag of graffiti in the
+configuration file:
+{{{
+<eliom module="path/to/graffiti.cma">
+  <staticdir>/tmp/static</staticdir>
+</eliom>
+}}}
 
 ===Connection with external accounts===
 <<concepts|openID>>
