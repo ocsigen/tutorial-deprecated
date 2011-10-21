@@ -1,4 +1,4 @@
-= Miscellaneous features =
+=Miscellaneous features=
 
 <<|outline target="documentation">>
 
@@ -16,7 +16,7 @@ To do:
 Help appreciated.
 >>
 
-== Multi-user collaborative drawing application ==
+==Multi-user collaborative drawing application==
 
 To turn our drawing application to a multi user one, we need to
 refactor some parts. In particular, we need to be able to handle
@@ -326,7 +326,7 @@ let () = My_appl.register ~service:multigraffiti_service
        canvas;])
 >>
 
-==== {{{Makefile}}} ====
+===={{{Makefile}}}====
 
 We now need to change the makefile to adapt to these changes. First,
 we add the files to the list of files wich need to be compiled. The
@@ -351,7 +351,7 @@ caml.
 It is also needed to add {{{-syntax camlp4o \}}} to commands that doesn't have it.
 >>
 
-=== Cleaning previous pages ===
+===Cleaning previous pages===
 <<concepts| Cancel threads and arrows\\ close buses>>
 
 A problem with the current version is that the client keeps receiving
@@ -513,7 +513,7 @@ by
   !% (fun name () username -> ...
 >>
 
-=== Type safe database requests using Macaque===
+===Type safe database requests using Macaque===
 
 <<concepts|Type safe database requests>>
 
@@ -615,7 +615,7 @@ check for the presence of an account before creating it.
 We need to add {{{macaque.syntax}}} in the makefile and
 {{{<extension findlib-package="macaque"/>}}} in graffiti.conf
 
-=== Lightweight database using Ocsipersist ===
+===Lightweight database using Ocsipersist===
 <<concepts|Persistent tables with Ocsipersist>>
 
 For maintaining the list of user and password, we do not need the full
@@ -656,7 +656,7 @@ let () = Eliom_output.Action.register
 >>
 
 
-=== Saving favorite pictures===
+===Saving favorite pictures===
 <<concepts|Atom feed>>
 
 We will now add a button to the application to save the current
@@ -785,7 +785,7 @@ Before running, add the {{{graffiti_saved}}} directory in your
 directory containing static contents and edit
 {{{let static_dir = "/tmp/static/"}}} to adapt to your configuration.
 
-=== Custom configuration options ===
+===Custom configuration options===
 <<concepts|Custom configuration options>>
 
 It is not convenient to have to edit the code to change some
@@ -827,7 +827,7 @@ It will show an example of use of this module.>>
 <<concept title=""|
 >>
 
-===listening music===
+===Listening music===
 <<concepts|Persistence of the client application>>
 
 We will add an audio player to the page that will stay when page

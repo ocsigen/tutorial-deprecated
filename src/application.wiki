@@ -1,83 +1,20 @@
-<<header| = Writing a client/server Eliom application >>
+<<header| =Writing a client/server Eliom application >>
 
 <<|outline target="documentation">>
 
 //The code of this tutorial has been tested against
 the 2.0 release of the Ocsigen framework.//\\
 
-This chapter and the two following ones are an overview of the
-features the Ocsigen framework brings to build Web applications.  They
-will allow you to understand the philosophy of Eliom (the Web
-programming framework in OCaml), and are also a good starting point to
-understand other libraries of the Ocsigen project: Lwt, Macaque, etc.
-
-Theses chapters do not aim at exhaustiveness but many references
-towards other chapters are made all along the text, so that you can
-learn the concepts in detail if you want to.
-
-We assume the reader has a good knowledge of the Objective Caml
-language.\\
-
-The present chapter is a tutorial for writing a small client/server
-[[site:graffiti/|collaborative drawing application]]. You will learn
-how to:
-
-* Create new //services//
-* Output //valid HTML//
-* Send //OCaml code// to be executed //on the client//
-* Call //Javascript methods// from OCaml
-* Catch //mouse events//
-* //Communicate// with the server, in both directions
-* Use the //O'Closure// widget library
-* Create services with //non-HTML output//
-
-The next chapter is devoted to server side programming.  We will
-create a new Web site with several pages and user connection. In this
-chapter, you will learn how to:
-
-* Create a //link// towards another service
-* Create //forms//
-* Register //session data// or //session services//
-* Create services performing //actions// (with no output)
-* Dynamically register new services (//continuation based// Web programming)
-
-The third chapter is an overview of miscellaneous features.  We will
-mix the application from the first chapter with the one from the
-second chapter to produce a multi-user collaborative drawing
-application.  In this chapter, you will learn how to:
-
-* Integrate a typical Web interaction (links, forms,~ …) with a client side program.
-* Use //Macaque// for safe database interaction
-* Add //sounds or videos// to your application
-* Change pages //without stopping the client side program//
-* Connect with external accounts (//openID//)
-* Add an Atom stream
-
-If you are not interested in client-side programming you can safely
-skip most of the first chapter (although we recommend you read at least
-the first section, which explains the basics). Conversely, if you are
-not interested in standard Web interactions, with sessions links, and
-forms, you can skip the second chapter.
-
-Keep in mind that one of the key feature of Eliom is that it allows
-one to mix commonplace Web interactions (URLs, forms, links,
-bookmarks, back button) with dynamic client side features. In
-particular, the client-side program **does not stop** when the user
-clicks a link, sends a form, or presses the back button--yet the user
-still can save bookmarks on pages!  This opens up a wide field of new
-possibilities, and should facilitate the emergence of new kinds of Web
-applications.
 
 In this chapter, we will write a [[site:graffiti/|collaborative
-drawing application]] (the final code is available <<a_file
-src="tutorial.tar.gz"|here>>).
-
-==@@id="basics"@@ Basics ==
-
-In this first section, we will build a collaborative drawing
-application. It is a client/server Web application displaying an area
+drawing application]].
+It is a client/server Web application displaying an area
 where users can draw using the mouse, and see what other users are
-drawing.
+drawing. The final code is available
+<<a_file src="tutorial.tar.gz"|for download>>).
+
+
+==@@id="basics"@@ Basics==
 
 ===My first page===
 
@@ -140,7 +77,7 @@ http://localhost:8080/graff
 <<concept title="Services"|
 
 Unlike typical Web programming techniques (CGI, PHP,~ ...), with
-Eliom, you don't write one file for each URL, but a single Caml module
+Eliom, you don't write one file for each URL, but a single OCaml module
 (*.cmo or *.cma) for the whole Web site.
 
 The <<a_api project="eliom" | module Eliom_services >> module allows
@@ -256,7 +193,7 @@ the <<a_manual project="lwt"|Lwt programming guide>>.
 
 >>
 
-=== Execute parts of the program on the client ===
+===Execute parts of the program on the client===
 
 <<concepts|
 Service sending an application\\
@@ -382,7 +319,7 @@ Js_of_ocaml's manual >>.
 
 >>
 
-=== Accessing server side variables on client side code ===
+===Accessing server side variables on client side code===
 <<concepts|Sharing server side values\\Manipulating HTML 'by reference'>>
 
 The client side processe is not really separated from the server side,
@@ -465,9 +402,9 @@ annotate it that way.
   For more information, see <<a_manual project="eliom"
   chapter="client" fragment="unique" | here >>.  >>
 
-==@@id="graffiti"@@ Collaborative drawing application ==
+==@@id="graffiti"@@ Collaborative drawing application==
 
-=== Drawing on a canvas ===
+===Drawing on a canvas===
 
 <<concepts|
 
@@ -638,7 +575,7 @@ the more traditional (but much more verbose)
 
 <<wip|**Warning** Event arrows will probably evolve in the near future.>>
 
-=== Collaborative drawing application ===
+===Collaborative drawing application===
 
 <<concepts|Client server communication >>
 
@@ -799,7 +736,7 @@ application. The full documentation is available
 
 >>
 
-=== Sending the initial image ===
+===Sending the initial image===
 
 <<concepts|Services sending other data types>>
 
