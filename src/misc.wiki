@@ -5,35 +5,34 @@
 //The code of this chapter of the tutorial has been
 tested against the 2.0 release of Eliom.//
 
-<<wip|This chapter is under construction.
-
-To do:
-* The first section must split the program without change
-* Introduce {{{unique}}} and {{{Eliom_client.Html5}}}
-  (unique for div and for page headers)
-* proof-read everything
-
-Help appreciated.
->>
 
 ==Multi-user collaborative drawing application==
 
-To turn our drawing application to a multi user one, we need to
-refactor some parts. In particular, we need to be able to handle
-separately different drawings. To do this, we will turn all global
-variable, like the bus, in local ones.
+We now want to take back our collaborative drawing application and 
+turn it to a multi user one. Each user will have his own drawing,
+where everyone can draw, and the owner will have the ability to save
+the drawing he wants and create an Atom feed containing all saved drawings.
 
 Download the <<a_file src="tutorial.tar.gz"|full code>> of the examples
-or browse it [[http://ocsigen.org/darcs/tutorial/files/tutorial/chapter3/multigraffiti|here]]
+or browse it
+[[http://ocsigen.org/darcs/tutorial/files/tutorial/chapter3/multigraffiti|online]].
 
-===Split application into multiple files===
+===Split application into multiple files and using several canvas===
 <<concepts| Complex eliom project\\Unique elements>>
+
+In this first section, we will build a multi-canvas drawing application.
+Each drawing has its own URL. Evryone can create a new drawing by going
+to the corresponding URL.
+
+We need to refactor some parts. In particular, we need to be able to handle
+separately different drawings. To do this, we will turn all global
+variable, like the bus, in local ones.
 
 When an application grows, it start being useful to split it in
 multiple files. For sake of example, we will split graffiti into 4
 files.
 
-* {{{common.ml}}} wich will be part of both client and server,
+* {{{common.ml}}} which will be part of both client and server,
 containing shared types and declarations
 * {{{client.ml}}} client only part of the application
 * {{{server.ml}}} server only part of the application
@@ -177,7 +176,7 @@ let imageservice =
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
     ~get_params:(let open Eliom_parameters in string "name" ** int "q")
-    (* we add another parameter for the browser not to cache: at least
+    (* we add an int parameter for the browser not to cache the image: at least
        for chrome, there is no way to force the browser to reload the
        image without leaving the application *)
     (fun (name,_) () ->
@@ -199,10 +198,10 @@ let get_bus (name:string) =
 
 >>
 
-The main page now does launch the application. It only contains a
-formulary to choose to wich drawing you want to go. The application is
-launched by the {{{multigraffiti_service}}} service. It is registered
-in {{{graffiti.eliom}}}.
+The main page now contains only a
+form to choose to which drawing you want to go.
+The drawing will be sent by the {{{multigraffiti_service}}} service,
+registered in {{{graffiti.eliom}}}.
 
 <<code language="ocaml"|
 let main_service = Eliom_services.service ~path:[""]
@@ -255,15 +254,15 @@ let () = My_appl.register ~service:main_service
 <<concept title="Unique scripts" |
 
   Sometimes we need to control when a script is loaded and reloaded on
-  page change. Since clicking on links in eliom application do not
+  page change. Since clicking on links in an Eliom application do not
   reload the entire page, already loaded libraries stay loaded. But if
   we simply add a script to each page, it will be loaded each time.
-  We usualy don't want that.
+  We usually don't want that.
 
   Using <<a_api project="eliom" | val Eliom_pervasives.HTML5.M.unique>>
   we can create an xml node manipulated 'by reference'. If a reference
   to a script node is included in a page, it will only be loaded
-  loaded the first time it appears in the header. Such a node can
+  the first time it appears in the header. Such a node can
   be created that way:
 
   <<code language="ocaml"|
@@ -275,7 +274,7 @@ let () = My_appl.register ~service:main_service
 >>
 ===={{{graffiti.eliom}}}====
 
-Here is the code that mix client and server parts.
+Here is the code that mixes client and server parts.
 
 We first open the corresponding modules for each parts of the
 application.
@@ -302,13 +301,13 @@ let start_drawing name image canvas =
     }}
 >>
 
-And we finally register the main service.
+And we finally register the service sending a drawing:
 
 <<code language="ocaml"|
 let counter = ref 0
 
 let () = My_appl.register ~service:multigraffiti_service
-  ( fun name () ->
+  (fun name () ->
     (* Some browsers won't reload the image, so we force
        them by changing the url each time. *)
     incr counter;
@@ -329,7 +328,7 @@ let () = My_appl.register ~service:multigraffiti_service
 ===={{{Makefile}}}====
 
 We now need to change the makefile to adapt to these changes. First,
-we add the files to the list of files wich need to be compiled. The
+we add the files to the list of files which need to be compiled. The
 order is important, the makefile does not resolve dependencies.
 <<code language="make"|
 SERVER_FILES := common.ml server.ml ${wildcard *.eliom}
@@ -384,8 +383,8 @@ We now need to keep the event arrow and the thread receiving data to build the
 <<code language="ocaml"|  let t = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   let drawing_arrow =
     run (mousedowns canvas
-           (arr (fun ev -> set_coord ev; line ev)
-                   >~>> first [mousemoves Dom_html.document (arr line);
+           (arr (fun ev -> set_coord ev; line ev) >~>>
+            first [mousemoves Dom_html.document (arr line);
                    mouseup Dom_html.document >~>> (arr line)])) () in
   { drawing_thread = t;
     drawing_arrow = drawing_arrow }
@@ -506,7 +505,7 @@ let () = Connected.register ~service:main_service
 to use that, in {{{graffiti.eliom}}} we just replace
 
 <<code language="ocaml"|let () = My_appl.register ~service:multigraffiti_service
-  ( fun name () -> ... )
+  (fun name () -> ... )
 >>
 by
 <<code language="ocaml"|let () = Connected.register ~service:multigraffiti_service
@@ -523,8 +522,8 @@ database backend.
 
 We will implement our database access function using
 the Macaque library, that allows easy manipulation of Postgresql
-database fully compatible with Lwt. ( For more information see
-[[wiki(25):| Macaque manual]] )
+database fully compatible with Lwt. (For more information see
+[[wiki(25):| Macaque manual]]).
 
 We will store the login and the password of users in a Postgresql
 database. For more information on how to set up and run it, see
@@ -532,7 +531,9 @@ database. For more information on how to set up and run it, see
 manual]].
 
 When the base is up and running, we create the base by running is a shell:
-<<code language="sh"| $ createdb testbase >>
+<<code language="sh"|
+$ createdb testbase
+>>
 
 Then we create the {{{users}}} table, by executing this sql script:
 
@@ -543,7 +544,9 @@ Then we create the {{{users}}} table, by executing this sql script:
 
 We save it under {{{create_table.sql}}} and run
 
-<<code language="sh"| $ psql -d testbase -f create_table.sql >>
+<<code language="sh"|
+$ psql -d testbase -f create_table.sql
+>>
 
 Macaque can use any thread library that provides a monadic
 interface. The default one provides simple blocking access to the
@@ -570,8 +573,8 @@ We can now open the database with our newly created {{{Lwt_PGOCaml.connect}}}.
       | None -> Lwt_PGOCaml.connect ~database:"testbase" ()
 >>
 
-Then we declare the table on wich we will work and the different
-request we do on it.
+Then we declare the table on which we will work and the different
+requests we do on it.
 
 <<code language="ocaml"|let table = <:table< users (
   login text NOT NULL,
@@ -597,7 +600,7 @@ let check_pwd name pwd =
             row in $table$;
             row.login = $string:name$;
 	    row.password = $string:pwd$ ~>>)
-  >|= ( function [] -> false | _ -> true )
+  >|= (function [] -> false | _ -> true)
 >>
 
 Finally, we change a bit the handler of {{{create_account_service}}} to
@@ -627,13 +630,13 @@ We first create a table holding ocaml values:
 let user_table = Ocsipersist.open_table "user_table"
 >>
 
-Then we can easilly replace the user management code.
+Then we can easily replace the user management code:
 
 <<code language="ocaml"|
 let check_pwd name pwd =
   try_lwt
     lwt saved_password = Ocsipersist.find user_table name in
-    Lwt.return ( pwd = saved_password )
+    Lwt.return (pwd = saved_password)
   with
     Not_found -> Lwt.return false
 
@@ -651,7 +654,7 @@ let () = Eliom_output.Action.register
 
 <<concept title="Ocsipersist"|
  Ocsipersist provides simple typed key/value tables. It provides different backends
- ( currently sqlite and dbm ) and can be extended.
+ (currently sqlite and dbm) and can be extended.
  For more informations see <<a_api project="ocsigenserver" | type Ocsipersist.table >>.
 >>
 
@@ -662,11 +665,11 @@ let () = Eliom_output.Action.register
 We will now add a button to the application to save the current
 image. The images will be saved to the filesystem using the module
 <<a_api project="lwt" | module Lwt_io>>. We will then make an Atom feed
-with the saved images using <<a_api project="eliom" version="dev"| module Atom_feed >>
+with the saved images using <<a_api project="eliom" version="dev"| module Atom_feed >>.
 
 We save the images in the directory containing the static contents
 under the directory {{{graffiti_saved/username}}}. The {{{username}}}
-directory is created if needed. If it already exists {{{mkdir}}} fail
+directory is created if needed. If it already exists {{{mkdir}}} fails
 and we do nothing.
 
 We will add this code in a new file:
@@ -694,9 +697,9 @@ is stocked in an <<a_api project="eliom" | module Ocsipersist >>
 table.
 <<code language="ocaml"|let image_info_table = Ocsipersist.open_table "image_info_table">>
 
-For each user, we stock a value of type
-{{{ int * CalendarLib.Calendar.t * ( (int * CalendarLib.Calendar.t) list )}}}.
-The first integer is the name under wich will be saved the image, the first time is the last update for that user and the list is the name and time of old images. We need those time to timestamp the entries of the feed.
+For each user, we stock a value of type\\
+{{{ int * CalendarLib.Calendar.t * ((int * CalendarLib.Calendar.t) list)}}}.
+The first integer is the name under which will be saved the image, the first time is the last update for that user and the list contains the names and times of old images. We need those times to timestamp the entries of the feed.
 
 <<code language="ocaml"|
 let save_image username =
@@ -772,13 +775,13 @@ let () = Eliom_atom.Reg.register ~service:feed_service feed
 
 
 In {{{graffiti.eliom}}}, we add a link to the feed and a save button
-that appear only if the user own the page.
+that appear only if the user owns the page.
 
 <<code language="ocaml"|
   Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
-    div ( if name = username
+    div (if name = username
       then [save_image_box name]
-      else [pcdata "no saving"] );
+      else [pcdata "no saving"]);
 >>
 
 Before running, add the {{{graffiti_saved}}} directory in your
