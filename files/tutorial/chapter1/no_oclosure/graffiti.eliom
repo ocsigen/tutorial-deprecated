@@ -66,48 +66,58 @@ let imageservice =
     ~get_params:Eliom_parameters.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))
 
+let page =
+  html
+    (head (title (pcdata "Graffiti")) [])
+    (body [h1 [pcdata "Graffiti"]])
+
+let onload_handler = {{
+  let canvas = Dom_html.createCanvas Dom_html.document in
+  let ctx = canvas##getContext (Dom_html._2d_) in
+  canvas##width <- width; canvas##height <- height;
+  ctx##lineCap <- Js.string "round";
+
+  Dom.appendChild Dom_html.document##body canvas;
+
+  (* The initial image: *)
+  let img =
+    Eliom_client.Html5.of_img
+      (img ~alt:"canvas"
+         ~src:(Eliom_output.Html5.make_uri ~service:%imageservice ())
+         ())
+  in
+  img##onload <- Dom_html.handler
+    (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
+
+  let x = ref 0 and y = ref 0 in
+
+  let set_coord ev =
+    let x0, y0 = Dom_html.elementClientPosition canvas in
+    x := ev##clientX - x0; y := ev##clientY - y0 in
+
+  let compute_line ev =
+    let oldx = !x and oldy = !y in
+    set_coord ev;
+    ("#ff9933", 5, (oldx, oldy), (!x, !y))
+  in
+
+  let line ev =
+    let v = compute_line ev in
+    let _ = Eliom_bus.write %bus v in
+    draw ctx v
+  in
+
+  let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
+
+  ignore (run (mousedowns canvas
+                 (arr (fun ev -> set_coord ev; line ev)
+				 >>> first [mousemoves Dom_html.document (arr line);
+					    mouseup Dom_html.document >>> (arr line)])) ());
+}}
+
 let main_service =
   My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
     (fun () () ->
-       Eliom_services.onload
-         {{
-           let canvas = Dom_html.createCanvas Dom_html.document in
-           let ctx = canvas##getContext (Dom_html._2d_) in
-           canvas##width <- width; canvas##height <- height;
-           ctx##lineCap <- Js.string "round";
+       Eliom_services.onload onload_handler;
+      Lwt.return page)
 
-           Dom.appendChild Dom_html.document##body canvas;
-
-           (* The initial image: *)
-           let img = Dom_html.createImg Dom_html.document in
-           img##alt <- Js.string "canvas";
-           img##src <- Js.string (Eliom_output.Html5.make_string_uri ~service:%imageservice ());
-           img##onload <- Dom_html.handler (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
-
-           let x = ref 0 and y = ref 0 in
-           let set_coord ev =
-             let x0, y0 = Dom_html.elementClientPosition canvas in
-             x := ev##clientX - x0; y := ev##clientY - y0 in
-           let compute_line ev =
-             let oldx = !x and oldy = !y in
-             set_coord ev;
-             ("#ff9933", 5, (oldx, oldy), (!x, !y))
-           in
-           let (bus:messages Eliom_bus.t) = %bus in
-           let line ev =
-             let v = compute_line ev in
-             let _ = Eliom_bus.write bus v in
-             draw ctx v
-           in
-           let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
-           ignore (run (mousedowns canvas
-                          (arr (fun ev -> set_coord ev; line ev)
-                           >>> first [mousemoves Dom_html.document (arr line);
-                                      mouseup Dom_html.document >>> (arr line)])) ());
-         }};
-      Lwt.return
-	(html
-	   (head
-	      (title (pcdata "Graffiti"))
-	      [My_appl.application_script ()])
-	   (body [h1 [pcdata "Graffiti"]]) ) )

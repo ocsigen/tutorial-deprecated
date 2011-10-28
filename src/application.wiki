@@ -6,8 +6,8 @@ the 2.0 release of the Ocsigen framework.//\\
 In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]].  It is a client/server Web application
 displaying an area where users can draw using the mouse, and see what
-other users are drawing. The final code is available <<a_file
-src="tutorial.tar.gz"|for download>>).
+other users are drawing. <<webonly| The final code is available <<a_file
+src="tutorial.tar.gz"|for download>>).>>
 
 <<|outline target="documentation">>
 
@@ -243,11 +243,11 @@ program,
 }}
 >>
 
-Download the <<a_file src="tutorial/chapter1/no_oclosure/Makefile">>, <<a_file
-src="tutorial/chapter1/no_oclosure/graffiti.conf">> and <<a_file
-src="tutorial/chapter1/no_oclosure/.depend">> files. You may want to adapt the
-configuration file to set some paths, especially the directory for
-static files. It is not necessary (and even not a good idea, for
+Download the <<a_file src="tutorial/chapter1/no_oclosure/Makefile">>
+and <<a_file src="tutorial/chapter1/no_oclosure/graffiti.conf">>
+files. You may want to adapt the configuration file to set some paths,
+especially the directory for static files (see also {{{STATICDIR}}} in
+the Makefile). It is not necessary (and even not a good idea, for
 security reasons) to put {{{.ml}}} and {{{.cma}}}/{{{.cmo}}} in the
 static files directory!
 
@@ -766,10 +766,10 @@ let page =
        (title (pcdata "Graffiti"))
        [ Eliom_output.Html5_forms.css_link
 	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
-		  ["css";"closure";"common.css"]) ();
+		  ["css";"common.css"]) ();
 	 Eliom_output.Html5_forms.css_link
 	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
-		  ["css";"closure";"hsvpalette.css"]) ();
+		  ["css";"hsvpalette.css"]) ();
 	 Eliom_output.Html5_forms.css_link
 	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
 		  ["css";"slider.css"]) ();
@@ -960,10 +960,12 @@ creation of the slider:
 
 <<code language="ocaml"|
 (* The initial image: *)
-let img = Dom_html.createImg Dom_html.document in
-img##alt <- Js.string "canvas";
-img##src <- Js.string (Eliom_output.Html5.make_string_uri
-                         ~service:%imageservice ());
+let img =
+  Eliom_client.Html5.of_img
+    (img ~alt:"canvas"
+       ~src:(Eliom_output.Html5.make_uri ~service:%imageservice ())
+       ())
+in
 img##onload <- Dom_html.handler
                 (fun ev -> ctx##drawImage(img, 0., 0.); Js._false);
 >>
@@ -977,8 +979,8 @@ following line in the configuration file.
 <extension findlib-package="cairo" />
 }}}
 
-The first version of the program is now complete. Download the code
-<<a_file src="tutorial.tar.gz"|here>>.
+The first version of the program is now complete. <<webonly| <<a_file
+src="tutorial.tar.gz"| Download the code>>.>>
 
 <<div class="exercices"|
 
