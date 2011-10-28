@@ -107,13 +107,14 @@ distclean: clean.local
 
 ## Dependencies
 
-depend:
+depend: .depend
+.depend: ${SERVER_FILES} ${CLIENT_FILES}
 	$(ELIOMDEP) -server ${SERVER_INC} ${SERVER_FILES} > .depend
 	$(ELIOMDEP) -client ${CLIENT_INC} ${CLIENT_FILES} >> .depend
 
 ## Warning: Dependencies towards *.eliom are not handled by eliomdep yet.
 
--include .depend
+include .depend
 
 ## installation #########
 

@@ -3,6 +3,14 @@
 background-color: ThreeDFace;
 position: relative;
 overflow: hidden;
+}
+
+.goog-slider-vertical {
+height: 300px;
+width: 20px;
+}
+
+.goog-slider-horizontal {
 height: 20px;
 width: 400px;
 }

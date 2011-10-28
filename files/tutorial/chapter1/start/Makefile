@@ -1,2 +1,2 @@
-graffiti.com: graffiti.ml
+graffiti.cmo: graffiti.ml
 	ocamlfind ocamlc -thread -package eliom.server -c graffiti.ml
