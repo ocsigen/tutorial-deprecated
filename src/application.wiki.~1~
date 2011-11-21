@@ -7,7 +7,7 @@ In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]].  It is a client/server Web application
 displaying an area where users can draw using the mouse, and see what
 other users are drawing. <<webonly| The final code is available <<a_file
-src="tutorial.tar.gz"|for download>>.>>
+src="tutorial.tar.gz"|for download>>).>>
 
 <<|outline target="documentation">>
 
@@ -48,10 +48,6 @@ let main_service =
           (HTML5.body [HTML5.h1 [HTML5.pcdata "Graffiti"]])))
 >>
 
-<<|BB
-  Why not just stick with one scheme of opening Ocsigen modules?
->>
-
 Copy one of the two pieces of code above in a file {{{graffiti.ml}}},
 then compile it with the following command ; it produce a file called
 {{{graffiti.cmo}}}.
@@ -73,10 +69,6 @@ Your page is now available at the URL:
 {{{
 http://localhost:8080/graff
 }}}
-<<|BB
-  direct link would be more reader-friendly:
-  [[http://localhost:8080/graff|`http://localhost:8080/graff`]]
->>
 
 <<concept title="Services"|
 
@@ -216,12 +208,6 @@ wanted to return HTML5. But actually we want our service to send an
 Eliom application.  To do that, we will create our own registration
 module by using the functor {{{Eliom_output.Eliom_appl}}}:
 
-<<|BB
-  This is a bit fast, especially if you just came to Ocsigen. The following
-  questions popped into my mind: What is an Eliom application? What's its
-  motivation, what comprises it and how does is work?
->>
-
 <<code language="ocaml"|
 module My_appl =
   Eliom_output.Eliom_appl (struct
@@ -241,11 +227,6 @@ let main_service =
         (html
            (head (title (pcdata "Graffiti")) [])
            (body [h1 [pcdata "Graffiti"]]) ) )
->>
-
-<<|BB
- The ~path:[""] is inconsistent with the ~path:["graff"] of the `main_service`
- in the last section (reload won't work).
 >>
 
 We now want to add some OCaml code to be executed by the browser. For
@@ -360,7 +341,7 @@ let main_service =
       Eliom_services.onload {{
         Dom_html.window##alert(Js.string
 	  (Printf.sprintf "You came %i times to this page" %count))
-      }};
+      }}
       Lwt.return
         (html
            (head (title (pcdata "Graffiti")) [])
@@ -425,33 +406,6 @@ let main_service =
            (container) ) )
 >>
 
-To be able to modify the actual page's {{{<body>}}} element, we need
-to declare the element as manipulated 'by reference'. To do so, we use
-the function <<a_api project="eliom| val
-Eliom_pervasives.HTML5.M.unique >> to create the element. In the
-previous exemple, we need to replace the {{{container}}} by:
-
-<<code language="ocaml"|
-  let container = unique (body [h1 [pcdata "Graffiti"]]) in
->>
-
-<<concept
-
-  title="Unique elements" |
-
-  Unique nodes are scpecific TyXML nodes meant to be instanciated only
-  once per instance of Eliom application. They can be seen as a
-  reference to the actual client instance of the node. They are
-  mandatory to access from an event handler to nodes previously
-  included in the document tree. E.g. they are mandatory to read the
-  current value of a input field or to modify the content of a
-  node. Furthermore, unique nodes content is preserved when clicking a
-  link that do not exit the application. See the Eliom manual for a
-  detailled presentation of <<a_manual project="eliom"
-  chapter="client" fragment="unique" | unique nodes >>.
-
->>
-
 ==@@id="graffiti"@@ Collaborative drawing application==
 
 ===Drawing on a canvas===
@@ -464,7 +418,7 @@ Canvas
 
 We now want to draw something on the page using an HTML5 canvas. As a
 first-step, we define a client-side function called {{{draw}}} that
-draw a line between two given points in a canvas and we call this
+draw a line between to given points in a canvas and we call this
 function once in the {{{onload}}} event handler to draw an <<span
 style="color:#ffaa33;"|orange>> line. Here is the (full) new version
 of the program:
@@ -614,9 +568,6 @@ terminate:
 
   For example {{{(mouseup Dom_html.document)}}} is an arrow from
   {{{unit}}} to {{{Dom_html.mouseEvent Js.t}}}.
-  <<|BB
-  {{{'a}}} to {{{Dom_html.mouseEvent Js.t}}} according to the documentation
-  >>
 
   The combinator <<a_api project="js_of_ocaml" | val
   Event_arrows.arr >> transforms a function of type {{{'a -> 'b}}} into
@@ -764,7 +715,7 @@ in
 pSmall##render(Js.some Dom_html.document##body);
 >>
 
-And to change the size and the color of the brush, we replace the last
+And to change the size and the color of the brsuh, we replace last
 line of the function {{{compute_line}}} of the {{{onload_handler}}}
 by:
 
@@ -842,11 +793,6 @@ static files directory:
   src="tutorial/static/css/graffiti.css"|{{{hsvpalette.css}}}>> are
   home-made css; and
 
-<<|BB
-  Which files should be referenced?  At least the naming of the referenced file
-  and the filename in the link text are inconsistent.
->>
-
 * the {{{graffiti_oclosure.js}}} script is generated according to the
 {{{graffiti.js}}} with the following command:
 
@@ -859,11 +805,6 @@ src="tutorial/chapter1/with_oclosure/Makefile"|{{{Makefile}}}>> all
 those static files are generated and installed by the {{{install}}}
 rule in the configured static directory (see the {{{STATICDIR}}}
 variable).
-
-<<|BB
-This Makefile intents to `cp -r ../../static/* $(STATICDIR)` for `make install`.
-This is obviously not working in my environment.
->>
 
 <<concept
 
@@ -987,11 +928,6 @@ We now want to load the initial image once the canvas is created.  Add
 the following lines just between the creation of the canvas and the
 creation of the slider:
 
-<<|BB
-... between the creation of the canvas //context// of the canvas and the
-creation of the slider (the former is necessary in the following).
->>
-
 <<code language="ocaml"|
 (* The initial image: *)
 let img =
@@ -1023,10 +959,6 @@ src="tutorial.tar.gz"| Download the code>>.>>
 * Add an OClosure button to make possible to download the current
   image and save it to the hard disk (reuse the service
   {{{imageservice}}}).
-  <<|BB
-    Wrapping my head around the huge oclosure-API offhanded is very hard. A
-    hint on how to register a click-listener with the button would help.
-  >>
 * Add an OClosure button with a color picker to select a color from
   the drawing. Pressing the button changes the mouse cursor, and disables
   current mouse events until the next mouse click event on the document.

@@ -20,7 +20,7 @@ or browse it
 <<concepts| Complex eliom project\\Unique elements>>
 
 In this first section, we will build a multi-canvas drawing application.
-Each drawing has its own URL. Evryone can create a new drawing by going
+Each drawing has its own URL. Everyone can create a new drawing by going
 to the corresponding URL.
 
 We need to refactor some parts. In particular, we need to be able to handle
@@ -49,7 +49,7 @@ let height = 400>>
 
 It is almost the same code as what was enclosed in {{{ {client{ ... }} }}}
 with the difference that what was previously in
-{{{ Eliom_services.onload {{ }} }}} is now in the function, {{{ launch_client_canvas}}}.
+{{{ Eliom_services.onload {{ }} }}} is now in the function {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|open Eliom_pervasives
 open Common
@@ -116,7 +116,7 @@ let launch_client_canvas bus image_elt canvas_elt =
 
 ===={{{server.ml}}}====
 
-It contains almost all the server part of the code.
+It contains almost all the server parts of the code.
 <<code language="ocaml"|open HTML5
 open Common
 open Lwt
@@ -353,7 +353,7 @@ It is also needed to add {{{-syntax camlp4o \}}} to commands that doesn't have i
 >>
 
 ===Cleaning previous pages===
-<<concepts| Cancel threads and arrows\\ close buses>>
+<<concepts| Cancel threads and arrows\\ Close buses>>
 
 A problem with the current version is that the client keeps receiving
 data from pages it left.

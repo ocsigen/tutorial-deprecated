@@ -22,6 +22,13 @@ the problem to the package maintainers. We recommend to use the source
 packages only if you want to test unreleased features from development
 versions.
 
+<<|BB
+consider splitting into
+ * technical requirements (ocaml, ocsigen, cairo(!))
+ * intelectual requirements (knowledge of the OCaml language)
+ * how to get help (i.e. mail, and what embedded IRC chat?)
+>>
+
 The first section of this introduction lists our main
 software projects. The second section is an overview of the tutorial.
 In the following chapters, we will show how to build

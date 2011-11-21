@@ -1,5 +1,9 @@
 =Implementing Web Interaction Using Eliom=
 
+<<|BB
+ s/\<Web\>/web/g
+>>
+
 <<|outline target="documentation">>
 
 //The code of this tutorial has been tested with the 2.1 release of
@@ -45,7 +49,7 @@ let main_service =
                        (body [h1 [pcdata "Hello"]])))
 >>
 
-Note that we are using {{{Eliom_output.Html5}}}, as are not building a
+Note that we are using {{{Eliom_output.Html5}}}, as we are not building a
 client side program for now.
 
 Put this example in a file ({{{tuto.ml}}}), compile it like so:
@@ -968,6 +972,11 @@ Also remove the registration of the {{{create_account_service}}}
 service and modify the user creation form to make it points towards
 {{{account_confirmation_service}}}.
 
+<<|BB
+  After the actual creation of the user, {{{create_account_service}}} stays
+  accessible. Reloading re-creates the same user again.
+  >>
+
 <<concept title="Dynamic creation of services" |
 
 In this example, we are dynamically creating a new service (here a
@@ -1144,7 +1153,14 @@ Eliom_output.Any.register
     );
 >>
 
-<<concept title="{{{Eliom_output.Any}}}" |
+<<| BB
+  Why not {{{raise_lwt Eliom_common.Eliom_404}}}?
+  >>
+
+<<| BB
+  Obviously, the no-wiki-tags {{{...}}} do not work in the title of concepts.
+>>>
+<<concept title="Eliom_output.Any" |
 
 The module <<a_api project="eliom" version="dev" | module
 Eliom_output.Eliom_appl >> can be used to create services that are
