@@ -425,8 +425,8 @@ previous exemple, we need to replace the {{{container}}} by:
   Unique nodes are scpecific TyXML nodes meant to be instanciated only
   once per instance of Eliom application. They can be seen as a
   reference to the actual client instance of the node. They are
-  mandatory to access nodes previously included in the document tree
-  from an event handler. Hence, they are mandatory for example to read
+  mandatory to access from an event handler to nodes previously
+  included in the document tree. E.g. they are mandatory to read the
   current value of a input field or to modify the content of a
   node. Furthermore, unique nodes content is preserved when clicking a
   link that do not exit the application. See the Eliom manual for a

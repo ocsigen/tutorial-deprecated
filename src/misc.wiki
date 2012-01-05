@@ -212,7 +212,8 @@ let multigraffiti_service = Eliom_services.service ~path:[""]
 let choose_drawing_form () =
   Eliom_output.Html5.get_form ~service:multigraffiti_service
     (fun (name) ->
-      [p [pcdata "drawing name: ";
+      [fieldset
+         [label ~a:[Eliom_output.Html5.a_for name] [pcdata "drawing name: "];
           Eliom_output.Html5.string_input ~input_type:`Text ~name ();
           br ();
           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Go" ()
@@ -447,16 +448,18 @@ let () =
 
 let disconnect_box () =
   My_appl.post_form disconnection_service
-    (fun _ -> [p [My_appl.string_input
-                  ~input_type:`Submit ~value:"Log out" ()]]) ()
+    (fun _ -> [fieldset
+                 [My_appl.string_input
+                     ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let login_name_form service button_text =
   My_appl.post_form ~service
     (fun (name1, name2) ->
-      [p [pcdata "login: ";
+      [fieldset
+         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
           My_appl.string_input ~input_type:`Text ~name:name1 ();
           br ();
-          pcdata "password: ";
+          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
           My_appl.string_input ~input_type:`Password ~name:name2 ();
           br ();
           My_appl.string_input ~input_type:`Submit ~value:button_text ()
@@ -722,7 +725,8 @@ let save_image_box name =
   in
   Eliom_output.Html5.post_form save_image_service
     (fun _ ->
-      [p [Eliom_output.Html5.string_input
+      [fieldset
+          [Eliom_output.Html5.string_input
              ~input_type:`Submit ~value:"save" ()]]) ()
 >>
 

@@ -82,11 +82,12 @@ let multigraffiti_service = Eliom_services.service ~path:[""]
 let choose_drawing_form () =
   Eliom_output.Html5.get_form ~service:multigraffiti_service
     (fun (name) ->
-      [p [pcdata "drawing name: ";
-          Eliom_output.Html5.string_input ~input_type:`Text ~name ();
-          br ();
-          Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Go" ()
-         ]])
+      [fieldset
+	  [label ~a:[Eliom_output.Html5.a_for name] [pcdata "drawing name: "];
+           Eliom_output.Html5.string_input ~input_type:`Text ~name ();
+           br ();
+           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Go" ()
+          ]])
 
 let connection_service =
   Eliom_services.post_coservice'
@@ -161,19 +162,21 @@ let () =
 
 let disconnect_box () =
   Eliom_output.Html5.post_form disconnection_service
-    (fun _ -> [p [Eliom_output.Html5.string_input
-                  ~input_type:`Submit ~value:"Log out" ()]]) ()
+    (fun _ -> [fieldset
+		  [Eliom_output.Html5.string_input
+                      ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let login_name_form service button_text =
   Eliom_output.Html5.post_form ~service
     (fun (name1, name2) ->
-      [p [pcdata "login: ";
-          Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
-          br ();
-          pcdata "password: ";
-          Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
-          br ();
-          Eliom_output.Html5.string_input ~input_type:`Submit ~value:button_text ()
+      [fieldset
+	  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
+           Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+           br ();
+           label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
+           Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
+           br ();
+           Eliom_output.Html5.string_input ~input_type:`Submit ~value:button_text ()
          ]]) ()
 
 let oclosure_script =

@@ -417,11 +417,12 @@ Let's create a function for generating the form:
 let connection_box () =
   Eliom_output.Html5.post_form ~service:connection_service
     (fun (name1, name2) ->
-      [p [pcdata "login: ";
+      [fieldset
+         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
           Eliom_output.Html5.string_input ~input_type:`Text
                                           ~name:name1 ();
           br ();
-          pcdata "password: ";
+          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
           Eliom_output.Html5.string_input ~input_type:`Password
                                           ~name:name2 ();
           br ();
@@ -492,11 +493,12 @@ let connection_box () =
       | None ->
         Eliom_output.Html5.post_form ~service:connection_service
           (fun (name1, name2) ->
-            [p [pcdata "login: ";
+            [fieldset
+	       [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
                 Eliom_output.Html5.string_input ~input_type:`Text
                                                 ~name:name1 ();
                 br ();
-                pcdata "password: ";
+                label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
                 Eliom_output.Html5.string_input ~input_type:`Password
                                                 ~name:name2 ();
                 br ();
@@ -845,11 +847,12 @@ let create_account_service =
 let create_account_form () =
   Eliom_output.Html5.post_form ~service:create_account_service
     (fun (name1, name2) ->
-      [p [pcdata "login: ";
+      [fieldset
+         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
           Eliom_output.Html5.string_input ~input_type:`Text
                                           ~name:name1 ();
           br ();
-          pcdata "password: ";
+          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
           Eliom_output.Html5.string_input ~input_type:`Password
                                           ~name:name2 ();
           br ();
@@ -1073,11 +1076,12 @@ let connection_box () =
         let l =
           [Eliom_output.Html5.post_form ~service:connection_service
             (fun (name1, name2) ->
-              [p [pcdata "login: ";
+              [fieldset
+	         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
                   Eliom_output.Html5.string_input ~input_type:`Text
                                                   ~name:name1 ();
                   br ();
-                  pcdata "password: ";
+                  label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
                   Eliom_output.Html5.string_input ~input_type:`Password
                                                   ~name:name2 ();
                   br ();
@@ -1192,16 +1196,17 @@ struct
       let connection_box =
         Eliom_output.Html5.post_form ~service:connection_service
           (fun (name1, name2) ->
-    	     [p [pcdata "login: ";
-              Eliom_output.Html5.string_input ~input_type:`Text
-                                              ~name:name1 ();
-              br ();
-              pcdata "password: ";
-              Eliom_output.Html5.string_input ~input_type:`Password
-                                              ~name:name2 ();
-              br ();
-              Eliom_output.Html5.string_input ~input_type:`Submit
-                                              ~value:"Connect" ()
+    	    [fieldset
+	      [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
+               Eliom_output.Html5.string_input ~input_type:`Text
+                                               ~name:name1 ();
+               br ();
+               label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
+               Eliom_output.Html5.string_input ~input_type:`Password
+                                               ~name:name2 ();
+               br ();
+               Eliom_output.Html5.string_input ~input_type:`Submit
+                                               ~value:"Connect" ()
 	     ]]) ()
       in
       Lwt.return

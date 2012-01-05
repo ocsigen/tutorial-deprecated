@@ -44,8 +44,9 @@ let wrong_pwd = Eliom_references.eref ~scope:Eliom_common.request false
 (* Page widgets: *)
 let disconnect_box () =
   Eliom_output.Html5.post_form disconnection_service
-    (fun _ -> [p [Eliom_output.Html5.string_input
-                    ~input_type:`Submit ~value:"Log out" ()]]) ()
+    (fun _ -> [fieldset
+		  [Eliom_output.Html5.string_input
+                      ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let connection_box () =
   lwt u = Eliom_references.get username in
@@ -58,13 +59,14 @@ let connection_box () =
         let l =
           [Eliom_output.Html5.post_form ~service:connection_service
             (fun (name1, name2) ->
-              [p [pcdata "login: ";
-                  Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
-                  br ();
-                  pcdata "password: ";
-                  Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
-                  br ();
-                  Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
+              [fieldset
+		  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
+                   Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+                   br ();
+                   label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
+                   Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
+                   br ();
+                   Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
                  ]]) ();
              p [Eliom_output.Html5.a new_user_form_service [pcdata "Create an account"] ()]]
         in
@@ -76,13 +78,14 @@ let connection_box () =
 let create_account_form () =
   Eliom_output.Html5.post_form ~service:account_confirmation_service
     (fun (name1, name2) ->
-      [p [pcdata "login: ";
-          Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
-          br ();
-          pcdata "password: ";
-          Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
-          br ();
-          Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
+      [fieldset
+	  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
+           Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+           br ();
+           label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
+           Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
+           br ();
+           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
          ]]) ()
 
 
