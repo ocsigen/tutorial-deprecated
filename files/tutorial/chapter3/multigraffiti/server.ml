@@ -1,5 +1,5 @@
 open Eliom_pervasives
-open HTML5.M
+open HTML5
 open Common
 open Lwt
 
@@ -143,27 +143,31 @@ let login_name_form service button_text =
           ]]) ()
 
 let oclosure_script =
-    HTML5.M.unique
-      (Eliom_output.Html5_forms.js_script
-         ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ())
+  HTML5.create_global_elt
+    (Eliom_output.Html5_forms.js_script
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+               ["graffiti_oclosure.js"]) ())
 
-let make_page body =
+let make_page content =
   Lwt.return
-    (HTML5.M.html
-       (HTML5.M.head
-	  (HTML5.M.title (HTML5.M.pcdata "Graffiti"))
- 	  [
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(HTML5.M.uri_of_string"./css/closure/common.css") ();
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(HTML5.M.uri_of_string"./css/closure/hsvpalette.css") ();
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(HTML5.M.uri_of_string"./css/slider.css") ();
-            oclosure_script;
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(HTML5.M.uri_of_string"./css/graffiti.css") ();
-          ])
-       (HTML5.M.body body))
+    (html
+       (head
+	  (title (pcdata "Graffiti"))
+       [ Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"common.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"hsvpalette.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"slider.css"]) ();
+         oclosure_script;
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"graffiti.css"]) ();
+       ])
+       (body content))
 
 
 let default_content () =
@@ -185,7 +189,7 @@ struct
 end
 
 module Connected =
-  Eliom_output.Customize ( My_appl ) ( My_appl ) ( Connected_translate )
+  Eliom_output.Customize ( My_appl ) ( Connected_translate )
 
 let ( !% ) f = fun a b -> return (fun c -> f a b c)
 

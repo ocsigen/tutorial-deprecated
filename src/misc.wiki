@@ -118,7 +118,7 @@ let launch_client_canvas bus image_elt canvas_elt =
 ===={{{server.ml}}}====
 
 It contains almost all the server part of the code.
-<<code language="ocaml"|open HTML5.M
+<<code language="ocaml"|open HTML5
 open Common
 open Lwt
 
@@ -220,31 +220,31 @@ let choose_drawing_form () =
          ]])
 
 let oclosure_script =
-    HTML5.M.unique
-      (Eliom_output.Html5_forms.js_script
-         ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ())
+  HTML5.create_global_elt
+    (Eliom_output.Html5_forms.js_script
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+               ["graffiti_oclosure.js"]) ())
 
-let make_page body =
+let make_page content =
   Lwt.return
-    (HTML5.M.html
-       (HTML5.M.head
-	  (HTML5.M.title (HTML5.M.pcdata "Graffiti"))
- 	  [
-            HTML5.M.link ~rel:[ `Stylesheet ]
-              ~href:(HTML5.M.uri_of_string"./css/closure/common.css")
-              ();
-            HTML5.M.link ~rel:[ `Stylesheet ]
-              ~href:(HTML5.M.uri_of_string"./css/closure/hsvpalette.css")
-              ();
-            HTML5.M.link ~rel:[ `Stylesheet ]
-              ~href:(HTML5.M.uri_of_string"./css/slider.css")
-              ();
-            oclosure_script;
-	    HTML5.M.link ~rel:[ `Stylesheet ]
-	      ~href:(HTML5.M.uri_of_string"./css/graffiti.css")
-              ();
-          ])
-       (HTML5.M.body body))
+    (html
+       (head
+	  (title (pcdata "Graffiti"))
+       [ Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"common.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"hsvpalette.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"slider.css"]) ();
+         oclosure_script;
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"graffiti.css"]) ();
+       ])
+       (body content))
 
 let () = My_appl.register ~service:main_service
   (fun () () ->
@@ -252,7 +252,7 @@ let () = My_appl.register ~service:main_service
 	       choose_drawing_form ()])
 >>
 
-<<concept title="Unique scripts" |
+<<concept title="Global node and scripts" |
 
   Sometimes we need to control when a script is loaded and reloaded on
   page change. Since clicking on links in an Eliom application do not
@@ -260,16 +260,18 @@ let () = My_appl.register ~service:main_service
   we simply add a script to each page, it will be loaded each time.
   We usually don't want that.
 
-  Using <<a_api project="eliom" | val Eliom_pervasives.HTML5.M.unique>>
-  we can create an xml node manipulated 'by reference'. If a reference
-  to a script node is included in a page, it will only be loaded
-  the first time it appears in the header. Such a node can
-  be created that way:
+  Using <<a_api project="eliom" | val
+  Eliom_pervasives.HTML5.create_global_elt>> we can create an xml node
+  manipulated 'by reference'. If a reference to a script node is
+  included in a page, it will only be loaded the first time it appears
+  in the header. Such a node can be created that way:
 
   <<code language="ocaml"|
-  let oclosure_script =
-    HTML5.M.unique (Eliom_output.Html5_forms.js_script
-      ~uri:(HTML5.M.uri_of_string "./graffiti_oclosure.js") ())
+let oclosure_script =
+  HTML5.create_global_elt
+    (Eliom_output.Html5_forms.js_script
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+               ["graffiti_oclosure.js"]) ())
   >>
 
 >>
@@ -281,7 +283,7 @@ We first open the corresponding modules for each parts of the
 application.
 
 <<code language="ocaml"|{shared{
-  open HTML5.M
+  open HTML5
   open Common
 }}
 {client{
@@ -481,7 +483,7 @@ username is always available.
 module Connected_translate =
 struct
   type page = string ->
-    [ HTML5_types.body_content_fun ] HTML5.M.elt list Lwt.t
+    [ HTML5_types.body_content_fun ] HTML5.elt list Lwt.t
   let translate page =
     Eliom_references.get username ~>>= function
       | None -> Lwt.return (create_page (default_content ()))
@@ -750,7 +752,7 @@ let rec entries name list = function
 	let title = Atom_feed.plain
 	  ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_uri.make_string_uri ~absolute:true
+	  Eliom_output.Xhtml.make_uri ~absolute:true
 	    ~service:(Eliom_services.static_dir ())
 	    (local_filename name n)
 	in
@@ -760,7 +762,7 @@ let rec entries name list = function
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = Eliom_uri.make_string_uri ~absolute:true
+  let id = Eliom_output.Xhtml.make_uri ~absolute:true
     ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
   try_lwt
@@ -844,10 +846,14 @@ content of the page and the url change.
 
 We first create the player node at toplevel.
 <<code language="ocaml"|
-let player = unique (audio
-		       ~srcs:(HTML5.M.uri_of_string "music.ogg",[])
-		       ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
-		       [pcdata "Your browser does not support audio element"])
+let player =
+  create_global_elt
+    (audio
+       ~srcs:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["music.ogg"],
+              [])
+       ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
+       [pcdata "Your browser does not support audio element" ])
 >>
 
 And we insert the player in the page:

@@ -1,6 +1,6 @@
 {shared{
   open Eliom_pervasives
-  open HTML5.M
+  open HTML5
   open Common
 }}
 {client{
@@ -19,20 +19,23 @@ let start_drawing name image canvas =
 
 let counter = ref 0
 
-let player = unique (audio
-		       ~srcs:(HTML5.M.uri_of_string "music.ogg",[])
-		       ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
-		       [pcdata "Your browser does not support audio element" ])
-
+let player =
+  create_global_elt
+    (audio
+       ~srcs:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["music.ogg"],[])
+       ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
+       [pcdata "Your browser does not support audio element" ])
+    
 let () = Connected.register ~service:multigraffiti_service
   !% ( fun name () username ->
     (* Some browsers won't reload the image, so we force
        them by changing the url each time. *)
     incr counter;
-    let image = unique (img ~alt:name ~src:(Eliom_output.Html5.make_string_uri
-					      ~service:imageservice (name,!counter)) ()) in
-    let canvas = unique (canvas ~a:[ a_width width; a_height height ]
-			   [pcdata "your browser doesn't support canvas"; br (); image]) in
+    let image = img ~alt:name ~src:(Eliom_output.Html5.make_uri
+					      ~service:imageservice (name,!counter)) () in
+    let canvas = canvas ~a:[ a_width width; a_height height ]
+			   [pcdata "your browser doesn't support canvas"; br (); image] in
     start_drawing name image canvas;
     make_page
       [h1 [pcdata name];

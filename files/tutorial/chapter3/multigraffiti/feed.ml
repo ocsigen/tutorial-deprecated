@@ -1,5 +1,5 @@
 open Eliom_pervasives
-open HTML5.M
+open HTML5
 open Server
 
 let static_dir =
@@ -66,7 +66,7 @@ let rec entries name list = function
       | (n,saved)::q ->
 	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_uri.make_string_uri ~absolute:true ~service:(Eliom_services.static_dir ())
+	  Eliom_output.Xhtml.make_uri ~absolute:true ~service:(Eliom_services.static_dir ())
 	    (local_filename name n)
 	in
 	let entry =
@@ -75,7 +75,7 @@ let rec entries name list = function
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = Eliom_uri.make_string_uri ~absolute:true ~service:feed_service name in
+  let id = Eliom_output.Xhtml.make_uri ~absolute:true ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
   try_lwt
     Ocsipersist.find image_info_table name >|=
@@ -87,7 +87,7 @@ let feed name () =
     | e -> Lwt.fail e
 
 let feed name () =
-  let id = Eliom_uri.make_string_uri ~absolute:true ~service:feed_service name in
+  let id = Eliom_output.Xhtml.make_uri ~absolute:true ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
   Lwt.catch
     (fun () -> Ocsipersist.find image_info_table name >|=

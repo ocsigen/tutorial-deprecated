@@ -1,6 +1,6 @@
 {shared{
   open Eliom_pervasives
-  open HTML5.M
+  open HTML5
   let width = 700
   let height = 400
 }}

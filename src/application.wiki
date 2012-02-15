@@ -24,14 +24,14 @@ this page by the following declaration:
 <<code language="ocaml" |
 open Lwt
 open Eliom_pervasives
-open HTML5.M
+open HTML5
 open Eliom_services
 open Eliom_parameters
 open Eliom_output.Html5
 
 let main_service =
   register_service ~path:["graff"] ~get_params:unit
-    (fun () () -> return (html (head (title (pcdata "")) [])
+    (fun () () -> return (html (head (title (pcdata "Page title")) [])
                                (body [h1 [pcdata "Graffiti"]])))>>
 
 The same, written with fully qualified names (without {{{open}}}):
@@ -43,9 +43,9 @@ let main_service =
     ~get_params:Eliom_parameters.unit
     (fun () () ->
       Lwt.return
-        (HTML5.M.html
-          (HTML5.M.head (HTML5.M.title (HTML5.M.pcdata "")) [])
-          (HTML5.M.body [HTML5.M.h1 [HTML5.M.pcdata "Graffiti"]])))
+        (HTML5.html
+          (HTML5.head (HTML5.title (HTML5.pcdata "")) [])
+          (HTML5.body [HTML5.h1 [HTML5.pcdata "Graffiti"]])))
 >>
 
 Copy one of the two pieces of code above in a file {{{graffiti.ml}}},
@@ -127,10 +127,10 @@ construction function for each HTML5 tag.
 //Note that it is also possible to use the usual HTML syntax (see
  <<a_api project="tyxml" | module Pa_tyxml >>).//
 
-Typing of HTML with <<a_api project="tyxml" version="dev"| module
-HTML5.M >> and <<a_api project="tyxml" version="dev"| module XHTML.M
->> is very strict and compels you to respect HTML5 standard (with some
-limitations). For example if you write:
+Ocsigen use the <<a_manual project="tyxml" version="dev"|TyXML>>
+library to build HTML tree.  The TyXML library is very strict and
+compels you to respect HTML5 standard (with some limitations). For
+example if you write:
 
 <<code language="ocaml"|
 (html
@@ -141,8 +141,8 @@ limitations). For example if you write:
 You will get the following error message, referring at the end of line 2:
 
 {{{
-Error: This expression has type ([> `PCDATA ] as 'a) HTML5.M.elt
-       but an expression was expected of type HTML5_types.head_content_fun HTML5.M.elt
+Error: This expression has type ([> `PCDATA ] as 'a) HTML5.elt
+       but an expression was expected of type HTML5_types.head_content_fun HTML5.elt
        Type 'a is not compatible with type HTML5_types.head_content_fun =
            [ `Base
            | `Command
@@ -154,30 +154,29 @@ Error: This expression has type ([> `PCDATA ] as 'a) HTML5.M.elt
        The second variant type does not allow tag(s) `PCDATA
 }}}
 
-where <<code-inline|HTML5_types.head_content_fun>> is the type of
-content allowed inside <<code-inline| <head> >> ({{{<base>}}},
+where <<a_api project="tyxml" | type HTML5_types.head_content_fun >>
+is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.). You see that
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic
 variant type.
 
 **Another example:** In HTML5, some tags cannot be empty. For example
-<<code-inline| <table> >>must contain at least one row.  To enforce
-this, the <<a_api project="tyxml" version="dev"| val HTML5.M.table >>
-function takes two parameters: the first one is the first row, the
-second one is a list containing all the other rows (same thing for
-<<code-inline|<tr> >>, <<code-inline|<form> >>, <<code-inline|<select>
->>, ...).  This forces the user to handle the empty list case
-specially and thus make the output conform to the recommendation from
-the W3C.
+{{{<table>}}}must contain at least one row.  To enforce this, the
+<<a_api project="tyxml" version="dev" text="HTML5.table"| val
+HTML5.M.table >> function takes two parameters: the first one is the
+first row, the second one is a list containing all the other rows
+(same thing for {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...).  This
+forces the user to handle the empty list case specially and thus make
+the output conform to the recommendation from the W3C.
 
 //Strict typing of HTML may seem arduous initially, but in fact it is
 very easy to get used to.  It actually saves a huge amount of
 debugging time as you will never have to bother about the validity of
 pages afterwards.//
 
-A more detailed introduction to <<code-inline|HTML5.M>> is
-available in the
-<<a_api project="tyxml" text="TyXML reference API" | module HTML5.M >>.
+A more detailed introduction to the construction of HTML5 tree is
+available in the <<a_api project="tyxml" text="TyXML reference API" |
+module HTML5.M >>.
 
 >>
 
@@ -190,7 +189,7 @@ for applications not related to Ocsigen.
 
 For now we will just use the {{{Lwt.return}}} function as above.  We
 will come back later on Lwt programming.  You can also have a look at
-the <<a_manual project="lwt"|Lwt programming guide>>. 
+the <<a_manual project="lwt"|Lwt programming guide>>.
 
 >>
 
@@ -408,33 +407,6 @@ let main_service =
            (container) ) )
 >>
 
-To be able to modify the actual page's {{{<body>}}} element, we need
-to declare the element as manipulated 'by reference'. To do so, we use
-the function <<a_api project="eliom| val
-Eliom_pervasives.HTML5.M.unique >> to create the element. In the
-previous exemple, we need to replace the {{{container}}} by:
-
-<<code language="ocaml"|
-  let container = unique (body [h1 [pcdata "Graffiti"]]) in
->>
-
-<<concept
-
-  title="Unique elements" |
-
-  Unique nodes are scpecific TyXML nodes meant to be instanciated only
-  once per instance of Eliom application. They can be seen as a
-  reference to the actual client instance of the node. They are
-  mandatory to access from an event handler to nodes previously
-  included in the document tree. E.g. they are mandatory to read the
-  current value of a input field or to modify the content of a
-  node. Furthermore, unique nodes content is preserved when clicking a
-  link that do not exit the application. See the Eliom manual for a
-  detailled presentation of <<a_manual project="eliom"
-  chapter="client" fragment="unique" | unique nodes >>.
-
->>
-
 ==@@id="graffiti"@@ Collaborative drawing application==
 
 ===Drawing on a canvas===
@@ -461,15 +433,14 @@ module My_appl =
 
 {shared{
   open Eliom_pervasives
-  open HTML5.M
+  open HTML5
   let width = 700
   let height = 400
 }}
 
 let canvas_elt =
-  unique
-    (canvas ~a:[a_width width; a_height height]
-      [pcdata "your browser doesn't support canvas"] )
+  canvas ~a:[a_width width; a_height height]
+    [pcdata "your browser doesn't support canvas"]
 
 let page =
   (html

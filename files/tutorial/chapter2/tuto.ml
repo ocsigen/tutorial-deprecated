@@ -1,4 +1,4 @@
-open HTML5.M
+open HTML5
 open Eliom_parameters
 
 (* Services *)

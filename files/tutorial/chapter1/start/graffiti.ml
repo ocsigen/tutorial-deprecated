@@ -1,6 +1,6 @@
 open Eliom_pervasives
 open Lwt
-open HTML5.M
+open HTML5
 open Eliom_services
 open Eliom_parameters
 open Eliom_output.Html5

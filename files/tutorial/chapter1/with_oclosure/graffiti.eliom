@@ -1,6 +1,6 @@
 {shared{
   open Eliom_pervasives
-  open HTML5.M
+  open HTML5
   let width = 700
   let height = 400
 }}
@@ -66,9 +66,8 @@ let imageservice =
     (fun () () -> Lwt.return (image_string (), "image/png"))
 
 let canvas_elt =
-  unique
-    (canvas ~a:[a_width width; a_height height]
-      [pcdata "your browser doesn't support canvas"] )
+  canvas ~a:[a_width width; a_height height]
+    [pcdata "your browser doesn't support canvas"]
 
 let page =
   html

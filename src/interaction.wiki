@@ -34,7 +34,7 @@ Let's start again from scratch with the following site.
 
 <<code language="ocaml"|
 open Eliom_pervasives
-open HTML5.M
+open HTML5
 
 let main_service =
   Eliom_output.Html5.register_service
@@ -200,7 +200,7 @@ Change the handler of {{{user_service}}} into:
 
 <<concept title="Creating hyperlinks" |
 
-To create a link, one could use the function {{{HTML5.M.a}}}, but this
+To create a link, one could use the function {{{HTML5.a}}}, but this
 requires us to provide the text of the URL to put in the {{{href}}}
 attribute. A better way to create hyperlinks is to use <<a_api
 project="eliom" version="dev" | val Eliom_output.Html5.a >>.
@@ -235,7 +235,7 @@ program:
 
 <<code language="ocaml"|
 open Eliom_pervasives
-open HTML5.M
+open HTML5
 open Eliom_parameters
 
 let main_service =
