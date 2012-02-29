@@ -3,8 +3,8 @@
 //Chat// is a chatting module and application, currently for conversations
 //between two users each.
 
-*Try the [[/chat|//Chat//-application]]
-*Download the [[site:download/chat.tar.gz|sourecode]]
+*[[site:chat|Try it]]
+*[[site:download/chat.tar.gz|Download the source code]]
 
 == Description ==
 
