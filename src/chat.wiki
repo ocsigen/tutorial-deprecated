@@ -6,7 +6,7 @@ exercise to the user.)
 
 First of all,
 * [[site:chat|try it]]! And
-* [[site:darcs/tutorial/src-examples/chat|browse it]],
+* [[site:darcsweb/?r=tutorial;a=tree;f=/src-examples/chat|browse it]],
 * ##darcs get http://ocsigen.org/darcs/tutorial; cd tutorial/src-examples/chat## it, or
 * [[site:download/chat.tar.gz|download]] the source code.
 
