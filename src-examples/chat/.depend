@@ -1,0 +1,24 @@
+_server/utils.cmo:
+_server/utils.cmx:
+_server/shared.cmo: _server/utils.cmo
+_server/shared.cmx: _server/utils.cmx
+_server/user_management.cmo: _server/utils.cmo
+_server/user_management.cmx: _server/utils.cmx
+_server/weak_info.cmo: _server/utils.cmo
+_server/weak_info.cmx: _server/utils.cmx
+_server/chat.cmo: _server/weak_info.cmo _server/utils.cmo _server/shared.cmo
+_server/chat.cmx: _server/weak_info.cmx _server/utils.cmx _server/shared.cmx
+chat.type_mli: _server/weak_info.cmo _server/utils.cmo _server/shared.cmo
+_server/chat_site.cmo: _server/utils.cmo _server/user_management.cmo
+_server/chat_site.cmx: _server/utils.cmx _server/user_management.cmx
+chat_site.type_mli: _server/utils.cmo _server/user_management.cmo
+_client/utils.cmo:
+_client/utils.cmx:
+_client/shared.cmo: _client/utils.cmo
+_client/shared.cmx: _client/utils.cmx
+_client/client.cmo: _client/utils.cmo _client/shared.cmo
+_client/client.cmx: _client/utils.cmx _client/shared.cmx
+_client/chat.cmo: _client/client.cmo
+_client/chat.cmx: _client/client.cmx
+_client/chat.cmo: chat.type_mli
+_client/chat.cmx: chat.type_mli

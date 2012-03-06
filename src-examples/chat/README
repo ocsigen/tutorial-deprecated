@@ -1,0 +1,22 @@
+Description
+===========
+
+See http://ocsigen.org/tutorial/chat.
+
+
+Installation
+============
+
+  $ make && make install
+
+
+Usage
+=====
+
+ 1.  $ make run
+
+ 2.  Open several independant browser sessions (i.e. on different computers, different Firefox profiles, or Chrome's
+     private mode)
+
+ 3.  Log in as user "a", "b", and/or "c".
+

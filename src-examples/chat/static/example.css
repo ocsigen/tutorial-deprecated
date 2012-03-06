@@ -1,0 +1,18 @@
+
+.login {
+  border: 1px solid gray;
+  width: auto;
+  display: block;
+  margin: 0 auto 0 auto;
+  padding: 0.5em;
+}
+
+.logout {
+  color: gray;
+  border-bottom: 1px solid gray;
+  padding: 0.5em;
+}
+
+.logout input {
+  margin-left: 1em;
+}
