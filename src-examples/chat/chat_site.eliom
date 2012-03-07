@@ -14,27 +14,33 @@ module Users = struct
 
   module User = struct
     type t = {
+      id : int;
       name : string;
       full_name : string;
       color : string;
     }
+    let id { id } = id
     let name { name } = name
     let full_name { full_name } = full_name
     let color { color } = color
-    let id = name
 
-    let make_session_group_name = Some id
+    let make_session_group_name = Some (string_of_int -| id)
 
-    let compare = on name compare
+    let compare = on id compare
 
-    let create name full_name = 
-      let color = Printf.sprintf "#%02x%02x%02x" (56+Random.int 200) (56+Random.int 200) (56+Random.int 200) in
-      { name; full_name; color }
+    let create =
+      let counter = ref 0 in
+      fun name full_name ->
+        let id = incr counter; !counter in
+        let color = Printf.sprintf "#%02x%02x%02x" (56+Random.int 200) (56+Random.int 200) (56+Random.int 200) in
+        { id; name; full_name; color }
 
     let verify ~user_name ~password =
-(*
       let l = String.length user_name in
-      if l > 2 then
+      if l < 3 then (
+        lwt () = Eliom_references.set login_message_ref (Some "User name too short (at least 3 letters)") in
+        Lwt.return None
+      ) else
         let rec check i = if i = l then true else user_name.[l-i-1] = password.[i] && check (succ i) in
         if l = String.length password && check 0 then
           if Lwt_react.S.value user_count < 100 then
@@ -46,15 +52,10 @@ module Users = struct
         else (
           Lwt.return None
         )
-      else (
-        lwt () = Eliom_references.set login_message_ref (Some "User name too short (at least 3 letters)") in
-        Lwt.return None
-      )
- *)
 (*       try *)
 (*         let password', user = List.assoc user_name !users_db in *)
 (*         if password = password' then *)
-          Lwt.return **> Some (create user_name user_name)
+(*           Lwt.return **> Some (create user_name user_name) *)
 (*         else None *)
 (*       with Not_found -> None *)
   end
@@ -89,7 +90,7 @@ module Users = struct
 end
 
 module My_scope = struct
-  let scope_name = Eliom_common.create_scope_name "chat"
+  let scope_name = Eliom_common.create_scope_name "chat_scope"
   let client_process = `Client_process scope_name
   let session = `Session scope_name
   let session_group = `Session_group scope_name 
@@ -153,7 +154,7 @@ let main_handler =
       Lwt.return **> 
         html
           (head
-             (title (pcdata "chat example"))
+             (title (pcdata "Ocsigen - Chat example"))
              (List.map mk_css_link (["example.css"] :: My_chat.css_files)))
           (body
              [(logout_form :> HTML5_types.body_content_fun HTML5.M.elt);
@@ -168,7 +169,5 @@ let chat_service =
 
 let () =
   Connected_chat_appl.register ~service:main_service main_handler;
-  My_chat.set_client_process_timeout 1.0;
-  My_chat.register ();
-  ()
+  My_chat.register ()
 

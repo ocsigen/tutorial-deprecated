@@ -11,7 +11,7 @@ let id_for_conversation conversation =
 
 let participants_class users =
   (* TODO We should use data attributes once they are in Tyxml *)
-  "participants-" ^ (String.concat "-" **> List.map User.id **> User_set.elements users)
+  "participants-" ^ (String.concat "-" **> List.map (string_of_int -| User.id) **> User_set.elements users)
 
 let handle_enter_pressed msg_author prompt_dom bus ev =
   if ev##keyCode = 13 then begin
@@ -114,6 +114,15 @@ let onload_chat ~users_signal ~users_elt ~conversations_elt ~user ~channel ~conv
   debug "onload chat";
   Eliom_comet.Configuration.(let c = new_configuration () in set_always_active c true);
   List.iter (append_conversation user conversations_elt) conversations;
-  Lwt.ignore_result **> Lwt_stream.iter (dispatch_event user conversations_elt) channel;
+  Lwt.ignore_result
+    (try_lwt
+       Lwt_stream.iter (dispatch_event user conversations_elt) channel
+     with
+       | Eliom_comet.Process_closed ->
+           Eliom_client.exit_to ~service:Eliom_services.void_coservice' () ();
+           Lwt.return ()
+       | e ->
+           debug_exn "Exception while streaming" e;
+           Lwt.return ());
   let other_users_signal = Lwt_react.S.map (User_set.filter (not -| User.equal user)) users_signal in
   Lwt_react.S.(keep **> map (change_users user users_elt create_dialog_service) other_users_signal)

@@ -73,7 +73,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
     let session_group_size = get_session_count user in
     debug "Discard session (in session group of %d)" session_group_size;
     lwt () = Callback.pre_logout ~session_group_size user in
-    lwt () = Eliom_state.discard ~scope:Scope.session () in
+    lwt () = Eliom_state.discard_all_scopes () in
     Lwt.return **> modify_session_count pred user
 
   let _ =
@@ -124,7 +124,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
       let logout_form user =
         let open HTML5 in
         let open Eliom_output.Html5 in
-        post_form ~a:[a_class ["logout"]] ~service:logout
+        post_form ~a:[a_class ["logout"]] ~service:logout ~no_appl:true
           (fun () ->
              [pcdata "Logged in as ";
               span [pcdata **> User.name user];

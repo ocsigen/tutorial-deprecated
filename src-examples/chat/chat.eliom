@@ -8,7 +8,8 @@ let debug fmt = debug_prefix "Chat" fmt
 module type USER = sig
   type t
   val compare : t -> t -> int
-  val id : t -> string
+  val id : t -> int
+  val name : t -> string
   val color : t -> string
 end
 
@@ -53,17 +54,19 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
   let import_user : ForeignUser.t -> User.t =
     fun user -> {
       User.id = ForeignUser.id user;
-      color = ForeignUser.color user
+      name = ForeignUser.name user;
+      color = ForeignUser.color user;
     }
 
   let users_signal, modify_users_signal = 
-    let users_signal, set_users_signal = Lwt_react.S.create ~eq:User_set.equal User_set.empty in
+    let users_signal, set = Lwt_react.S.create ~eq:User_set.equal User_set.empty in
     let modify_users_signal f =
       let users = f **> Lwt_react.S.value users_signal in
       debug "modify_users_signal to %s" (User_set.to_string users);
-      set_users_signal users
+      set users
     in
-    users_signal, modify_users_signal
+    Eliom_react.S.Down.of_react ~name:"users_signal" ~scope:Eliom_common.site users_signal,
+    modify_users_signal
 
   module User_info = struct
     type key = User.t
@@ -96,8 +99,8 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
     let user_info_ref = Eliom_references.eref ~scope:Scope.session_group None in
     let user_info_table = User_info_table.create 13 in
     let set_user user =
-      debug "Set user %s" (User.id user);
-      Eliom_state.set_volatile_data_session_group ~scope:Scope.session (User.id user);
+      debug "Set user %s" (User.name user);
+      Eliom_state.set_volatile_data_session_group ~scope:Scope.session (string_of_int **> User.id user);
       match_lwt Eliom_references.get user_info_ref with
           None ->
             let user_info = User_info.create user in
@@ -138,7 +141,7 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
     User_set.iter for_user_info users
 
   let tear_down_conversations user =
-    debug "Tearing down conversations for user %s" (User.id user);
+    debug "Tearing down conversations for user %s" (User.name user);
     let user_info = get_user_info user in
     flip List.iter user_info.User_info.conversations **> begin fun conversation ->
       flip User_set.iter conversation.Conversation.users **> fun user' ->
@@ -150,17 +153,17 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
     end;
     user_info.User_info.conversations <- []
 
-  let add_client_process, remove_client_process =
+  let add_client_process, on_timeout_client_process =
     let client_process_counts = Hashtbl.create 13 in
     (fun user ->
       let count = try Hashtbl.find client_process_counts user with Not_found -> 0 in
-      debug "Add client process count for user %s from %d" (User.id user) count;
+      debug "Add client process count for user %s from %d" (User.name user) count;
       if count = 0 then
         modify_users_signal (User_set.add user);
       Hashtbl.add client_process_counts user (succ count)),
     (fun user ->
       let count = Hashtbl.find client_process_counts user in
-      debug "Remove client process count for user %s from %d" (User.id user) count;
+      debug "Remove client process count for user %s from %d" (User.name user) count;
       if count = 1 then (
         modify_users_signal (User_set.remove user);
         tear_down_conversations user
@@ -191,17 +194,16 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
       debug "render_onload";
       let user = import_user user in
       lwt user_info = get_current_user_info user in
-      let users_signal = Eliom_react.S.Down.of_react ~name:"users_signal" ~scope users_signal in
       lwt channel =
         match_lwt Eliom_references.get channel_ref with
             Some channel ->
               Lwt.return channel
-          | None -> 
-              debug "No client process channel for user %s, creating one and junk old messages" (User.id user);
+          | None ->
+              debug "No client process channel for user %s, creating one and junk old messages" (User.name user);
               let stream = Lwt_stream.clone user_info.User_info.stream in
               let stream = flip Lwt_stream.map stream **> tap **> fun ev ->
                 debug "Event %s for client process of user %s with info %d"
-                  (event_to_string ev) (User.id user) user_info.User_info.id
+                  (event_to_string ev) (User.name user) user_info.User_info.id
               in
               lwt () = Lwt_stream.junk_old stream in
               let channel = Eliom_comet.Channels.create ~name:"channel" ~scope stream in
@@ -210,7 +212,8 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
               Lwt.ignore_result (
                 lwt () = Eliom_comet.Channels.wait_timeout ~scope !client_process_timout in
                 lwt () = Eliom_references.set channel_ref None in
-                Lwt.return (remove_client_process user)
+                lwt () = Eliom_state.discard ~scope () in
+                Lwt.return (on_timeout_client_process user)
               );
               Lwt.return channel
       in

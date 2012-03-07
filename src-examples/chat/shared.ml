@@ -5,10 +5,12 @@ open Utils
    within the [Chat.Make] functor. *)
 module User = struct
   type t = {
-    id : string;
+    id : int;
+    name : string;
     color : string;
   } deriving (Json)
   let id { id } = id
+  let name { name } = name
   let compare = on id compare
   let hash = Hashtbl.hash -| id
   let equal = on id (=)
@@ -17,7 +19,7 @@ end
 module User_set = struct
   include Set.Make (User)
   let to_string =
-    String.concat ", " -| List.map User.id -| elements
+    String.concat ", " -| List.map User.name -| elements
 end
 
 module Conversation = struct 
@@ -64,7 +66,7 @@ let user_span ?self user =
     get_option ~default:[] **> map_option self_class self
   in
   span ~a:([a_class ("user_name" :: self_class); a_style ("background-color: "^user.User.color)]) [
-    pcdata user.User.id
+    pcdata user.User.name
   ]
 
 let create_user_li ?self =
