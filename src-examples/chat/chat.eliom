@@ -222,10 +222,12 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
         ~users_signal ~users_elt ~conversations_elt ~user
         ~channel ~conversations ~create_dialog_service
 
-  let users_id = HTML5.new_global_elt_id ()
-  let conversations_id = HTML5.new_global_elt_id ()
+  let users_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_global_elt_id
+  let conversations_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_global_elt_id
 
   let render user =
+    lwt users_id = Eliom_references.get users_id in
+    lwt conversations_id = Eliom_references.get conversations_id in
     let user_elt = render_user user in
     let users_elt = render_users ~id:users_id () in
     let conversations_elt = render_conversations ~id:conversations_id () in
