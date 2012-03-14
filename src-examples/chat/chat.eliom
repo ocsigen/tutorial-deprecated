@@ -173,11 +173,11 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
   let render_user = import_user |- fun user ->
     user_span ~self:user user
 
-  let render_users ?id () =
-    HTML5.create_global_elt ?id HTML5.(ul ~a:[a_class ["users_list"]] [])
+  let render_users ~id () =
+    HTML5.(create_named_elt ~id (ul ~a:[a_class ["users_list"]] []))
 
-  let render_conversations ?id () =
-    HTML5.create_global_elt ?id HTML5.(div ~a:[a_class ["conversations"]] [])
+  let render_conversations ~id () =
+    HTML5.(create_named_elt ~id (div ~a:[a_class ["conversations"]] []))
 
   let client_process_timout = ref 1.0
   let set_client_process_timeout = set client_process_timout
@@ -222,8 +222,8 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
         ~users_signal ~users_elt ~conversations_elt ~user
         ~channel ~conversations ~create_dialog_service
 
-  let users_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_global_elt_id
-  let conversations_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_global_elt_id
+  let users_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_elt_id
+  let conversations_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_elt_id
 
   let render user =
     lwt users_id = Eliom_references.get users_id in
