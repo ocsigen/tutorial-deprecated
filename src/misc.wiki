@@ -2,9 +2,8 @@
 
 <<|outline target="documentation">>
 
-//The code of this chapter of the tutorial has been
-tested against the 2.0 release of Eliom.//
-
+//The code of this tutorial has been tested with the 2.1 release of
+  the Ocsigen bundle.//\\
 
 ==Multi-user collaborative drawing application==
 

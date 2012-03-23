@@ -2,8 +2,8 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested against
-the 2.0 release of the Ocsigen framework.//\\
+//The code of this tutorial has been tested with the 2.1 release of
+  the Ocsigen bundle.//\\
 
 This chapter is a tutorial explaining how to create a small Web site
 with several pages, users, sessions, etc. Then, in next chapter,
@@ -543,14 +543,12 @@ Function {{{Eliom_references.get}}} has type
 of such functions (ones that return values in the //Lwt monad//), is
 to use {{{Lwt.bind}}}. 
 
-<<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t>>
-It is convenient to define the infix
-operator {{{>>=}}} like this:
-<<code language="ocaml"| let (~>>=) = Lwt.bind>>
-Then the code <<code language="ocaml"| f () ~>>= fun x -> >>
-has to be read as
-<<code language="ocaml"| let x = f () in>>
-but only for functions returning a value in the Lwt monad.\\
+<<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
+Lwt.t>> It is convenient to define an infix operator like this: <<code
+language="ocaml"| let (~>>=) = Lwt.bind>> Then the code <<code
+language="ocaml"| f () ~>>= fun x -> >> has to be read as <<code
+language="ocaml"| let x = f () in>> but only for functions returning a
+value in the Lwt monad.\\
 
 For more clarity, there is a syntax extension for Lwt, defining a
 new keyword {{{lwt}}} to be used instead of {{{let}}} for Lwt

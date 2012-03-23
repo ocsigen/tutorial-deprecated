@@ -1,7 +1,7 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested against
-the 2.0 release of the Ocsigen framework.//\\
+//The code of this tutorial has been tested with the 2.1 release of
+  the Ocsigen bundle.//\\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]].  It is a client/server Web application
