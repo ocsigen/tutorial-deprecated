@@ -398,8 +398,7 @@ let main_service =
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
       Eliom_services.onload {{
-        Dom.appendChild (Eliom_client.Html5.of_body %container)
-	  (Eliom_client.Html5.of_div (div [pcdata "some text"]));
+        Eliom_dom.appendChild %container (div [pcdata "some text"]);
       }}
       Lwt.return
         (html
