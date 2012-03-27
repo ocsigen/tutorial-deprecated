@@ -102,8 +102,8 @@ let change_users user users_elt create_dialog_service users =
     let user_span_elt = HTML5.li [user_span ~self:user other] in
     ignore **> Eliom_dom.addEventListener
       user_span_elt
-      Dom_events.Typ.click
-      (fun _ _ -> create_or_focus_conversation create_dialog_service user other);
+      Dom_html.Event.click
+      (fun _ _ -> create_or_focus_conversation create_dialog_service user other; false);
     user_span_elt
   in
   Eliom_dom.replaceAllChild
