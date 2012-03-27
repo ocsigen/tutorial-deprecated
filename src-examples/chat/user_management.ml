@@ -124,7 +124,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
       let logout_form user =
         let open HTML5 in
         let open Eliom_output.Html5 in
-        post_form ~a:[a_class ["logout"]] ~service:logout ~xhr:true
+        post_form ~a:[a_class ["logout"]] ~service:logout ~xhr:false
           (fun () ->
              [pcdata "Logged in as ";
               span [pcdata **> User.name user];
