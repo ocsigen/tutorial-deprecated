@@ -570,8 +570,8 @@ terminate:
 
   The module <<a_api project="js_of_ocaml" | module Event_arrows>>
   allows us to define event listeners easily (using arrows). An arrow
-  from {{{'a}}} to {{{'b}}} has type {{{ ('a, 'b) Event_arrows.t }}}.
-  The operator {{{ >~>> }}} is used to bind the output
+  from {{{'a}}} to {{{'b}}} has type {{{ ('a, 'b) Event_arrows.t}}}.
+  The operator {{{ >>> }}} is used to bind the output
   of an arrow to the input of the following one.
 
   For example {{{(mouseup Dom_html.document)}}} is an arrow from
