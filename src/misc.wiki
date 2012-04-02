@@ -763,7 +763,7 @@ let rec entries name list = function
 let feed name () =
   let id = Eliom_output.Xhtml.make_uri ~absolute:true
     ~service:feed_service name in
-  let title = Atom_feed.plain ("nice drawings of " ^ name) in
+  let title = Atom_feed.plain ("Nice drawings by " ^ name) in
   try_lwt
     Ocsipersist.find image_info_table name >|=
       (fun (number,updated,list) ->
@@ -780,7 +780,7 @@ let () = Eliom_atom.Reg.register ~service:feed_service feed
 
 
 In {{{graffiti.eliom}}}, we add a link to the feed and a save button
-that appear only if the user owns the page.
+that appears only if the user owns the page.
 
 <<code language="ocaml"|
   Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
@@ -867,9 +867,10 @@ And that's all ! Since the {{{player}}} node is declared unique, no new
 player is created when the page changed: this is exact same node.
 
 <<wip| In fact browser stops pause the player as soon as the dom
-element is manipulated. That happens when we change the page: To
+element is manipulated. That happens when we change the page: to
 continue playing the player should not be present as an element of the
 page>>
 
-To run this example, you will need to add an ogg file in the static directory. If you can't find one, there are some [[http://www.gnu.org/music/free-software-song.html|here]]
+To run this example, you will need to add an ogg file in the static directory. If you can't find one, there is one here:
+[[http://www.gnu.org/music/free-software-song.html]].
 

@@ -68,15 +68,8 @@ Ocsigen server, with the following command:
 ocsigenserver -c graffiti.conf
 }}}
 
-Your page is now available at the URL:
+Your page is now available at URL [[http://localhost:8080/graff|{{{http://localhost:8080/graff}}}]].
 
-{{{
-http://localhost:8080/graff
-}}}
-<<|BB
-  direct link would be more reader-friendly:
-  [[http://localhost:8080/graff|`http://localhost:8080/graff`]]
->>
 
 <<concept title="Services"|
 
@@ -230,7 +223,8 @@ module My_appl =
 >>
 
 It is now possible to use {{{MyAppl}}} instead of
-{{{Eliom_output.Html5}}} for registering our main service:
+{{{Eliom_output.Html5}}} for registering our main service
+(now at URL {{{/}}}):
 
 <<code language="ocaml"|
 let main_service =
@@ -241,11 +235,6 @@ let main_service =
         (html
            (head (title (pcdata "Graffiti")) [])
            (body [h1 [pcdata "Graffiti"]]) ) )
->>
-
-<<|BB
- The ~path:[""] is inconsistent with the ~path:["graff"] of the `main_service`
- in the last section (reload won't work).
 >>
 
 We now want to add some OCaml code to be executed by the browser. For
@@ -425,33 +414,6 @@ let main_service =
            (container) ) )
 >>
 
-To be able to modify the actual page's {{{<body>}}} element, we need
-to declare the element as manipulated 'by reference'. To do so, we use
-the function <<a_api project="eliom| val
-Eliom_pervasives.HTML5.M.unique >> to create the element. In the
-previous exemple, we need to replace the {{{container}}} by:
-
-<<code language="ocaml"|
-  let container = unique (body [h1 [pcdata "Graffiti"]]) in
->>
-
-<<concept
-
-  title="Unique elements" |
-
-  Unique nodes are scpecific TyXML nodes meant to be instanciated only
-  once per instance of Eliom application. They can be seen as a
-  reference to the actual client instance of the node. They are
-  mandatory to access from an event handler to nodes previously
-  included in the document tree. E.g. they are mandatory to read the
-  current value of a input field or to modify the content of a
-  node. Furthermore, unique nodes content is preserved when clicking a
-  link that do not exit the application. See the Eliom manual for a
-  detailled presentation of <<a_manual project="eliom"
-  chapter="client" fragment="unique" | unique nodes >>.
-
->>
-
 ==@@id="graffiti"@@ Collaborative drawing application==
 
 ===Drawing on a canvas===
@@ -608,15 +570,12 @@ terminate:
 
   The module <<a_api project="js_of_ocaml" | module Event_arrows>>
   allows us to define event listeners easily (using arrows). An arrow
-  from {{{'a}}} to {{{'b}}} has type {{{('a, 'b)
-  Event_arrows.t}}}. The operator {{{>>>}}} is used to bind the output
+  from {{{'a}}} to {{{'b}}} has type {{{ ('a, 'b) Event_arrows.t }}}.
+  The operator {{{ >~>> }}} is used to bind the output
   of an arrow to the input of the following one.
 
   For example {{{(mouseup Dom_html.document)}}} is an arrow from
-  {{{unit}}} to {{{Dom_html.mouseEvent Js.t}}}.
-  <<|BB
-  {{{'a}}} to {{{Dom_html.mouseEvent Js.t}}} according to the documentation
-  >>
+  {{{'a}}} to {{{Dom_html.mouseEvent Js.t}}}.
 
   The combinator <<a_api project="js_of_ocaml" | val
   Event_arrows.arr >> transforms a function of type {{{'a -> 'b}}} into
@@ -836,17 +795,9 @@ static files directory:
   and <<a_file
   src="tutorial/static/css/hsvpalette.css"|{{{hsvpalette.css}}}>> are
   taken from the Google Closure library;
-
-* the <<a_file src="tutorial/static/css/slider.css"|{{{common.css}}}>>
-  and <<a_file
-  src="tutorial/static/css/graffiti.css"|{{{hsvpalette.css}}}>> are
+* the <<a_file src="tutorial/static/css/slider.css"|{{{slider.css}}}>>
+  and <<a_file src="tutorial/static/css/graffiti.css"|{{{graffiti.css}}}>> are
   home-made css; and
-
-<<|BB
-  Which files should be referenced?  At least the naming of the referenced file
-  and the filename in the link text are inconsistent.
->>
-
 * the {{{graffiti_oclosure.js}}} script is generated according to the
 {{{graffiti.js}}} with the following command:
 
@@ -984,13 +935,8 @@ in the next chapter.
 >>
 
 We now want to load the initial image once the canvas is created.  Add
-the following lines just between the creation of the canvas and the
+the following lines just between the creation of the canvas context and the
 creation of the slider:
-
-<<|BB
-... between the creation of the canvas //context// of the canvas and the
-creation of the slider (the former is necessary in the following).
->>
 
 <<code language="ocaml"|
 (* The initial image: *)
