@@ -1,0 +1,29 @@
+{shared{
+  open Eliom_pervasives
+}}
+
+{client{
+  open Js
+}}
+
+module %%MODULE_NAME%%_appl =
+  Eliom_output.Eliom_appl (struct
+    let application_name = "%%PROJECT_NAME%%"
+  end)
+
+let main_service =
+  Eliom_services.service ~path:[] ~get_params:Eliom_parameters.unit ()
+
+let main_handler () () =
+  let open HTML5 in
+  Lwt.return
+    (html
+       (head (title (pcdata "%%PROJECT_NAME%%")) [])
+       (body [
+         h1 [pcdata "Gratulations!"];
+         a [pcdata "And welcome to Eliom!"];
+       ]))
+
+let () =
+  debug "hic";
+  %%MODULE_NAME%%_appl.register ~service:main_service main_handler

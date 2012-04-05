@@ -1,0 +1,20 @@
+<ocsigen>
+  <server>
+    <port>8080</port>
+    <charset>utf-8</charset>
+    <logdir>%%LOGDIR%%</logdir>
+    <datadir>%%LOGDIR%%</datadir>
+    <commandpipe>%%CMDPIPE%%</commandpipe>
+    <debugmode/>
+    <extension findlib-package="ocsigenserver.ext.staticmod"/>
+    <extension findlib-package="ocsigenserver.ext.extendconfiguration"/>
+    <extension findlib-package="ocsigenserver.ext.userconf"/>
+    <extension findlib-package="ocsigenserver.ext.ocsipersist-sqlite"/>
+    <extension findlib-package="eliom.server"/>
+    <host hostfilter="*">
+      <static dir="%%STATICDIR%%" />
+      <static dir="%%STATICDIR%%" />
+      <eliom module="%%LIBDIR%%/%%PROJECT_NAME%%.cma" />
+    </host>
+  </server>
+</ocsigen>

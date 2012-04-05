@@ -1,0 +1,8 @@
+
+This is an scaffold of a simple Eliom application. To make it work, please
+
+ 1. Adapt the values in the Makefile (at PROJECT_NAME)
+ 2. $ make start
+ 3. $ make byte install run
+ 4. $ firefox 127.0.0.1:8080
+
