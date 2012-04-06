@@ -12,7 +12,7 @@ STATICDIR := ${PREFIX}/var/www/${PROJECT_NAME}
 LIBDIR := ${PREFIX}/var/lib/${PROJECT_NAME}
 
 ifeq (${PROJECT_NAME}, PROJECT_NAME)
-  $(error "Please adapt the PROJECT_NAME in the Makefile")
+  $(error "Please adapt the PROJECT_NAME in the Makefile. Then type: make start; make byte install run")
 endif
 
 ## Packages required to build the server part of the application
@@ -132,7 +132,7 @@ depend: .depend
 
 ## Warning: Dependencies towards *.eliom are not handled by eliomdep yet.
 
-${PROJECT_NAME}.conf: PROJECT.conf.in
+${PROJECT_NAME}.conf: .PROJECT.conf.in
 	sed \
 	  -e "s|%%LIBDIR%%|${LIBDIR}|" \
 	  -e "s|%%STATICDIR%%|${STATICDIR}|" \
@@ -145,15 +145,15 @@ ${PROJECT_NAME}.conf: PROJECT.conf.in
 
 PHONY: start run install
 
-start: ${PROJECT_NAME}.eliom
-
-${PROJECT_NAME}.eliom: PROJECT.eliom.in
-	sed \
+start: .PROJECT.eliom.in static/.PROJECT.css ${PROJECT_NAME}.conf
+	mv .PROJECT.eliom.in ${PROJECT_NAME}.eliom
+	sed -i \
 	  -e "s|%%PROJECT_NAME%%|${PROJECT_NAME}|" \
 	  -e "s|%%MODULE_NAME%%|${shell echo ${PROJECT_NAME}|sed 's/^./\u&/;'}|" \
-	  $< > $@
+	  ${PROJECT_NAME}.eliom
+	mv static/.PROJECT.css static/${PROJECT_NAME}.css
 
-install:
+install: byte
 	mkdir -p ${DATADIR}
 	mkdir -p ${LIBDIR}
 	mkdir -p ${STATICDIR}
@@ -161,9 +161,7 @@ install:
 	mkdir -p ${shell dirname ${CMDPIPE}}
 	cp ${PROJECT_NAME}.cma ${LIBDIR}
 	cp ${PROJECT_NAME}.js ${STATICDIR}
-ifneq "${shell ls static|wc -l}" "0"
 	cp -r static/* ${STATICDIR}
-endif
 
 run: ${PROJECT_NAME}.conf
 	ocsigenserver -c $<
