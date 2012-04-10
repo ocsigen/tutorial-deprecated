@@ -3,6 +3,12 @@ This is an scaffold of a simple Eliom application. To make it work, please
 
  1. Adapt the values in the Makefile (at PROJECT_NAME)
  2. $ make start
+    (Generate the Eliom module, Ocsigenserver configuration, and CSS:)
+
  3. $ make byte install run
  4. $ firefox 127.0.0.1:8080
+
+ 5. Edit your Eliom module
+ 6. $ make reload
+    (rebuild the modules, install them and reload the server)
 

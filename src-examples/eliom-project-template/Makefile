@@ -2,7 +2,7 @@
 ## Sample Makefile for eliom application.
 
 # Adapt those values:
-PROJECT_NAME := PROJECT_NAME
+PROJECT_NAME :=
 PORT := 8080
 PREFIX := ${shell pwd}/local
 DATADIR := ${PREFIX}/var/www/data/${PROJECT_NAME}
@@ -11,7 +11,7 @@ CMDPIPE := ${PREFIX}/var/run/${PROJECT_NAME}-cmd
 STATICDIR := ${PREFIX}/var/www/${PROJECT_NAME}
 LIBDIR := ${PREFIX}/var/lib/${PROJECT_NAME}
 
-ifeq (${PROJECT_NAME}, PROJECT_NAME)
+ifeq (${PROJECT_NAME}, )
   $(error "Please adapt the PROJECT_NAME in the Makefile. Then type: make start; make byte install run")
 endif
 
@@ -50,12 +50,10 @@ export ELIOM_TYPE_DIR   := .
 
 #####################################
 
-COMMAND_PIPE := /tmp/example/ocsigenserver_command
+all: byte
 
-all: byte 
-
-restart: all
-	@if [ -e $(COMMAND_PIPE) ]; then; echo reload >  $(COMMAND_PIPE); fi
+reload: install
+	@if [ -e $(CMDPIPE) ]; then echo reload > $(CMDPIPE); fi
 
 byte:: ${PROJECT_NAME}.cma ${PROJECT_NAME}.js
 opt:: ${PROJECT_NAME}.cmxs ${PROJECT_NAME}.js
@@ -143,15 +141,18 @@ ${PROJECT_NAME}.conf: .PROJECT.conf.in
 	  -e "s|%%PROJECT_NAME%%|${PROJECT_NAME}|" \
 	  $< > $@
 
-PHONY: start run install
-
-start: .PROJECT.eliom.in static/.PROJECT.css ${PROJECT_NAME}.conf
-	mv .PROJECT.eliom.in ${PROJECT_NAME}.eliom
-	sed -i \
+${PROJECT_NAME}.eliom: .PROJECT.eliom.in
+	sed \
 	  -e "s|%%PROJECT_NAME%%|${PROJECT_NAME}|" \
 	  -e "s|%%MODULE_NAME%%|${shell echo ${PROJECT_NAME}|sed 's/^./\u&/;'}|" \
-	  ${PROJECT_NAME}.eliom
-	mv static/.PROJECT.css static/${PROJECT_NAME}.css
+	  $< > $@
+
+static/${PROJECT_NAME}.css: static/.PROJECT.css
+	cp $< $@
+
+PHONY: start install run
+
+start: ${PROJECT_NAME}.eliom static/${PROJECT_NAME}.css ${PROJECT_NAME}.conf
 
 install: byte
 	mkdir -p ${DATADIR}
