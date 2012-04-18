@@ -1,0 +1,13 @@
+
+* {
+  font-family: sans-serif;
+}
+
+body {
+  margin: 1em;
+}
+
+h1 {
+  background-color: #eee;
+  padding: 0.2em 0.2em 0.2em 0.5em;
+}

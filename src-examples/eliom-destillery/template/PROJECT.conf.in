@@ -1,0 +1,31 @@
+<!-- vim: set ft=xml: -->
+%%% This is the template for your configuration file. The below %%VALUES%% are
+%%% taken from the Makefile to generate the actual configuration files.
+%%% This comment will disappear there.
+<!-- %%WARNING%% -->
+<ocsigen>
+  <server>
+    <port>8080</port>
+    <charset>utf-8</charset>
+    <logdir>%%LOGDIR%%</logdir>
+    <datadir>%%LOGDIR%%</datadir>
+    <debugmode/>
+    <commandpipe>%%CMDPIPE%%</commandpipe>
+    <extension findlib-package="ocsigenserver.ext.staticmod"/>
+#ifndef MINIMAL_PROJECT
+    <extension findlib-package="macaque"/>
+    <extension findlib-package="ocsigenserver.ext.userconf"/>
+    <extension findlib-package="ocsigenserver.ext.extendconfiguration"/>
+#endif /* MINIMAL_PROJECT */
+    <extension findlib-package="ocsigenserver.ext.ocsipersist-sqlite"/>
+    <extension findlib-package="eliom.server"/>
+    <host hostfilter="*">
+      <static dir="%%STATICDIR%%" />
+      <eliom module="%%LIBDIR%%/%%PROJECT_NAME%%.cma">
+#ifdef WITH_DATABASE
+        <database name="%%DATABASE_NAME%%" user="%%DATABASE_USER%%" />
+#endif
+      </eliom>
+    </host>
+  </server>
+</ocsigen>

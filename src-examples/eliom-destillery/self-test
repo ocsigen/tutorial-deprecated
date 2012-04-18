@@ -1,0 +1,50 @@
+#!/bin/sh
+
+cd `dirname $0`
+ELIOM_DESTILLERY=`pwd`/eliom-destillery
+
+test() {
+  dir=`mktemp -d`
+  (
+    cd $dir
+    $ELIOM_DESTILLERY
+    make byte
+    make run.local&
+    pid=$!
+    read nothing
+    kill $pid
+  )
+  rm -rf $dir
+}
+
+echo "Just a MINIMAL_PROJECT"
+export PROJECT_NAME=tff
+export MINIMAL_PROJECT=true
+export WITH_DATABASE=false
+export BASIC_USER=false
+test
+
+echo "A non-mimimal project"
+export PROJECT_NAME=fff
+export MINIMAL_PROJECT=false
+export WITH_DATABASE=false
+export BASIC_USER=false
+test
+
+echo "A non-mimimal project with database"
+export PROJECT_NAME=ftf
+export MINIMAL_PROJECT=false
+export WITH_DATABASE=true
+export DATABASE_NAME=ocsigen
+export DATABASE_USER=ocsigen
+export BASIC_USER=false
+test
+
+echo "A non-mimimal project with database and user stuff"
+export PROJECT_NAME=ftt
+export MINIMAL_PROJECT=false
+export WITH_DATABASE=true
+export DATABASE_NAME=ocsigen
+export DATABASE_USER=ocsigen
+export BASIC_USER=true
+test

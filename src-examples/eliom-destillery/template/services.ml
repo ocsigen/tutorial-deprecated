@@ -1,0 +1,33 @@
+
+open Eliom_parameters
+
+#ifndef MINIMAL_PROJECT
+module ##MODULE_NAME##_appl =
+  Eliom_output.Eliom_appl (struct
+    let application_name = "##PROJECT_NAME##"
+  end)
+#endif /* MINIMAL_PROJECT */
+let main_service =
+  Eliom_services.service
+    ~path:[]
+    ~get_params:unit
+    ()
+#ifdef BASIC_USER
+let connect_service =
+  Eliom_services.post_coservice'
+    ~name:"login"
+    ~post_params:(string "login" ** string "password")
+    ()
+
+let signout_service =
+  Eliom_services.post_coservice'
+    ~name:"signout"
+    ~post_params:unit
+    ()
+
+let important_service =
+  Eliom_services.service
+    ~path:["important"]
+    ~get_params:unit
+    ()
+#endif /* BASIC_USER */
