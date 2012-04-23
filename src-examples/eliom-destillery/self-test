@@ -4,6 +4,10 @@ cd `dirname $0`
 ELIOM_DESTILLERY=`pwd`/eliom-destillery
 
 test() {
+  echo PROJECT_NAME=$PROJECT_NAME
+  echo MINIMAL_PROJECT=$MINIMAL_PROJECT
+  echo WITH_DATABASE=$WITH_DATABASE
+  echo BASIC_USER=$BASIC_USER
   dir=`mktemp -d`
   (
     cd $dir

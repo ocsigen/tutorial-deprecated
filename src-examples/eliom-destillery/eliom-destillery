@@ -15,6 +15,8 @@ DESCRIBE_BASIC_USER="\
   You get a database table for users, login- and logout-services, and widgets
   for it."
 
+DEBUG=false
+
 while [ $# -gt 0 ]; do
   case $1 in
     --help)
@@ -24,7 +26,7 @@ while [ $# -gt 0 ]; do
       DESTINATION_DIR=$2
       shift;;
     --debug)
-      set -x;;
+      DEBUG=true;;
     *)
       echo "$HELP_TEXT"
       echo "Unknown option $1"
@@ -88,28 +90,34 @@ fi
 
 
 # Get WITH_DATABASE
-if ! $MINIMAL_PROJECT ; then
-  if [ -z $WITH_DATABASE ]; then
+if [ -z $WITH_DATABASE ]; then
+  if ! $MINIMAL_PROJECT ; then
     read_yes_no WITH_DATABASE "You need a bit of this database caboodle, too" "$DESTINATION_WITH_DATABASE"
+  else
+    WITH_DATABASE=false
   fi
 fi
 
 # Get DATABASE_USER and DATABASE_NAME
-if $WITH_DATABASE ; then
-  if [ -z $DATABASE_USER ]; then
+if [ -z $DATABASE_USER ]; then
+  if $WITH_DATABASE ; then
     question "What is the database user: "
     read DATABASE_USER
   fi
-  if [ -z $DATABASE_NAME ]; then
+fi
+if [ -z $DATABASE_NAME ]; then
+  if $WITH_DATABASE ; then
     question "What is the database name: "
     read DATABASE_NAME
   fi
 fi
 
 # Get BASIC_USER
-if $WITH_DATABASE ; then
-  if [ -z $BASIC_USER ]; then
+if [ -z $BASIC_USER ]; then
+  if $WITH_DATABASE ; then
     read_yes_no BASIC_USER "And what about some user handling" "$DESCRIBE_BASIC_USER"
+  else
+    BASIC_USER=false
   fi
 fi
 
@@ -138,9 +146,15 @@ fi
   #TODO
 #fi
 
-
-echo sed_args $sed_args
-echo cpp_args $cpp_args
+if $DEBUG; then
+  echo MINIMAL_PROJECT: \"$WITH_DATABASE\"
+  echo WITH_DATABASE: \"$WITH_DATABASE\"
+  echo BASIC_USER: \"$BASIC_USER\"
+  echo DATABASE_USER: \"$DATABASE_USER\"
+  echo DATABASE_NAME: \"$DATABASE_NAME\"
+  echo sed_args $sed_args
+  echo cpp_args $cpp_args
+fi
 
 # Generate files
 generate() {

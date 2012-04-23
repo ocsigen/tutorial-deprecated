@@ -96,7 +96,7 @@ let connect_wrapper handler get_params post_params =
     | Some user ->
         handler user get_params post_params
     | None ->
-        page [ Widgets.login_form ]
+        page [ pcdata "Not allowed. Log in first!" ]
 
 let connect_service_handler () (email, pwd) =
   try_lwt
@@ -112,7 +112,6 @@ let signout_service_handler () () =
 
 let important_service_handler user () () =
     page HTML5.([
-      Widgets.signout_form user;
       h2 [pcdata "This is you"];
       table
         (tr [
@@ -137,7 +136,10 @@ let important_service_handler user () () =
 
 let main_handler () () =
   page [
-    HTML5.(p [pcdata "Can I has content, plz!"]);
+    p [pcdata "Can I has content, plz!"];
+#ifdef BASIC_USER
+    p [a ~service:Services.important_service [pcdata "los!"] ()];
+#endif /* BASIC_USER */
   ]
 
 let () =

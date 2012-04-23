@@ -36,10 +36,10 @@ let check_pwd email pwd =
   lwt dbh = get_db () in
   match_lwt
     Lwt_Query.query dbh
-      <:select< row
-      | row in $users_table$;
-      row.email = $string:email$;
-      row.pwd = $string:pwd$; >>
+      <:select< u
+      | u in $users_table$;
+      u.email = $string:email$;
+      u.pwd = $string:pwd$; >>
   with
     | [] -> Lwt.fail Not_found
     | [a] -> Lwt.return (a#!userid)
@@ -50,9 +50,9 @@ let get_user id =
   lwt dbh = get_db () in
   match_lwt
     Lwt_Query.query dbh
-      <:select< row |
-        row in $users_table$;
-        row.userid = $int64:id$ >>
+      <:select< u |
+        u in $users_table$;
+        u.userid = $int64:id$ >>
   with
     | [] -> Lwt.fail Not_found
     | [user] -> Lwt.return user
@@ -63,8 +63,8 @@ let () =
     lwt dbh = get_db () in
     match_lwt
       Lwt_Query.query dbh
-        <:select< row |
-          row in $users_table$; >>
+        <:select< u |
+          u in $users_table$; >>
     with
       | [] ->
           Lwt.return (print_endline "Create a user first!") (* TODO *)
@@ -84,8 +84,8 @@ let articles_table = <:table< articles (
 let get_articles () =
   lwt dbh = get_db () in
   Lwt_Query.query dbh
-    <:select< row |
-      row in $articles_table$ >>
+    <:select< article |
+      article in $articles_table$ >>
 
 let get_article id =
   lwt dbh = get_db () in
