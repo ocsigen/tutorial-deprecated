@@ -269,7 +269,7 @@ make
 
 This will generate a file called {{{graffiti.cma}}} and another one
 called {{{graffiti.js}}}. The latter //must be placed in the static
-file directory. To copy it to its rightful place, type:
+file directory//. To copy it to its rightful place, type:
 
 {{{
 make install
@@ -392,6 +392,7 @@ message box.
 
 >>
 
+<<|BB/BS This only applies to elements created by HTML5.M
 It is possible to send almost any type of values that way, but keep in
 mind that sent values are //copies// of server side ones. For HTML
 elements, this is not always the expected behaviour. Considering the
@@ -412,6 +413,8 @@ let main_service =
         (html
            (head (title (pcdata "Graffiti")) [])
            (container) ) )
+>>
+
 >>
 
 ==@@id="graffiti"@@ Collaborative drawing application==
@@ -654,7 +657,7 @@ To write draw orders into the bus, we just replace the function
 let line ev =
   let v = compute_line ev in
   let _ = Eliom_bus.write %bus v in
-  draw ctx v
+  draw ctx v in
 >>
 
 Finally, to interpret the draw orders read on the bus, we add the
@@ -703,6 +706,10 @@ lines are drawn on both windows.
 In this section, we add a color picker and slider to choose the size
 of the brush. For that we used add two widgets provided by the
 <<a_manual project="oclosure"|OClosure widget library>>.
+
+For using OClosure, you have to make sure that it is installed. If you are
+using the bundle, it should have been configured with the option ##--enable-oclosure##.
+Cf. the [[wiki(36):bundle#oclosure|corresponding bundle documentation]].
 
 To create the widgets, we add the following code in the
 {{{onload_handler}}} immediatly after canvas configuration:
@@ -788,17 +795,20 @@ service handler and still use relative URI.
 
 >>
 
-You need to install the corresponding stylesheets and images into your
-static files directory:
+You need to install the corresponding stylesheets and images into your project:
 
+The stylesheet files should go in the directory ##static/css##:
 * the <<a_file src="tutorial/static/css/common.css"|{{{common.css}}}>>
-  and <<a_file
-  src="tutorial/static/css/hsvpalette.css"|{{{hsvpalette.css}}}>> are
-  taken from the Google Closure library;
+  and <<a_file src="tutorial/static/css/hsvpalette.css"|{{{hsvpalette.css}}}>>
+  are taken from the Google Closure library;
 * the <<a_file src="tutorial/static/css/slider.css"|{{{slider.css}}}>>
   and <<a_file src="tutorial/static/css/graffiti.css"|{{{graffiti.css}}}>> are
   home-made css; and
-* the {{{graffiti_oclosure.js}}} script is generated according to the
+
+the following image should go into ##static/images##:
+* the <<a_file src="tutorial/static/images/hsv-sprite-sm.png"|{{{hsv-sprite-sm.png}}}>>
+
+Finally, the {{{graffiti_oclosure.js}}} script is generated according to the
 {{{graffiti.js}}} with the following command:
 
 {{{
@@ -811,10 +821,6 @@ those static files are generated and installed by the {{{install}}}
 rule in the configured static directory (see the {{{STATICDIR}}}
 variable).
 
-<<|BB
-This Makefile intents to `cp -r ../../static/* $(STATICDIR)` for `make install`.
-This is obviously not working in my environment.
->>
 
 <<concept
 
@@ -828,15 +834,17 @@ This is obviously not working in my environment.
 
 >>
 
-===Sending the initial image===
+===@@id="initial-image"@@ Sending the initial image===
 
 <<concepts|Services sending other data types>>
 
 To finish the first part of the tutorial, we want to save the current
 drawing on server side and send the current image when a new user
 arrives. To do that, we will use the
-[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml
-(you must have it installed for this section).
+[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml.
+
+For using Cairo, make sure that it is installed. If you are using the bundle,
+it should have been configured with the option ##--enable-cairo##.
 
 The {{{draw_server}}} function below is the equivalent of the
 {{{draw}}} function on the server side and the {{{image_string}}}

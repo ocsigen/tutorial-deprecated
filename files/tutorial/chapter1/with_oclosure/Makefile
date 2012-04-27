@@ -128,7 +128,7 @@ $(STATICDIR):
 install: all $(STATICDIR)
 	cp $(APP_NAME)_oclosure.js $(STATICDIR)/$(APP_NAME)_oclosure.js
 	cp $(APP_NAME).js $(STATICDIR)/$(APP_NAME).js
-	cp -r ../../static/* $(STATICDIR)
+	cp -r static/* $(STATICDIR)
 
 ## oclosure #############
 
