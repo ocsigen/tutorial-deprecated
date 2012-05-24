@@ -1,18 +1,18 @@
 
 APP_NAME := graffiti
-SERVER_PACKAGE := cairo,unix
+SERVER_PACKAGE := cairo, unix
 CLIENT_PACKAGE :=
 
 SERVER_FILES = common.ml server.ml feed.ml ${wildcard *.eliom}
 CLIENT_FILES = common.ml client.ml ${wildcard *.eliom}
 
-PORT := 8081
+PORT := 8080
 
 OCLOSURE := YES
 
 ###
 
-all: local byte opt
+all: local byte opt conf
 
 LIBDIR := local/var/www/lib
 JSDIR  := local/var/www/static
@@ -20,9 +20,9 @@ JSDIR  := local/var/www/static
 include Makefile.common
 
 distclean::
-	-rm css/closure
-	-rm -r local
-	-rm graffiti.p*.conf
+	-rm -rf css/closure
+	-rm -rf local
+	-rm -f graffiti.conf
 
 ####
 
@@ -30,27 +30,34 @@ DIRS = local/var/lib/ocsidbm local/var/run local/var/log \
        local/var/www/static local/var/www/lib local/etc \
        local/var/www/static/graffiti_saved
 
-local: ${DIRS} local/var/www/static/css css/closure
+local: ${DIRS} local/var/www/static/css local/var/www/static/images css/closure
 
 local/var/www/static/css:
 	ln -fs $(shell pwd)/css local/var/www/static/css
+
+local/var/www/static/images:
+	ln -fs $(shell pwd)/images local/var/www/static/images
+
 css/closure:
 	ln -fs $(shell ocamlfind query oclosure)/closure/goog/css/ css/closure
+
 ${DIRS}:
 	mkdir -p $@
 
-local/etc/graffiti.p${PORT}.conf: graffiti.conf.in
+conf: graffiti.conf
+
+graffiti.conf: graffiti.conf.in
 	sed -e "s|%%SRC%%|$(shell pwd)|" \
 	    -e "s|%%LIBDIR%%|${LIBDIR}|" \
 	    -e "s|%%JSDIR%%|${JSDIR}|" \
 	    -e "s|%%PORT%%|${PORT}|" \
 	    $< > $@
 
-run.local: local/etc/graffiti.p${PORT}.conf
-	ocsigenserver -c local/etc/graffiti.p${PORT}.conf
+run.local: graffiti.conf
+	ocsigenserver -c graffiti.conf
 
-run.opt.local: local/etc/graffiti.p${PORT}.conf
-	ocsigenserver.opt -c local/etc/graffiti.p${PORT}.conf
+run.opt.local: graffiti.conf
+	ocsigenserver.opt -c graffiti.conf
 
 ####
 

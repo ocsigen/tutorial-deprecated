@@ -124,6 +124,7 @@ ${JSDIR}/$(APP_NAME)_oclosure.js: ${JSDIR}/$(APP_NAME).js
 clean::
 	-rm -f *.cm[ioax] *.cmxa *.cmxs *.o *.a *.annot
 	-rm -f *.type_mli
+	-rm -f .depend
 	-rm -f ${JSDIR}/${APP_NAME}.js ${JSDIR}/${APP_NAME}_oclosure.js
 	-rm -rf ${ELIOM_CLIENT_DIR} ${ELIOM_SERVER_DIR}
 
@@ -146,7 +147,7 @@ depend: .depend
 ####
 
 INSTALL_USER ?= -o www-data -g www-data
-INSTALL_DIR  ?= /var/www/${APP_NAME}
+INSTALL_DIR  ?= local/var/www/${APP_NAME}
 
 install::
 	install -d -m 775 ${INSTALL_USER} ${INSTALL_DIR}/lib

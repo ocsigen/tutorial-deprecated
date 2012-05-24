@@ -365,7 +365,7 @@ let () = My_appl.register ~service:multigraffiti_service
        canvas;])
 >>
 
-At this point, you can run your application on the server provided that you installed the css and images directories in the main directory of your application, build it using this <<a_file src="path/To/MakefileNoFeed"|{{{Makefile}}}>> along with this <<a_file src="path/To/Makefile.common"|{{{Makefile.common}}}>> and configured it using <<a_file src="path/To/graffiti.conf.in"|{{{graffiti.conf.in}}}>> as groundwork of configuration file.
+At this point, you can run your application on the server provided that you installed the css and images directories in the main directory of your application, build it using this <<a_file src="path/to/MakefileNoFeed"|{{{Makefile}}}>> along with this <<a_file src="tutorial/chapter3/multigraffiti/Makefile.common"|{{{Makefile.common}}}>> and configured it using <<a_file src="tutorial/chapter3/multigraffiti/graffiti.conf.in"|{{{graffiti.conf.in}}}>> as groundwork of configuration file.
 
 ===Mixing client/server application with traditional Web interaction===
 

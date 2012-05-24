@@ -121,9 +121,9 @@ let table = <:table< users (
 let find name =
   (get_db () >>= fun dbh ->
    Lwt_Query.view dbh
-   <:view< {password = row.password} |
-            row in $table$;
-            row.login = $string:name$; >>)
+   <:view< {password = user_.password} |
+            user_ in $table$;
+            user_.login = $string:name$; >>)
 
 let insert name pwd =
   get_db () >>= fun dbh ->
@@ -133,10 +133,10 @@ let insert name pwd =
 let check_pwd name pwd =
   (get_db () >>= fun dbh ->
    Lwt_Query.view dbh
-   <:view< {password = row.password} |
-            row in $table$;
-            row.login = $string:name$;
-	    row.password = $string:pwd$ >>)
+   <:view< {password = user_.password} |
+            user_ in $table$;
+            user_.login = $string:name$;
+	    user_.password = $string:pwd$ >>)
   >|= (function [] -> false | _ -> true)
 
 let () = Eliom_output.Action.register
