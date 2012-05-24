@@ -3,7 +3,7 @@ APP_NAME := graffiti
 SERVER_PACKAGE := cairo, unix, macaque.syntax
 CLIENT_PACKAGE :=
 
-SERVER_FILES = common.ml server.ml feed.ml ${wildcard *.eliom}
+SERVER_FILES = common.ml server.ml ${wildcard *.eliom}
 CLIENT_FILES = common.ml client.ml ${wildcard *.eliom}
 
 PORT := 8080
@@ -20,9 +20,9 @@ JSDIR  := local/var/www/static
 include Makefile.common
 
 distclean::
-	-rm -rf css/closure
-	-rm -rf local
-	-rm -f graffiti.conf
+	-rm css/closure
+	-rm -r local
+	-rm graffiti.conf
 
 ####
 

@@ -23,7 +23,7 @@ let player =
   create_global_elt
     (audio
        ~srcs:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
-                  ["music.ogg"],[])
+                  ["free-software-song.ogg"],[])
        ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
        [pcdata "Your browser does not support audio element" ])
     

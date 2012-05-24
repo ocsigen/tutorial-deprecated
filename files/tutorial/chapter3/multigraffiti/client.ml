@@ -9,7 +9,7 @@ let draw ctx (color, size, (x1, y1), (x2, y2)) =
   ctx##lineTo(float x2, float y2);
   ctx##stroke()
 
-(* type containing all informations we need to stop interraction
+(* type containing all informations we need to stop interaction
    inside the page *)
 type drawing_canceller =
     { drawing_thread : unit Lwt.t;
@@ -69,9 +69,8 @@ let launch_client_canvas bus image_elt canvas_elt =
   let t = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   let drawing_arrow =
     run (mousedowns canvas
-           (arr (fun ev -> set_coord ev; line ev)
-                   >>> first [mousemoves Dom_html.document (arr line);
-                              mouseup Dom_html.document >>>
-				(arr line)])) () in
+           (arr (fun ev -> set_coord ev; line ev) >>>
+              first [mousemoves Dom_html.document (arr line);
+                     mouseup Dom_html.document >>> (arr line)])) () in
   { drawing_thread = t;
     drawing_arrow = drawing_arrow }

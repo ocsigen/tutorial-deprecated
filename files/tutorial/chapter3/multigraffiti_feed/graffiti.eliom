@@ -7,6 +7,7 @@
   open Client
 }}
 open Server
+open Feed
 
 let start_drawing name image canvas =
   let bus = get_bus name in
@@ -19,7 +20,7 @@ let start_drawing name image canvas =
 let counter = ref 0
 
 let () = Connected.register ~service:multigraffiti_service
-  !% (fun name () username ->
+  !% ( fun name () username ->
     (* Some browsers won't reload the image, so we force
        them by changing the url each time. *)
     incr counter;
@@ -35,4 +36,9 @@ let () = Connected.register ~service:multigraffiti_service
       [h1 [pcdata name];
        disconnect_box ();
        choose_drawing_form ();
+       Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
+       div ( if name = username
+	 then [save_image_box name]
+	 else [pcdata "no saving"] );
        canvas;])
+

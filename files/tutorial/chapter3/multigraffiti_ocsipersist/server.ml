@@ -4,9 +4,10 @@ open Common
 open Lwt
 
 module My_appl =
-  Eliom_output.Eliom_appl (struct
-    let application_name = "graffiti"
-  end)
+  Eliom_output.Eliom_appl (
+    struct
+      let application_name = "graffiti"
+    end)
 
 let rgb_from_string color = (* color is in format "#rrggbb" *)
   let get_color i =
@@ -54,9 +55,9 @@ let imageservice =
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
     ~get_params:(let open Eliom_parameters in string "name" ** int "q")
-    (* we add another parameter for the browser not to cache: at least
-       for chrome, there is no way to force the browser to reload the
-       image without leaving the application *)
+    (* we add an int parameter for the browser not to cache the image:
+       at least for chrome, there is no way to force the browser to
+       reload the image without leaving the application *)
     (fun (name,_) () ->
       try_lwt
         let _ ,image_string = Hashtbl.find graffiti_info name in
@@ -83,77 +84,72 @@ let choose_drawing_form () =
   Eliom_output.Html5.get_form ~service:multigraffiti_service
     (fun (name) ->
       [fieldset
-	  [label ~a:[Eliom_output.Html5.a_for name] [pcdata "drawing name: "];
+          [label ~a:[Eliom_output.Html5.a_for name]
+	      [pcdata "drawing name: "];
            Eliom_output.Html5.string_input ~input_type:`Text ~name ();
            br ();
-           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Go" ()
+           Eliom_output.Html5.string_input
+	     ~input_type:`Submit
+	     ~value:"Go" ()
           ]])
+    
+let oclosure_script =
+  HTML5.create_global_elt
+    (Eliom_output.Html5_forms.js_script
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+               ["graffiti_oclosure.js"]) ())
+
+let make_page content =
+  Lwt.return
+    (html
+       (head
+	  (title (pcdata "Graffiti"))
+       [ Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"common.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"hsvpalette.css"]) ();
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"slider.css"]) ();
+         oclosure_script;
+         Eliom_output.Html5_forms.css_link
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+                  ["css";"graffiti.css"]) ();
+       ])
+       (body content))
 
 let connection_service =
-  Eliom_services.post_coservice'
-    ~post_params:(let open Eliom_parameters in (string "name" ** string "password"))
-    ()
-let disconnection_service = Eliom_services.post_coservice' ~post_params:Eliom_parameters.unit ()
+  Eliom_services.post_coservice' ~post_params:
+    (let open Eliom_parameters in (string "name" ** string "password")) ()
+let disconnection_service = Eliom_services.post_coservice'
+  ~post_params:Eliom_parameters.unit ()
 let create_account_service =
-  Eliom_services.post_coservice ~fallback:main_service ~post_params:(let open Eliom_parameters in (string "name" ** string "password")) ()
+  Eliom_services.post_coservice ~fallback:main_service ~post_params:
+  (let open Eliom_parameters in (string "name" ** string "password")) ()
 
 let username = Eliom_references.eref ~scope:Eliom_common.session None
 
-module Lwt_thread = struct
-  include Lwt
-  include Lwt_chan
-end
-module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
-module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
-
-let get_db : unit -> unit Lwt_PGOCaml.t Lwt.t =
-  let db_handler = ref None in
-  fun () ->
-    match !db_handler with
-      | Some h -> Lwt.return h
-      | None -> Lwt_PGOCaml.connect ~database:"testbase" ()
-
-let table = <:table< users (
-  login text NOT NULL,
-  password text NOT NULL
-) >>
-
-let find name =
-  (get_db () >>= fun dbh ->
-   Lwt_Query.view dbh
-   <:view< {password = user_.password} |
-            user_ in $table$;
-            user_.login = $string:name$; >>)
-
-let insert name pwd =
-  get_db () >>= fun dbh ->
-  Lwt_Query.query dbh
-  <:insert< $table$ := { login = $string:name$; password = $string:pwd$; } >>
+let user_table = Ocsipersist.open_table "user_table"
 
 let check_pwd name pwd =
-  (get_db () >>= fun dbh ->
-   Lwt_Query.view dbh
-   <:view< {password = user_.password} |
-            user_ in $table$;
-            user_.login = $string:name$;
-	    user_.password = $string:pwd$ >>)
-  >|= (function [] -> false | _ -> true)
+  try_lwt
+    lwt saved_password = Ocsipersist.find user_table name in
+    Lwt.return (pwd = saved_password)
+  with
+    Not_found -> Lwt.return false
 
 let () = Eliom_output.Action.register
   ~service:create_account_service
-  (fun () (name, pwd) ->
-    find name >>=
-      (function
-	| [] -> insert name pwd
-	| _ -> Lwt.return ()))
+  (fun () (name, pwd) -> Ocsipersist.add user_table name pwd)
 
 let () = Eliom_output.Action.register
   ~service:connection_service
   (fun () (name, password) ->
-    check_pwd name password >>=
-      (function
-	| true -> Eliom_references.set username (Some name)
-	| false -> Lwt.return ()))
+    match_lwt check_pwd name password with
+      | true -> Eliom_references.set username (Some name)
+      | false -> Lwt.return ())
 
 let () =
   Eliom_output.Action.register
@@ -163,45 +159,25 @@ let () =
 let disconnect_box () =
   Eliom_output.Html5.post_form disconnection_service
     (fun _ -> [fieldset
-		  [Eliom_output.Html5.string_input
-                      ~input_type:`Submit ~value:"Log out" ()]]) ()
+                 [Eliom_output.Html5.string_input
+                     ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let login_name_form service button_text =
   Eliom_output.Html5.post_form ~service
     (fun (name1, name2) ->
       [fieldset
-	  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-           Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
-           br ();
-           label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-           Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
-           br ();
-           Eliom_output.Html5.string_input ~input_type:`Submit ~value:button_text ()
+         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
+          Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+          br ();
+          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
+          Eliom_output.Html5.string_input
+	    ~input_type:`Password
+	    ~name:name2 ();
+          br ();
+          Eliom_output.Html5.string_input
+	    ~input_type:`Submit
+	    ~value:button_text ()
          ]]) ()
-
-let oclosure_script =
-  create_global_elt
-    (Eliom_output.Html5_forms.js_script
-       ~uri:(uri_of_string "./graffiti_oclosure.js") ())
-
-let make_page content =
-  Lwt.return
-    (html
-       (head
-	  (title (pcdata "Graffiti"))
- 	  [
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(uri_of_string"./css/closure/common.css") ();
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(uri_of_string"./css/closure/hsvpalette.css") ();
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(uri_of_string"./css/slider.css") ();
-            oclosure_script;
-	    Eliom_output.Html5_forms.css_link
-	      ~uri:(uri_of_string"./css/graffiti.css") ();
-          ])
-       (body content))
-
 
 let default_content () =
   make_page
@@ -231,4 +207,3 @@ let () = Connected.register ~service:main_service
     make_page
       [h1 [pcdata ("Welcome to Multigraffiti " ^ username)];
        choose_drawing_form ()])
-
