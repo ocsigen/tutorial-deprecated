@@ -1,6 +1,5 @@
 {shared{
-  open Eliom_pervasives
-  open HTML5
+  open Eliom_content.Html5.D
   let width = 700
   let height = 400
 }}
@@ -63,7 +62,7 @@ let _ = Lwt_stream.iter draw_server (Eliom_bus.stream bus)
 let imageservice =
   Eliom_output.Text.register_service
     ~path:["image"]
-    ~get_params:Eliom_parameters.unit
+    ~get_params:Eliom_parameter.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))
 
 let page =
@@ -81,9 +80,9 @@ let onload_handler = {{
 
   (* The initial image: *)
   let img =
-    Eliom_client.Html5.of_img
+    Html5.To_dom.of_img
       (img ~alt:"canvas"
-         ~src:(Eliom_output.Html5.make_uri ~service:%imageservice ())
+         ~src:(make_uri ~service:%imageservice ())
          ())
   in
   img##onload <- Dom_html.handler
@@ -116,8 +115,8 @@ let onload_handler = {{
 }}
 
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-       Eliom_services.onload onload_handler;
+       Eliom_service.onload onload_handler;
       Lwt.return page)
 

@@ -1,5 +1,7 @@
 
+open Eliom_content
 open Utils
+open Eliom_lib
 
 (* The Chat application needs it's own user because the original one is trapped
    within the [Chat.Make] functor. *)
@@ -14,7 +16,7 @@ module User = struct
   let compare = on id compare
   let hash = Hashtbl.hash -| id
   let equal = on id (=)
-  let parameter = flip Eliom_parameters.caml Json.t<t>
+  let parameter = flip Eliom_parameter.caml Json.t<t>
 end
 module User_set = struct
   include Set.Make (User)
@@ -60,17 +62,17 @@ let event_to_string = function
 (* HTML generation functions shared between client and server *)
 
 let user_span ?self user =
-  let open HTML5.M in
+  let open Html5.F in
   let self_class =
     let self_class user' = if User.equal user user' then ["self"] else [] in
-    get_option ~default:[] **> map_option self_class self
+    Option.get (fun () -> []) **> Option.map self_class self
   in
   span ~a:([a_class ("user_name" :: self_class); a_style ("background-color: "^user.User.color)]) [
     pcdata user.User.name
   ]
 
 let create_user_li ?self =
-  HTML5.M.li -| singleton -| user_span ?self
+  Html5.F.li -| singleton -| user_span ?self
 
 (* Translate changes in a users signal into events removing/adding users. *)
 let user_added_event, user_removed_event =

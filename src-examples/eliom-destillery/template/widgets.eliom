@@ -1,6 +1,5 @@
 
-open HTML5.M
-open Eliom_output.Html5
+open Eliom_content.Html5.F
 
 #ifdef BASIC_USER
 let class_userbox = "##PROJECT_NAME##_userbox"
@@ -11,12 +10,12 @@ let login_form =
     (fun (loginname, pwdname) ->
       [fieldset [
         label ~a:[a_for loginname] [pcdata "Email: "];
-        Eliom_output.Html5.string_input ~input_type:`Text ~name:loginname ();
+        string_input ~input_type:`Text ~name:loginname ();
         br ();
         label ~a:[a_for pwdname] [pcdata "Password: "];
-        Eliom_output.Html5.string_input ~input_type:`Password ~name:pwdname ();
+        string_input ~input_type:`Password ~name:pwdname ();
         br ();
-        Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
+        string_input ~input_type:`Submit ~value:"Connect" ()
       ]])
     ()
 

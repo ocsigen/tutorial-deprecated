@@ -1,4 +1,5 @@
 
+open Eliom_content
 open Utils
 open Shared
 
@@ -23,20 +24,20 @@ let handle_enter_pressed msg_author prompt_dom bus ev =
 
 let dispatch_message user messages { Conversation.msg_author; msg_content } =
   let message =
-    HTML5.(li [
+    Html5.D.(li [
       user_span ~self:user msg_author;
       span ~a:[a_class ["content"]] [pcdata msg_content]
     ])
   in
-  Eliom_dom.appendChild messages message;
-  (let messages_dom = Eliom_client.Html5.of_element messages in
+  Html5.Manip.appendChild messages message;
+  (let messages_dom = Html5.To_dom.of_element messages in
    messages_dom##scrollTop <- messages_dom##scrollHeight)
 
 (* Create a new conversation in the UI *)
 let append_conversation user conversations conversation =
   debug "append_conversation between %s" (User_set.to_string conversation.Conversation.users);
   let conversation =
-    let open HTML5 in
+    let open Html5.D in
     let users_ul = ul ~a:[a_class ["participants"]] **>
       List.map (li -| singleton -| user_span ~self:user) **>
         User_set.elements **>
@@ -49,9 +50,9 @@ let append_conversation user conversations conversation =
     ignore **> Lwt_stream.iter
       (dispatch_message user messages)
       (Eliom_bus.stream conversation.Conversation.bus);
-    (let prompt_dom = Eliom_client.Html5.of_input prompt in
+    (let prompt_dom = Html5.To_dom.of_input prompt in
      (* XXX Why is there no return value for the eventhandler in Eliom_dom? We then could use
-        [Eliom_dom.addEventListener] *)
+        [Html5.Manip.addEventListener] *)
      ignore **> Dom_html.addEventListener
        prompt_dom
        Dom_html.Event.keypress
@@ -66,14 +67,14 @@ let append_conversation user conversations conversation =
           users_ul];
        messages; prompt]
   in
-  Eliom_dom.appendChild conversations conversation
+  Html5.Manip.appendChild conversations conversation
 
 (* Remvoe a conversation from the UI and stop close its bus. *)
 let remove_conversation conversation conversations =
   debug "remove_conversation between %s" (User_set.to_string conversation.Conversation.users);
   Eliom_bus.close conversation.Conversation.bus;
   Js.Opt.iter Dom_html.document##getElementById(Js.string **> id_for_conversation conversation)
-    **> Dom.removeChild (Eliom_client.Html5.of_div conversations)
+    **> Dom.removeChild (Html5.To_dom.of_div conversations)
 
 (* The main dispatching function for events on the client's [channel]' *)
 let dispatch_event user conversations_elt = function
@@ -99,14 +100,14 @@ let create_or_focus_conversation create_dialog_service user other =
 (* Reflect changes of the [users] signal in the list of users in the UI *)
 let change_users user users_elt create_dialog_service users =
   let create_user_li other =
-    let user_span_elt = HTML5.li [user_span ~self:user other] in
-    ignore **> Eliom_dom.addEventListener
+    let user_span_elt = Html5.D.li [user_span ~self:user other] in
+    ignore **> Html5.Manip.addEventListener
       user_span_elt
       Dom_html.Event.click
       (fun _ _ -> create_or_focus_conversation create_dialog_service user other; false);
     user_span_elt
   in
-  Eliom_dom.replaceAllChild
+  Html5.Manip.replaceAllChild
     users_elt
     (List.map create_user_li **> User_set.elements users)
 
@@ -119,7 +120,7 @@ let onload_chat ~users_signal ~users_elt ~conversations_elt ~user ~channel ~conv
        Lwt_stream.iter (dispatch_event user conversations_elt) channel
      with
        | Eliom_comet.Process_closed ->
-           Eliom_client.exit_to ~service:Eliom_services.void_coservice' () ();
+           Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ();
            Lwt.return ()
        | e ->
            debug_exn "Exception while streaming" e;

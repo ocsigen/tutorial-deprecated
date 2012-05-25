@@ -50,7 +50,7 @@ let height = 400>>
 
 It is almost the same code as what was enclosed in {{{ {client{ ... }} }}}
 with the difference that what was previously in
-{{{ Eliom_services.onload {{ }} }}} is now in the function {{{ launch_client_canvas}}}.
+{{{ Eliom_service.onload {{ }} }}} is now in the function {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|
 open Common
@@ -89,11 +89,11 @@ Notice that the client does not keep data from pages it left.
 <<code language="ocaml"|
 
 let launch_client_canvas bus image_elt canvas_elt =
-  let canvas = Eliom_client.Html5.of_canvas canvas_elt in
+  let canvas = Html5.To_dom.of_canvas canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
 
-  let img = Eliom_client.Html5.of_img image_elt in
+  let img = Html5.To_dom.of_img image_elt in
   let copy_image () = ctx##drawImage(img, 0., 0.) in
   if Js.to_bool (img##complete)
   then copy_image ()
@@ -145,8 +145,7 @@ let launch_client_canvas bus image_elt canvas_elt =
 
 It contains almost all the server parts of the code.
 <<code language="ocaml"|
-open Eliom_pervasives
-open HTML5
+open Eliom_content.Html5.D
 open Common
 open Lwt
 
@@ -204,7 +203,7 @@ let imageservice =
   Eliom_output.Text.register_service
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
-    ~get_params:(let open Eliom_parameters in string "name" ** int "q")
+    ~get_params:(let open Eliom_parameter in string "name" ** int "q")
     (* we add an int parameter for the browser not to cache the image:
        at least for chrome, there is no way to force the browser to
        reload the image without leaving the application *)
@@ -233,10 +232,10 @@ The drawing will be sent by the {{{multigraffiti_service}}} service,
 registered in {{{graffiti.eliom}}}.
 
 <<code language="ocaml"|
-let main_service = Eliom_services.service ~path:[""]
-  ~get_params:(Eliom_parameters.unit) ()
-let multigraffiti_service = Eliom_services.service ~path:[""]
-  ~get_params:(Eliom_parameters.suffix (Eliom_parameters.string "name")) ()
+let main_service = Eliom_service.service ~path:[""]
+  ~get_params:(Eliom_parameter.unit) ()
+let multigraffiti_service = Eliom_service.service ~path:[""]
+  ~get_params:(Eliom_parameter.suffix (Eliom_parameter.string "name")) ()
 
 let choose_drawing_form () =
   Eliom_output.Html5.get_form ~service:multigraffiti_service
@@ -252,9 +251,9 @@ let choose_drawing_form () =
           ]])
     
 let oclosure_script =
-  HTML5.create_global_elt
+  Html5.Id.create_global_elt
     (Eliom_output.Html5_forms.js_script
-       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_service.static_dir ())
                ["graffiti_oclosure.js"]) ())
 
 let make_page content =
@@ -263,17 +262,17 @@ let make_page content =
        (head
 	  (title (pcdata "Graffiti"))
        [ Eliom_output.Html5_forms.css_link
-           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
                   ["css";"common.css"]) ();
          Eliom_output.Html5_forms.css_link
-           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
                   ["css";"hsvpalette.css"]) ();
          Eliom_output.Html5_forms.css_link
-           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
                   ["css";"slider.css"]) ();
          oclosure_script;
          Eliom_output.Html5_forms.css_link
-           ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+           ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
                   ["css";"graffiti.css"]) ();
        ])
        (body content))
@@ -293,16 +292,16 @@ let () = My_appl.register ~service:main_service
   We usually don't want that.
 
   Using <<a_api project="eliom"| val
-  Eliom_pervasives.HTML5.create_global_elt>> we can create an xml node
+  Eliom_content.Html5.Id.create_global_elt>> we can create an xml node
   manipulated 'by reference'. If a reference to a script node is
   included in a page, it will only be loaded the first time it appears
   in the header. Such a node can be created that way:
 
   <<code language="ocaml"|
 let oclosure_script =
-  HTML5.create_global_elt
+  Eliom_content.Html5.Id.create_global_elt
     (Eliom_output.Html5_forms.js_script
-       ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+       ~uri:(Eliom_output.Html5.make_uri  (Eliom_service.static_dir ())
                ["graffiti_oclosure.js"]) ())
   >>
 
@@ -316,8 +315,7 @@ application.
 
 <<code language="ocaml"|
 {shared{
-  open Eliom_pervasives
-  open HTML5
+  open Eliom_content.Html5.D
   open Common
 }}
 {client{
@@ -331,14 +329,14 @@ And then we define the function adding the {{{onload}}} handler.
 <<code language="ocaml"|
 let start_drawing name image canvas =
   let bus = get_bus name in
-  Eliom_services.onload
+  Eliom_service.onload
     {{
       let canceller = launch_client_canvas %bus %image %canvas in
       Eliom_client.on_unload (fun () -> stop_drawing canceller)
     }}
 >>
 
-The function registered by <<a_api project="eliom" subproject="server"| val Eliom_services.on_unload >> will be called when the page change
+The function registered by <<a_api project="eliom" subproject="server"| val Eliom_service.on_unload >> will be called when the page change
 inside the application.
 
 And we finally register the service sending a drawing:
@@ -375,15 +373,15 @@ From the previous chapter, we copy the code handling users to {{{server.ml}}}:
 
 <<code language="ocaml"|
 let connection_service =
-  Eliom_services.post_coservice' ~post_params:
-    (let open Eliom_parameters in (string "name" ** string "password")) ()
-let disconnection_service = Eliom_services.post_coservice'
-  ~post_params:Eliom_parameters.unit ()
+  Eliom_service.post_coservice' ~post_params:
+    (let open Eliom_parameter in (string "name" ** string "password")) ()
+let disconnection_service = Eliom_service.post_coservice'
+  ~post_params:Eliom_parameter.unit ()
 let create_account_service =
-  Eliom_services.post_coservice ~fallback:main_service ~post_params:
-  (let open Eliom_parameters in (string "name" ** string "password")) ()
+  Eliom_service.post_coservice ~fallback:main_service ~post_params:
+  (let open Eliom_parameter in (string "name" ** string "password")) ()
 
-let username = Eliom_references.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.session None
 
 let users = ref ["user","password";"test","test"]
 
@@ -401,7 +399,7 @@ let () = Eliom_output.Action.register
   ~service:connection_service
   (fun () (name, password) ->
     match_lwt check_pwd name password with
-      | true -> Eliom_references.set username (Some name)
+      | true -> Eliom_reference.set username (Some name)
       | false -> Lwt.return ())
 
 let () =
@@ -451,7 +449,7 @@ module Connected_translate =
 struct
   type page = string -> My_appl.page Lwt.t
   let translate page =
-    Eliom_references.get username ~>>=
+    Eliom_reference.get username ~>>=
       function
 	| None -> default_content ()
 	| Some username -> page username
@@ -613,7 +611,7 @@ let () = Eliom_output.Action.register
   (fun () (name, password) ->
     check_pwd name password ~>>=
       (function
-	| true -> Eliom_references.set username (Some name)
+	| true -> Eliom_reference.set username (Some name)
 	| false -> Lwt.return ()))
 >>
 
@@ -656,7 +654,7 @@ let () = Eliom_output.Action.register
   ~service:connection_service
   (fun () (name, password) ->
     match_lwt check_pwd name password with
-      | true -> Eliom_references.set username (Some name)
+      | true -> Eliom_reference.set username (Some name)
       | false -> Lwt.return ())
 >>
 
@@ -683,8 +681,7 @@ and we do nothing.
 We will add this code in a new file:
 ===={{{feed.ml}}}====
 <<code language="ocaml"|
-open Eliom_pervasives
-open HTML5
+open Eliom_content.Html5.D
 open Server
 
 let static_dir = "/tmp/static/"
@@ -733,7 +730,7 @@ let save_image username =
 let save_image_box name =
   let save_image_service =
     Eliom_output.Action.register_post_coservice'
-      ~post_params:Eliom_parameters.unit
+      ~post_params:Eliom_parameter.unit
       (fun () () -> save_image name)
   in
   Eliom_output.Html5.post_form save_image_service
@@ -742,14 +739,14 @@ let save_image_box name =
              ~input_type:`Submit ~value:"save" ()]]) ()
 >>
 
-We find the url of the images with <<a_api project="eliom" subproject="server"| val Eliom_services.static_dir >>.
+We find the url of the images with <<a_api project="eliom" subproject="server"| val Eliom_service.static_dir >>.
 It is a service taking file path as
 parameter, serving the content of the static directory. We use <<a_api project="eliom"| val Eliom_uri.make_string_uri >> to get the
 url as a string.
 
 <<code language="ocaml"|
-let feed_service = Eliom_services.service ~path:["feed"]
-  ~get_params:(Eliom_parameters.string "name") ()
+let feed_service = Eliom_service.service ~path:["feed"]
+  ~get_params:(Eliom_parameter.string "name") ()
 
 let local_filename name number =
   ["graffiti_saved"; Url.encode name ; (string_of_int number) ^ ".png"]
@@ -764,7 +761,7 @@ let rec entries name list = function
 	  ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
 	  Eliom_output.Xhtml.make_uri ~absolute:true
-	    ~service:(Eliom_services.static_dir ())
+	    ~service:(Eliom_service.static_dir ())
 	    (local_filename name n)
 	in
 	let entry =
@@ -873,7 +870,7 @@ We first create the player node at toplevel.
 let player =
   create_global_elt
     (audio
-       ~srcs:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+       ~srcs:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
                   ["music.ogg"],
               [])
        ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]

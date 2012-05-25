@@ -1,25 +1,25 @@
-open HTML5
-open Eliom_parameters
+open Eliom_content.Html5.D
+open Eliom_parameter
 
 (* Services *)
-let main_service = Eliom_services.service ~path:[""] ~get_params:unit ()
+let main_service = Eliom_service.service ~path:[""] ~get_params:unit ()
 
 let user_service =
-  Eliom_services.service
+  Eliom_service.service
     ~path:["users"] ~get_params:(suffix (string "name")) ()
 
 let connection_service =
-  Eliom_services.post_service
+  Eliom_service.post_service
     ~fallback:main_service
     ~post_params:(string "name" ** string "password")
     ()
 
-let disconnection_service = Eliom_services.post_coservice' ~post_params:unit ()
+let disconnection_service = Eliom_service.post_coservice' ~post_params:unit ()
 
-let new_user_form_service = Eliom_services.service ~path:["create account"] ~get_params:unit ()
+let new_user_form_service = Eliom_service.service ~path:["create account"] ~get_params:unit ()
 
 let account_confirmation_service =
-  Eliom_services.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
+  Eliom_service.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
 
 
 
@@ -28,47 +28,47 @@ let account_confirmation_service =
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
 let user_links () =
-  ul (List.map (fun (name, _) -> li [Eliom_output.Html5.a ~service:user_service [pcdata name] name]) !users)
+  ul (List.map (fun (name, _) -> li [a ~service:user_service [pcdata name] name]) !users)
 
 let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> false
 
 
 
 (* Eliom references *)
-let username = Eliom_references.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.session None
 
-let wrong_pwd = Eliom_references.eref ~scope:Eliom_common.request false
+let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request false
 
 
 
 (* Page widgets: *)
 let disconnect_box () =
-  Eliom_output.Html5.post_form disconnection_service
+  post_form disconnection_service
     (fun _ -> [fieldset
-		  [Eliom_output.Html5.string_input
+		  [string_input
                       ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let connection_box () =
-  lwt u = Eliom_references.get username in
-  lwt wp = Eliom_references.get wrong_pwd in
+  lwt u = Eliom_reference.get username in
+  lwt wp = Eliom_reference.get wrong_pwd in
   Lwt.return
     (match u with
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
                        disconnect_box () ]
       | None ->
         let l =
-          [Eliom_output.Html5.post_form ~service:connection_service
+          [post_form ~service:connection_service
             (fun (name1, name2) ->
               [fieldset
-		  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-                   Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+		  [label ~a:[a_for name1] [pcdata "login: "];
+                   string_input ~input_type:`Text ~name:name1 ();
                    br ();
-                   label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-                   Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
+                   label ~a:[a_for name2] [pcdata "password: "];
+                   string_input ~input_type:`Password ~name:name2 ();
                    br ();
-                   Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
+                   string_input ~input_type:`Submit ~value:"Connect" ()
                  ]]) ();
-             p [Eliom_output.Html5.a new_user_form_service [pcdata "Create an account"] ()]]
+             p [a new_user_form_service [pcdata "Create an account"] ()]]
         in
         if wp
         then div ((p [em [pcdata "Wrong user or password"]])::l)
@@ -76,16 +76,16 @@ let connection_box () =
     )
 
 let create_account_form () =
-  Eliom_output.Html5.post_form ~service:account_confirmation_service
+  post_form ~service:account_confirmation_service
     (fun (name1, name2) ->
       [fieldset
-	  [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-           Eliom_output.Html5.string_input ~input_type:`Text ~name:name1 ();
+	  [label ~a:[a_for name1] [pcdata "login: "];
+           string_input ~input_type:`Text ~name:name1 ();
            br ();
-           label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-           Eliom_output.Html5.string_input ~input_type:`Password ~name:name2 ();
+           label ~a:[a_for name2] [pcdata "password: "];
+           string_input ~input_type:`Password ~name:name2 ();
            br ();
-           Eliom_output.Html5.string_input ~input_type:`Submit ~value:"Connect" ()
+           string_input ~input_type:`Submit ~value:"Connect" ()
          ]]) ()
 
 
@@ -113,7 +113,7 @@ let _ =
           (html (head (title (pcdata name)) [])
              (body [h1 [pcdata name];
                     cf;
-                    p [Eliom_output.Html5.a ~service:main_service [pcdata "Home"] ()]]))
+                    p [a ~service:main_service [pcdata "Home"] ()]]))
       end
       else
         Eliom_output.Html5.send
@@ -127,8 +127,8 @@ let _ =
     ~service:connection_service
     (fun () (name, password) ->
       if check_pwd name password
-      then Eliom_references.set username (Some name)
-      else Eliom_references.set wrong_pwd true);
+      then Eliom_reference.set username (Some name)
+      else Eliom_reference.set wrong_pwd true);
 
   Eliom_output.Action.register
     ~service:disconnection_service
@@ -149,7 +149,7 @@ let _ =
       let create_account_service =
         Eliom_output.Action.register_coservice
           ~fallback:main_service
-          ~get_params:Eliom_parameters.unit
+          ~get_params:Eliom_parameter.unit
           ~timeout:60.
           (fun () () ->
             users := (name, pwd)::!users;
@@ -158,9 +158,9 @@ let _ =
       Lwt.return
         (html (head (title (pcdata "")) [])
               (body [h1 [pcdata "Confirm account creation for "; pcdata name];
-                     p [Eliom_output.Html5.a ~service:create_account_service [pcdata "Yes"] ();
+                     p [a ~service:create_account_service [pcdata "Yes"] ();
                         pcdata " ";
-                        Eliom_output.Html5.a ~service:main_service [pcdata "No"] ()]
+                        a ~service:main_service [pcdata "No"] ()]
                     ])))
 
 

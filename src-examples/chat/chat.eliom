@@ -1,5 +1,5 @@
 
-open Eliom_pervasives
+open Eliom_content
 open Utils
 open Shared
 
@@ -24,7 +24,7 @@ module type ACTION = sig
   val register :
     ?scope:[< Eliom_common.scope ] -> ?options:Eliom_output.Action.options -> ?charset:string ->
     ?code:int -> ?content_type:string -> ?headers:Http_headers.t -> ?secure_session:bool ->
-    service:('a, 'b, [< Eliom_services.internal_service_kind ], [< Eliom_services.suff ], 'c, 'd, [ `Registrable ], Eliom_output.Action.return) Eliom_services.service ->
+    service:('a, 'b, [< Eliom_service.internal_service_kind ], [< Eliom_service.suff ], 'c, 'd, [ `Registrable ], Eliom_output.Action.return) Eliom_service.service ->
     ?error_handler:((string * exn) list -> (user -> unit Lwt.t) Lwt.t) ->
     ('a -> 'b -> (user -> unit Lwt.t) Lwt.t) -> unit
 end
@@ -47,7 +47,7 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
   (* A service for triggering the creation of a dialog (i.e. a conversation of
      2 participants). *)
   let create_dialog_service =
-    Eliom_services.post_coservice' ~post_params:(User.parameter "user") ()
+    Eliom_service.post_coservice' ~post_params:(User.parameter "user") ()
 
   let css_files = [["chat.css"]]
 
@@ -96,26 +96,26 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
      weak array which can be arbitrarily accessed. *)
   let set_user, get_current_user_info, get_user_info, get_all_users_infos =
     let module User_info_table = Weak_info.Make (User) (User_info) in
-    let user_info_ref = Eliom_references.eref ~scope:Scope.session_group None in
+    let user_info_ref = Eliom_reference.eref ~scope:Scope.session_group None in
     let user_info_table = User_info_table.create 13 in
     let set_user user =
       debug "Set user %s" (User.name user);
       Eliom_state.set_volatile_data_session_group ~scope:Scope.session (string_of_int **> User.id user);
-      match_lwt Eliom_references.get user_info_ref with
+      match_lwt Eliom_reference.get user_info_ref with
           None ->
             let user_info = User_info.create user in
             let data = User_info_table.add_by_key user_info_table user user_info in
             debug "No data yet, create it (%d) and store it in a eliom reference of scope session group, and in a global, weak array."
               user_info.User_info.id;
-            Eliom_references.set user_info_ref (Some data)
+            Eliom_reference.set user_info_ref (Some data)
         | Some _ -> Lwt.return ()
     in
     let get_current_user_info user =
-      match_lwt Eliom_references.get user_info_ref with
+      match_lwt Eliom_reference.get user_info_ref with
           Some user_info -> Lwt.return (User_info_table.E.info user_info)
         | None ->
             lwt () = set_user user in
-            Lwt.map (User_info_table.E.info -| get_some) **> Eliom_references.get user_info_ref
+            Lwt.map (User_info_table.E.info -| get_some) **> Eliom_reference.get user_info_ref
     in
     let get_user_info user =
       User_info_table.find_by_key user_info_table user
@@ -174,28 +174,30 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
     user_span ~self:user user
 
   let render_users ~id () =
-    HTML5.(create_named_elt ~id (ul ~a:[a_class ["users_list"]] []))
+    Html5.Id.create_named_elt ~id
+      Html5.D.(ul ~a:[a_class ["users_list"]] [])
 
   let render_conversations ~id () =
-    HTML5.(create_named_elt ~id (div ~a:[a_class ["conversations"]] []))
+    Html5.Id.create_named_elt ~id
+      Html5.D.(div ~a:[a_class ["conversations"]] [])
 
   let client_process_timout = ref 1.0
   let set_client_process_timeout = set client_process_timout
 
   let render_onload :
     ForeignUser.t ->
-    users_elt:HTML5_types.ul HTML5.elt ->
-    conversations_elt:HTML5_types.div HTML5.elt ->
-    #Dom_html.event XML.caml_event_handler Lwt.t
+    users_elt:Html5_types.ul Html5.elt ->
+    conversations_elt:Html5_types.div Html5.elt ->
+    #Dom_html.event Xml.caml_event_handler Lwt.t
   =
     let scope = Scope.client_process in
-    let channel_ref = Eliom_references.eref ~scope None in
+    let channel_ref = Eliom_reference.eref ~scope None in
     fun user ~users_elt ~conversations_elt ->
       debug "render_onload";
       let user = import_user user in
       lwt user_info = get_current_user_info user in
       lwt channel =
-        match_lwt Eliom_references.get channel_ref with
+        match_lwt Eliom_reference.get channel_ref with
             Some channel ->
               Lwt.return channel
           | None ->
@@ -207,11 +209,11 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
               in
               lwt () = Lwt_stream.junk_old stream in
               let channel = Eliom_comet.Channels.create ~name:"channel" ~scope stream in
-              lwt () = Eliom_references.set channel_ref (Some channel) in
+              lwt () = Eliom_reference.set channel_ref (Some channel) in
               let () = add_client_process user in
               Lwt.ignore_result (
                 lwt () = Eliom_comet.Channels.wait_timeout ~scope !client_process_timout in
-                lwt () = Eliom_references.set channel_ref None in
+                lwt () = Eliom_reference.set channel_ref None in
                 lwt () = Eliom_state.discard ~scope () in
                 Lwt.return (on_timeout_client_process user)
               );
@@ -222,17 +224,17 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
         ~users_signal ~users_elt ~conversations_elt ~user
         ~channel ~conversations ~create_dialog_service
 
-  let users_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_elt_id
-  let conversations_id = Eliom_references.eref_from_fun ~scope:Eliom_common.session HTML5.new_elt_id
+  let users_id = Eliom_reference.eref_from_fun ~scope:Eliom_common.session Html5.Id.new_elt_id
+  let conversations_id = Eliom_reference.eref_from_fun ~scope:Eliom_common.session Html5.Id.new_elt_id
 
   let render user =
-    lwt users_id = Eliom_references.get users_id in
-    lwt conversations_id = Eliom_references.get conversations_id in
+    lwt users_id = Eliom_reference.get users_id in
+    lwt conversations_id = Eliom_reference.get conversations_id in
     let user_elt = render_user user in
     let users_elt = render_users ~id:users_id () in
     let conversations_elt = render_conversations ~id:conversations_id () in
     lwt onload = render_onload user ~users_elt ~conversations_elt in
-    let open HTML5 in
+    let open Html5.D in
     Lwt.return **>
       div ~a:[a_class ["chat"]; a_onload onload] [
         div ~a:[a_class ["user_and_users"]] [
@@ -243,7 +245,7 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
           span ~a:[a_class["info_label"]] [
             pcdata "Users: "
           ];
-          (users_elt :> HTML5_types.div_content_fun HTML5.elt);
+          (users_elt :> Html5_types.div_content_fun Html5.elt);
           span ~a:[a_class["note"]] [
             pcdata " (Click one to start a conversation)"
           ]

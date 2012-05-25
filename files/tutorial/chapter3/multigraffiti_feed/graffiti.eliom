@@ -1,6 +1,5 @@
 {shared{
-  open Eliom_pervasives
-  open HTML5
+  open Eliom_content.Html5.D
   open Common
 }}
 {client{
@@ -11,7 +10,7 @@ open Feed
 
 let start_drawing name image canvas =
   let bus = get_bus name in
-  Eliom_services.onload
+  Eliom_service.onload
     {{
       let canceller = launch_client_canvas %bus %image %canvas in
       Eliom_client.on_unload (fun () -> stop_drawing canceller)
@@ -26,7 +25,7 @@ let () = Connected.register ~service:multigraffiti_service
     incr counter;
     let image =
       img ~alt:name
-        ~src:(Eliom_output.Html5.make_uri
+        ~src:(make_uri
 		~service:imageservice (name,!counter)) () in
     let canvas =
       canvas ~a:[ a_width width; a_height height ]
@@ -36,7 +35,7 @@ let () = Connected.register ~service:multigraffiti_service
       [h1 [pcdata name];
        disconnect_box ();
        choose_drawing_form ();
-       Eliom_output.Html5.a feed_service [pcdata "atom feed"] name;
+       a feed_service [pcdata "atom feed"] name;
        div ( if name = username
 	 then [save_image_box name]
 	 else [pcdata "no saving"] );

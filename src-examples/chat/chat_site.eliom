@@ -1,10 +1,10 @@
 
-open Eliom_pervasives
+open Eliom_content
 open Utils
 
 let debug fmt = debug_prefix "Chat_site" fmt
 
-let login_message_ref = Eliom_references.eref ~scope:Eliom_common.request None
+let login_message_ref = Eliom_reference.eref ~scope:Eliom_common.request None
 
 (** This is the implementation for both [Chat.USERS] and [User_management.USERS]
     to make their user systems compatible. *)
@@ -38,7 +38,7 @@ module Users = struct
     let verify ~user_name ~password =
       let l = String.length user_name in
       if l < 3 then (
-        lwt () = Eliom_references.set login_message_ref (Some "User name too short (at least 3 letters)") in
+        lwt () = Eliom_reference.set login_message_ref (Some "User name too short (at least 3 letters)") in
         Lwt.return None
       ) else
         let rec check i = if i = l then true else user_name.[l-i-1] = password.[i] && check (succ i) in
@@ -46,7 +46,7 @@ module Users = struct
           if Lwt_react.S.value user_count < 100 then
             Lwt.return **> Some (create user_name user_name)
           else (
-            lwt () = Eliom_references.set login_message_ref (Some "Too many users") in
+            lwt () = Eliom_reference.set login_message_ref (Some "Too many users") in
             Lwt.return None
           )
         else (
@@ -111,11 +111,11 @@ end
 module My_context = struct
   let disconnected content =
     lwt msg =
-      Eliom_references.get login_message_ref >|= function
-        | Some msg -> [HTML5.(p [pcdata msg])]
+      Eliom_reference.get login_message_ref >|= function
+        | Some msg -> [Html5.D.(p [pcdata msg])]
         | None -> []
     in
-    Lwt.return HTML5.(
+    Lwt.return Html5.D.(
       h4 [pcdata "Welcome to Ocsigen Chat"]
       :: p [pcdata "To log in, please enter your username of choice and its reverse as the password ;-)"]
       :: content
@@ -140,30 +140,29 @@ module Chat_appl =
   )
 module Connected_chat_appl = Eliom_output.Customize (Chat_appl) (My_user_management.Connected_translate_Html5)
 
-let main_service = Eliom_services.service ~path:[] ~get_params:Eliom_parameters.unit ()
+let main_service = Eliom_service.service ~path:[] ~get_params:Eliom_parameter.unit ()
 
 let main_handler =
+  let open Html5.F in
   let mk_css_link path =
-    let open Eliom_output.Html5_forms in
-    let uri = make_uri (Eliom_services.static_dir ()) path in
-    HTML5.create_global_elt HTML5.M.(css_link ~uri ()) in
+    let uri = make_uri (Eliom_service.static_dir ()) path in
+    Html5.Id.create_global_elt (css_link ~uri ()) in
   fun () () -> Lwt.return **>
     fun ~logout_form user ->
       lwt chat_body = My_chat.render user in
-      let open HTML5.M in
       Lwt.return **> 
         html
           (head
              (title (pcdata "Ocsigen - Chat example"))
              (List.map mk_css_link (["example.css"] :: My_chat.css_files)))
           (body
-             [(logout_form :> HTML5_types.body_content_fun HTML5.M.elt);
+             [(logout_form :> Html5_types.body_content_fun Html5.F.elt);
               chat_body])
 
 (*
 let chat_service =
   let aux ~path handler =
-    Connected_chat_appl.register_service ~path ~get_params:Eliom_parameters.unit handler in
+    Connected_chat_appl.register_service ~path ~get_params:Eliom_parameter.unit handler in
   My_chat.service aux ["chat"]
  *)
 

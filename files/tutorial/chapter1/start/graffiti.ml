@@ -1,9 +1,7 @@
-open Eliom_pervasives
 open Lwt
-open HTML5
-open Eliom_services
-open Eliom_parameters
-open Eliom_output.Html5
+open Eliom_service
+open Eliom_parameter
+open Eliom_content.Html5.D
 
 let main_service =
   register_service ~path:["graff"] ~get_params:unit

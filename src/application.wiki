@@ -23,10 +23,9 @@ this page by the following declaration:
 
 <<code language="ocaml" |
 open Lwt
-open Eliom_pervasives
-open HTML5
-open Eliom_services
-open Eliom_parameters
+open Eliom_content.Html5.D
+open Eliom_service
+open Eliom_parameter
 open Eliom_output.Html5
 
 let main_service =
@@ -37,15 +36,16 @@ let main_service =
 The same, written with fully qualified names (without {{{open}}}):
 
 <<code language="ocaml"|
+open Eliom_content
 let main_service =
   Eliom_output.Html5.register_service
     ~path:["graff"] 
-    ~get_params:Eliom_parameters.unit
+    ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
-        (HTML5.html
-          (HTML5.head (HTML5.title (HTML5.pcdata "")) [])
-          (HTML5.body [HTML5.h1 [HTML5.pcdata "Graffiti"]])))
+        (Html5.D.html
+          (Html5.D.head (Html5.D.title (Html5.D.pcdata "")) [])
+          (Html5.D.body [Html5.D.h1 [Html5.D.pcdata "Graffiti"]])))
 >>
 
 <<|BB
@@ -77,7 +77,7 @@ Unlike typical Web programming techniques (CGI, PHP,~ ...), with
 Eliom, you don't write one file for each URL, but a single OCaml module
 (*.cmo or *.cma) for the whole Web site.
 
-The <<a_api project="eliom" | module Eliom_services >> module allows
+The <<a_api project="eliom" | module Eliom_service >> module allows
 to create new entry points to your Web site, called //services//. In
 general, services are attached to a URL and generate a Web page.
 Services are represented by OCaml values, through which you must
@@ -142,9 +142,9 @@ example if you write:
 You will get the following error message, referring at the end of line 2:
 
 {{{
-Error: This expression has type ([> `PCDATA ] as 'a) HTML5.elt
-       but an expression was expected of type HTML5_types.head_content_fun HTML5.elt
-       Type 'a is not compatible with type HTML5_types.head_content_fun =
+Error: This expression has type ([> `PCDATA ] as 'a) Html5.elt
+       but an expression was expected of type Html5_types.head_content_fun Html5.elt
+       Type 'a is not compatible with type Html5_types.head_content_fun =
            [ `Base
            | `Command
            | `Link
@@ -155,7 +155,7 @@ Error: This expression has type ([> `PCDATA ] as 'a) HTML5.elt
        The second variant type does not allow tag(s) `PCDATA
 }}}
 
-where <<a_api project="tyxml" | type HTML5_types.head_content_fun >>
+where <<a_api project="tyxml" | type Html5_types.head_content_fun >>
 is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.). You see that
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic
@@ -163,8 +163,8 @@ variant type.
 
 **Another example:** In HTML5, some tags cannot be empty. For example
 {{{<table>}}}must contain at least one row.  To enforce this, the
-<<a_api project="tyxml" version="dev" text="HTML5.table"| val
-HTML5.M.table >> function takes two parameters: the first one is the
+<<a_api project="tyxml" version="dev" text="Html5.table"| val
+Html5.F.table >> function takes two parameters: the first one is the
 first row, the second one is a list containing all the other rows
 (same thing for {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...).  This
 forces the user to handle the empty list case specially and thus make
@@ -177,7 +177,7 @@ pages afterwards.//
 
 A more detailed introduction to the construction of HTML5 tree is
 available in the <<a_api project="tyxml" text="TyXML reference API" |
-module HTML5.M >>.
+module Html5.F >>.
 
 >>
 
@@ -229,7 +229,7 @@ It is now possible to use {{{MyAppl}}} instead of
 <<code language="ocaml"|
 let main_service =
   My_appl.register_service ~path:[""]
-    ~get_params:Eliom_parameters.unit
+    ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
         (html
@@ -343,10 +343,10 @@ let count = ref 0
 
 <<code language="ocaml"|
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let count = incr count; !count in
-      Eliom_services.onload {{
+      Eliom_service.onload {{
         Dom_html.window##alert(Js.string
 	  (Printf.sprintf "You came %i times to this page" %count))
       }};
@@ -359,7 +359,7 @@ let main_service =
 Here, we are increasing the reference {{{count}}} each time the page
 is accessed. When the page is loaded the client execute the event
 handler registred with <<a_api project="eliom" subproject="server" |
-val Eliom_services.onload >> : this client side code access to the
+val Eliom_service.onload >> : this client side code access to the
 counter using the syntax extension {{{%count}}}, and displays it in a
 message box.
 
@@ -369,7 +369,7 @@ message box.
 
   To execute some code on client side just after loading a page, use
   function <<a_api project="eliom" version="dev" | val
-  Eliom_services.onload>>.  It takes as parameter an event handler
+  Eliom_service.onload>>.  It takes as parameter an event handler
   that you can provide using the syntax {{{ {{ ... }} }}}.
 
 >>
@@ -392,7 +392,7 @@ message box.
 
 >>
 
-<<|BB/BS This only applies to elements created by HTML5.M
+<<|BB/BS This only applies to elements created by Html5.F
 It is possible to send almost any type of values that way, but keep in
 mind that sent values are //copies// of server side ones. For HTML
 elements, this is not always the expected behaviour. Considering the
@@ -403,11 +403,11 @@ a copy of the {{{<body>}}} element. Hence, the actual page's
 
 <<code language="ocaml"|
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
-      Eliom_services.onload {{
-        Eliom_dom.appendChild %container (div [pcdata "some text"]);
+      Eliom_service.onload {{
+        Html5.Manip.appendChild %container (div [pcdata "some text"]);
       }}
       Lwt.return
         (html
@@ -442,8 +442,7 @@ module My_appl =
     end)
 
 {shared{
-  open Eliom_pervasives
-  open HTML5
+  open Eliom_content.Html5.D
   let width = 700
   let height = 400
 }}
@@ -469,16 +468,16 @@ let page =
 }}
 
 let onload_handler = {{
-  let canvas = Eliom_client.Html5.of_canvas %canvas_elt in
+  let canvas = Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
   draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
 }}
 
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-      Eliom_services.onload onload_handler;
+      Eliom_service.onload onload_handler;
       Lwt.return page)
 
 >>
@@ -524,7 +523,7 @@ following piece of code, then compile and draw !
 <<code language="ocaml"|
 let onload_handler = {{
 
-  let canvas = Eliom_client.Html5.of_canvas %canvas_elt in
+  let canvas = Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
 
@@ -750,19 +749,19 @@ let page =
     (head
        (title (pcdata "Graffiti"))
        [ Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
 		  ["css";"common.css"]) ();
 	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
 		  ["css";"hsvpalette.css"]) ();
 	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
 		  ["css";"slider.css"]) ();
 	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_services.static_dir ())
+	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
 		  ["css";"graffiti.css"]) ();
 	 Eliom_output.Html5_forms.js_script
-	   ~uri:(Eliom_output.Html5.make_uri  (Eliom_services.static_dir ())
+	   ~uri:(Eliom_output.Html5.make_uri  (Eliom_service.static_dir ())
 		  ["graffiti_oclosure.js"]) ();
        ])
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
@@ -782,9 +781,9 @@ let page () =
 
 ...
 
-My_appl.register_service ~path:[""] ~get_params:Eliom_parameters.unit
+My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-      Eliom_services.onload onload_handler;
+      Eliom_service.onload onload_handler;
       Lwt.return (page ()))
 >>
 
@@ -903,7 +902,7 @@ We also define a service that send the picture:
 let imageservice =
   Eliom_output.String.register_service
     ~path:["image"]
-    ~get_params:Eliom_parameters.unit
+    ~get_params:Eliom_parameter.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))
 >>
 
@@ -949,7 +948,7 @@ creation of the slider:
 <<code language="ocaml"|
 (* The initial image: *)
 let img =
-  Eliom_client.Html5.of_img
+  Html5.To_dom.of_img
     (img ~alt:"canvas"
        ~src:(Eliom_output.Html5.make_uri ~service:%imageservice ())
        ())

@@ -1,5 +1,5 @@
 
-open Eliom_pervasives
+open Eliom_content
 open Utils
 
 let debug fmt = debug_prefix "User_management" fmt
@@ -32,7 +32,7 @@ module No_callback = struct
 end
 
 module type CONTEXT = sig
-  val disconnected : HTML5_types.div_content_fun HTML5.elt list -> HTML5_types.body_content_fun HTML5.elt list Lwt.t
+  val disconnected : Html5_types.div_content_fun Html5.elt list -> Html5_types.body_content_fun Html5.elt list Lwt.t
 end
 
 module Identity_context = struct
@@ -56,15 +56,15 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
     in
     modify_session_count, get_session_count
 
-  let login = Eliom_services.post_coservice' ~post_params:Eliom_parameters.(string "name" ** string "password") ()
-  let logout = Eliom_services.post_coservice' ~post_params:Eliom_parameters.unit ()
+  let login = Eliom_service.post_coservice' ~post_params:Eliom_parameter.(string "name" ** string "password") ()
+  let logout = Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
 
-  let user_ref = Eliom_references.eref ~scope:Scope.session None
-  let message_ref = Eliom_references.eref ~scope:Eliom_common.request None
+  let user_ref = Eliom_reference.eref ~scope:Scope.session None
+  let message_ref = Eliom_reference.eref ~scope:Eliom_common.request None
 
   let do_login user =
     iter_option (fun f -> Eliom_state.set_volatile_data_session_group ~scope:Scope.session (f user)) Users.User.make_session_group_name;
-    lwt () = Eliom_references.set user_ref (Some user) in
+    lwt () = Eliom_reference.set user_ref (Some user) in
     lwt () = Callback.post_login user in
     Lwt.return **> modify_session_count succ user
 
@@ -78,17 +78,17 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
 
   let _ =
     let login_handler () (user_name, password) =
-      match_lwt Eliom_references.get user_ref with
+      match_lwt Eliom_reference.get user_ref with
           None -> begin
             match_lwt User.verify ~user_name ~password with
                 Some user -> do_login user
-              | None -> Eliom_references.set message_ref (Some "Invalid credentials")
+              | None -> Eliom_reference.set message_ref (Some "Invalid credentials")
           end
         | Some _ -> Lwt.return ()
     in
     let logout_handler () () =
       debug "logout_handler";
-      match_lwt Eliom_references.get user_ref with
+      match_lwt Eliom_reference.get user_ref with
           Some user -> do_logout user
         | None -> Lwt.return ()
     in
@@ -98,22 +98,21 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
 
   module Connected_translate_Html5 = struct
 
-    type page = logout_form:HTML5_types.form HTML5.elt -> User.t -> Eliom_output.Html5.page Lwt.t
+    type page = logout_form:Html5_types.form Html5.elt -> User.t -> Eliom_output.Html5.page Lwt.t
 
     let translate page =
       let login_form =
-        let open Eliom_output.Html5 in
-        post_form ~a:[HTML5.a_class ["login"]] ~service:login
+        let open Html5.D in
+        post_form ~a:[a_class ["login"]] ~service:login
           (fun (user_name, password) -> [
-            let open HTML5 in
             table
               (tr [
-                td [label ~a:[a_for "name"] [pcdata "Name"]];
-                td [string_input ~a:[HTML5.a_id "name"] ~input_type:`Text ~name:user_name ()]
+                td [label ~a:[Raw.a_for "name"] [pcdata "Name"]];
+                td [string_input ~a:[a_id "name"] ~input_type:`Text ~name:user_name ()]
                ])
               [tr [
-                td [label ~a:[a_for "password"] [pcdata "Password"]];
-                td [string_input ~a:[HTML5.a_id "password"] ~input_type:`Password ~name:password ()]
+                td [label ~a:[Raw.a_for "password"] [pcdata "Password"]];
+                td [string_input ~a:[a_id "password"] ~input_type:`Password ~name:password ()]
                ];
                tr [
                  td [];
@@ -122,8 +121,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
           ]) ()
       in
       let logout_form user =
-        let open HTML5 in
-        let open Eliom_output.Html5 in
+        let open Html5.D in
         post_form ~a:[a_class ["logout"]] ~service:logout ~xhr:false
           (fun () ->
              [pcdata "Logged in as ";
@@ -131,11 +129,11 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
               string_input ~input_type:`Submit ~value:"Logout" ()])
           ()
       in
-      match_lwt Eliom_references.get user_ref with
+      match_lwt Eliom_reference.get user_ref with
           None ->
-            let open HTML5 in
+            let open Html5.D in
             lwt message =
-              match_lwt Eliom_references.get message_ref with
+              match_lwt Eliom_reference.get message_ref with
                   None -> Lwt.return []
                 | Some msg -> Lwt.return [p [pcdata msg]]
             in
@@ -145,7 +143,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
                 (head (title (pcdata "login")) [])
                 (body body_content)
         | Some user ->
-            page ~logout_form:(logout_form user :> HTML5_types.form HTML5.elt) user
+            page ~logout_form:(logout_form user :> Html5_types.form Html5.elt) user
   end
 
   module Connected_translate_action = struct
@@ -153,7 +151,7 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
     type page = User.t -> unit Lwt.t
 
     let translate page =
-      match_lwt Eliom_references.get user_ref with
+      match_lwt Eliom_reference.get user_ref with
           None -> raise Eliom_common.Eliom_Session_expired
         | Some user -> page user
   end

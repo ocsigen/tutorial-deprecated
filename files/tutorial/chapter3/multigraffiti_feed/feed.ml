@@ -1,5 +1,4 @@
-open Eliom_pervasives
-open HTML5
+open Eliom_content.Html5.D
 open Server
 
 let static_dir =
@@ -44,16 +43,16 @@ let save_image username =
 let save_image_box name =
   let save_image_service =
     Eliom_output.Action.register_post_coservice'
-      ~post_params:Eliom_parameters.unit
+      ~post_params:Eliom_parameter.unit
       (fun () () -> save_image name)
   in
-  Eliom_output.Html5.post_form save_image_service
+  post_form save_image_service
     (fun _ ->
-      [p [Eliom_output.Html5.string_input
+      [p [string_input
              ~input_type:`Submit ~value:"save" ()]]) ()
 
-let feed_service = Eliom_services.service ~path:["feed"]
-  ~get_params:(Eliom_parameters.string "name") ()
+let feed_service = Eliom_service.service ~path:["feed"]
+  ~get_params:(Eliom_parameter.string "name") ()
 
 let local_filename name number =
   ["graffiti_saved"; Url.encode name ; (string_of_int number) ^ ".png"]
@@ -66,7 +65,7 @@ let rec entries name list = function
       | (n,saved)::q ->
 	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_output.Xhtml.make_uri ~absolute:true ~service:(Eliom_services.static_dir ())
+	  Eliom_output.Xhtml.make_uri ~absolute:true ~service:(Eliom_service.static_dir ())
 	    (local_filename name n)
 	in
 	let entry =
