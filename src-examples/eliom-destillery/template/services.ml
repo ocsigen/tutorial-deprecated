@@ -3,7 +3,7 @@ open Eliom_parameter
 
 #ifndef MINIMAL_PROJECT
 module ##MODULE_NAME##_appl =
-  Eliom_output.Eliom_appl (struct
+  Eliom_registration.App (struct
     let application_name = "##PROJECT_NAME##"
   end)
 #endif /* MINIMAL_PROJECT */

@@ -40,7 +40,7 @@ Let's start again from scratch with the following site.
 open Eliom_content.Html5.D
 
 let main_service =
-  Eliom_output.Html5.register_service
+  Eliom_registration.Html5.register_service
     ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
@@ -48,7 +48,7 @@ let main_service =
                        (body [h1 [pcdata "Hello"]])))
 >>
 
-Note that we are using {{{Eliom_output.Html5}}}, as we are not building a
+Note that we are using {{{Eliom_registration.Html5}}}, as we are not building a
 client side program for now.
 
 Put this example in a file ({{{tuto.ml}}}), compile it like so:
@@ -75,7 +75,7 @@ new service, taking the user name as parameter:
 
 <<code language="ocaml"|
 let user_service =
-  Eliom_output.Html5.register_service
+  Eliom_registration.Html5.register_service
     ~path:[""] ~get_params:(Eliom_parameter.string "name")
     (fun name () ->
       Lwt.return
@@ -147,7 +147,7 @@ I change the definition of my service this way:
 
 <<code language="ocaml"|
 let user_service =
-  Eliom_output.Html5.register_service
+  Eliom_registration.Html5.register_service
     ~path:["users"]
     ~get_params:
        (Eliom_parameter.suffix (Eliom_parameter.string "name"))
@@ -197,8 +197,7 @@ Change the handler of {{{user_service}}} into:
   (html
     (head (title (pcdata name)) [])
     (body [h1 [pcdata name];
-           p [Eliom_output.Html5.a
-                ~service:main_service [pcdata "Home"] ()]])))
+           p [a ~service:main_service [pcdata "Home"] ()]])))
 >>
 
 <<concept title="Creating hyperlinks" |
@@ -206,7 +205,7 @@ Change the handler of {{{user_service}}} into:
 To create a link, one could use the function {{{Html5.a}}}, but this
 requires us to provide the text of the URL to put in the {{{href}}}
 attribute. A better way to create hyperlinks is to use <<a_api
-project="eliom" version="dev" | val Eliom_output.Html5.a >>.
+project="eliom" | val Eliom_content.Html5.D.a >>.
 
 Thus, you don't have to know the precise URL of the service you want
 to link to, and if the URL changes, all links will remain valid.
@@ -214,7 +213,7 @@ Using this function has a wonderful consequence: //You will never have
 broken links!//
 
 The function <<a_api project="eliom" version="dev" | val
-Eliom_output.Html5.a >> accepts the following parameters:
+Eliom_content.Html5.D.a >> accepts the following parameters:
 * the service
 * the content of the link
 * URL parameters to be given to the service
@@ -252,12 +251,12 @@ let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
 let user_links () =
   ul (List.map (fun (name, _) -> 
-                  li [Eliom_output.Html5.a
+                  li [a
                         ~service:user_service [pcdata name] name])
                !users)
 
-let _ = 
-  Eliom_output.Html5.register
+let _ =
+  Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
       Lwt.return
@@ -265,14 +264,13 @@ let _ =
               (body [h1 [pcdata "Hello"];
                      user_links ()])));
 
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:user_service
     (fun name () ->
       Lwt.return
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
-                     p [Eliom_output.Html5.a
-                          ~service:main_service [pcdata "Home"] ()]])))
+                     p [a ~service:main_service [pcdata "Home"] ()]])))
 >>
 
 <<concept title="Mutually recursive services" |
@@ -381,7 +379,7 @@ the Ocsigen server manual >>).  >>
 Now you can register a handler for the new service:
 
 <<code language="ocaml"|
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:connection_service
     (fun () (name, password) ->
       let message =
@@ -417,18 +415,18 @@ Let's create a function for generating the form:
 
 <<code language="ocaml"|
 let connection_box () =
-  Eliom_output.Html5.post_form ~service:connection_service
+  post_form ~service:connection_service
     (fun (name1, name2) ->
       [fieldset
-         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-          Eliom_output.Html5.string_input ~input_type:`Text
+         [label ~a:[a_for name1] [pcdata "login: "];
+          string_input ~input_type:`Text
                                           ~name:name1 ();
           br ();
-          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-          Eliom_output.Html5.string_input ~input_type:`Password
+          label ~a:[a_for name2] [pcdata "password: "];
+          string_input ~input_type:`Password
                                           ~name:name2 ();
           br ();
-          Eliom_output.Html5.string_input ~input_type:`Submit
+          string_input ~input_type:`Submit
                                           ~value:"Connect" ()
          ]]) ()
 >>
@@ -439,9 +437,9 @@ Now, add a call to this function in the handler of the main service
 <<concept title="Forms" |
 
 Form creation is very similar to link creation, using the functions
-<<a_api project="eliom" version="dev" | val
-Eliom_output.Html5.get_form >> and <<a_api project="eliom"
-version="dev" | val Eliom_output.Html5.post_form >>.
+<<a_api project="eliom" | val
+Eliom_content.Html5.D.get_form >> and <<a_api project="eliom"
+| val Eliom_content.Html5.D.post_form >>.
 
 The first parameter is the service, and the last parameter (only for
 {{{post_form}}}) is for GET parameters you want sent in the URL, if
@@ -459,11 +457,12 @@ In the example, note that the service is expecting a pair
 {{{(string * string)}}}.  The function given to {{{post_form}}} takes two
 parameters corresponding to the names of each field.
 
-<<a_api project="eliom" version="dev" | module Eliom_output.Html5 >>
+<<a_api project="eliom" | module Eliom_content.Html5.D >> (and
+<<a_api project="eliom" | module Eliom_content.Html5.F >>)
 defines constructors for all possible form fields.  OCaml checks that
 the name you use matches the field.  For example it is not possible to
 use the names above with <<a_api project="eliom" version="dev" | val
-Eliom_output.Html5.int_input >> as it is a name for a string.  >>
+Eliom_content.Html5.D.int_input >> as it is a name for a string.  >>
 
 ===Opening a session===
 
@@ -493,18 +492,18 @@ let connection_box () =
     (match u with
       | Some s -> p [pcdata "You are connected as "; pcdata s]
       | None ->
-        Eliom_output.Html5.post_form ~service:connection_service
+        post_form ~service:connection_service
           (fun (name1, name2) ->
             [fieldset
-	       [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-                Eliom_output.Html5.string_input ~input_type:`Text
+	       [label ~a:[a_for name1] [pcdata "login: "];
+                string_input ~input_type:`Text
                                                 ~name:name1 ();
                 br ();
-                label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-                Eliom_output.Html5.string_input ~input_type:`Password
+                label ~a:[a_for name2] [pcdata "password: "];
+                string_input ~input_type:`Password
                                                 ~name:name2 ();
                 br ();
-                Eliom_output.Html5.string_input ~input_type:`Submit
+                string_input ~input_type:`Submit
                                                 ~value:"Connect" ()
                ]]) ())
 >>
@@ -512,7 +511,7 @@ let connection_box () =
 ...~ and replace the registration of the main service and the connection service by:
 
 <<code language="ocaml"|
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
       lwt cf = connection_box () in
@@ -522,7 +521,7 @@ let connection_box () =
                      cf;
                      user_links ()])));
 
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:connection_service
     (fun () (name, password) ->
       lwt message =
@@ -672,7 +671,7 @@ just perform a side effect.  Replace the registration
 of the connection service by:
 
 <<code language="ocaml"|
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:connection_service
     (fun () (name, password) ->
       if check_pwd name password
@@ -743,7 +742,7 @@ Now you can add the connection box on user pages.
 
 <<code language="ocaml"|
 let connection_service =
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:user_service
     (fun name () ->
       connection_box () ~>>= fun cf ->
@@ -751,7 +750,7 @@ let connection_service =
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
                      cf;
-                     p [Eliom_output.Html5.a
+                     p [a
                           ~service:main_service [pcdata "Home"] ()]])));
 >>
 
@@ -762,13 +761,13 @@ redirection.  This avoids reposting the data if the user reloads the
 page.
 
 Eliom provides the module <<a_api project="eliom" version="dev" |
-module Eliom_output.Redirection >> to register services doing
+module Eliom_registration.Redirection >> to register services doing
 redirections.  Such services return a service without parameter.
 
 Example:
 
 <<code language="ocaml"|
-let redir_service = Eliom_output.Redirection.register_service
+let redir_service = Eliom_registration.Redirection.register_service
     ~path:["redir"]
     ~get_params:Eliom_parameter.unit
    (fun sp () () -> Lwt.return main_service)
@@ -798,12 +797,12 @@ let disconnection_service =
   Eliom_service.post_coservice' ~post_params:unit ()
 
 let disconnect_box () =
-  Eliom_output.Html5.post_form disconnection_service
-    (fun _ -> [p [Eliom_output.Html5.string_input
+  post_form disconnection_service
+    (fun _ -> [p [string_input
                     ~input_type:`Submit ~value:"Log out" ()]]) ()
 
 let _ =
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:disconnection_service
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ())
 >>
@@ -845,23 +844,20 @@ let create_account_service =
     ~post_params:(string "name" ** string "password") ()
 
 let create_account_form () =
-  Eliom_output.Html5.post_form ~service:create_account_service
+  post_form ~service:create_account_service
     (fun (name1, name2) ->
       [fieldset
-         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-          Eliom_output.Html5.string_input ~input_type:`Text
-                                          ~name:name1 ();
+         [label ~a:[a_for name1] [pcdata "login: "];
+          string_input ~input_type:`Text ~name:name1 ();
           br ();
-          label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-          Eliom_output.Html5.string_input ~input_type:`Password
-                                          ~name:name2 ();
+          label ~a:[a_for name2] [pcdata "password: "];
+          string_input ~input_type:`Password ~name:name2 ();
           br ();
-          Eliom_output.Html5.string_input ~input_type:`Submit
-                                          ~value:"Connect" ()
+          string_input ~input_type:`Submit ~value:"Connect" ()
          ]]) ()
 
 let _ =
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:new_user_form_service
     (fun () () ->
       Lwt.return
@@ -870,7 +866,7 @@ let _ =
                      create_account_form ();
                     ])));
 
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:create_account_service
     (fun () (name, pwd) ->
       users := (name, pwd)::!users;
@@ -887,11 +883,11 @@ let connection_box () =
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
                        disconnect_box () ]
       | None ->
-        div [Eliom_output.Html5.post_form ~service:connection_service
+        div [post_form ~service:connection_service
                 (fun (name1, name2) ->
 ...
                 ) ();
-             p [Eliom_output.Html5.a new_user_form_service
+             p [a new_user_form_service
                   [pcdata "Create an account"] ()]]
             )
 >>
@@ -941,11 +937,11 @@ page.  As a side effect, this page will create the actual account
 creation service:
 
 <<code language="ocaml"|
-Eliom_output.Html5.register
+Eliom_registration.Html5.register
   ~service:account_confirmation_service
   (fun () (name, pwd) ->
     let create_account_service =
-      Eliom_output.Action.register_coservice
+      Eliom_registration.Action.register_coservice
         ~fallback:main_service
         ~get_params:Eliom_parameter.unit
         ~timeout:60.
@@ -958,11 +954,9 @@ Eliom_output.Html5.register
         (head (title (pcdata "")) [])
           (body
             [h1 [pcdata "Confirm account creation for "; pcdata name];
-             p [Eliom_output.Html5.a
-                  ~service:create_account_service [pcdata "Yes"] ();
+             p [a ~service:create_account_service [pcdata "Yes"] ();
                 pcdata " ";
-                Eliom_output.Html5.a
-                  ~service:main_service [pcdata "No"] ()]
+                a ~service:main_service [pcdata "No"] ()]
             ])))
 >>
 
@@ -1079,21 +1073,18 @@ let connection_box () =
                        disconnect_box () ]
       | None ->
         let l =
-          [Eliom_output.Html5.post_form ~service:connection_service
+          [post_form ~service:connection_service
             (fun (name1, name2) ->
               [fieldset
-	         [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-                  Eliom_output.Html5.string_input ~input_type:`Text
-                                                  ~name:name1 ();
+	         [label ~a:[a_for name1] [pcdata "login: "];
+                  string_input ~input_type:`Text ~name:name1 ();
                   br ();
-                  label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-                  Eliom_output.Html5.string_input ~input_type:`Password
-                                                  ~name:name2 ();
+                  label ~a:[a_for name2] [pcdata "password: "];
+                  string_input ~input_type:`Password ~name:name2 ();
                   br ();
-                  Eliom_output.Html5.string_input ~input_type:`Submit
-                                                  ~value:"Connect" ()
+                  string_input ~input_type:`Submit ~value:"Connect" ()
                  ]]) ();
-             p [Eliom_output.Html5.a new_user_form_service
+             p [a new_user_form_service
                   [pcdata "Create an account"] ()]]
         in
         if wp
@@ -1105,7 +1096,7 @@ let connection_box () =
 ...~ and modify the {{{connection_service}}} handler:
 
 <<code language="ocaml"|
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:connection_service
     (fun () (name, password) ->
       if check_pwd name password
@@ -1118,7 +1109,7 @@ let connection_box () =
 <<concepts|
 
 Sending 404\\
-{{{Eliom_output.Any}}}
+{{{Eliom_registration.Any}}}
 
 >>
 
@@ -1126,24 +1117,23 @@ Our service {{{user_service}}} responds to any request parameter, even
 if the user does not exist in the database.  We want to check that the
 user is in the database before displaying the page, and send a 404
 error if the user is not.  To do that, we will replace the module
-{{{ My_appl }}} by <<a_api project="eliom" version="dev" | module
-Eliom_output.Any >> to register the service {{{user_service}}}:
+{{{ My_app }}} by <<a_api project="eliom" version="dev" | module
+Eliom_registration.Any >> to register the service {{{user_service}}}:
 
 <<code language="ocaml"|
-Eliom_output.Any.register
+Eliom_registration.Any.register
   ~service:user_service
   (fun name () ->
     if List.exists (fun (n, _) -> n = name) !users
     then begin
       lwt cf = connection_box () in
-      Eliom_output.Html5.send
+      Eliom_registration.Html5.send
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
-                    cf;
-                    p [Eliom_output.Html5.a
-                         ~service:main_service [pcdata "Home"] ()]]))
+                     cf;
+                     p [a ~service:main_service [pcdata "Home"] ()]]))
     end else
-      Eliom_output.Html5.send
+      Eliom_registration.Html5.send
         ~code:404
         (html (head (title (pcdata "404")) [])
               (body [h1 [pcdata "404"];
@@ -1158,10 +1148,10 @@ Eliom_output.Any.register
 <<| BB
   Obviously, the no-wiki-tags {{{...}}} do not work in the title of concepts.
 >>>
-<<concept title="Eliom_output.Any" |
+<<concept title="Eliom_registration.Any" |
 
 The module <<a_api project="eliom" version="dev" | module
-Eliom_output.Eliom_appl >> can be used to create services that are
+Eliom_registration.App >> can be used to create services that are
 flexible to choose the kind of output they want to send.
 
 Use the {{{send}}} function from the module you want to send the
@@ -1174,7 +1164,7 @@ response code (here, we choose to use 404) or to set HTTP headers.
 
 In the future, we may add functions like {{{set_http_code}}} or
 {{{set_http_header}}} to personalize the answer without using
-{{{Eliom_output.Any}}}.
+{{{Eliom_registration.Any}}}.
 
 >>
 
@@ -1182,7 +1172,7 @@ In the future, we may add functions like {{{set_http_code}}} or
 
 <<concepts|
 
-{{{Eliom_output.Customize}}}
+{{{Eliom_registration.Customize}}}
 
 >>
 
@@ -1191,7 +1181,7 @@ sessions, for instance when a site is mainly available to connected
 users, it becomes tedious to check everywhere that a reference is not
 None. We can build a version of a registration module to simplify that
 using <<a_api project="eliom" version="dev" | module
-Eliom_output.Customize >>.
+Eliom_registration.Customize >>.
 
 We first need a translation module which checks for session
 informations and fall back to a default page if they are not
@@ -1200,25 +1190,22 @@ available.
 <<code language="ocaml"|
 module Connected_translate =
 struct
-  type page = string -> Eliom_output.Html5.page Lwt.t
+  type page = string -> Eliom_registration.Html5.page Lwt.t
   let translate page =
     lwt username = Eliom_reference.get username in
     match username with
     | None ->
       let connection_box =
-        Eliom_output.Html5.post_form ~service:connection_service
+        post_form ~service:connection_service
           (fun (name1, name2) ->
     	    [fieldset
-	      [label ~a:[Eliom_output.Html5.a_for name1] [pcdata "login: "];
-               Eliom_output.Html5.string_input ~input_type:`Text
-                                               ~name:name1 ();
+	      [label ~a:[a_for name1] [pcdata "login: "];
+               string_input ~input_type:`Text ~name:name1 ();
                br ();
-               label ~a:[Eliom_output.Html5.a_for name2] [pcdata "password: "];
-               Eliom_output.Html5.string_input ~input_type:`Password
-                                               ~name:name2 ();
+               label ~a:[a_for name2] [pcdata "password: "];
+               string_input ~input_type:`Password ~name:name2 ();
                br ();
-               Eliom_output.Html5.string_input ~input_type:`Submit
-                                               ~value:"Connect" ()
+               string_input ~input_type:`Submit ~value:"Connect" ()
 	     ]]) ()
       in
       Lwt.return
@@ -1237,8 +1224,9 @@ login page if not.
 We can now make our own registration module.
 
 <<code language="ocaml"|
-module Connected = Eliom_output.Customize(Eliom_output.Html5)
-                                         (Connected_translate)
+module Connected =
+  Eliom_registration.Customize
+    (Eliom_registration.Html5) (Connected_translate)
 
 let _ = Connected.register_service 
   ~path:[""] ~get_params:unit

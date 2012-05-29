@@ -2,8 +2,8 @@ open Eliom_content.Html5.D
 open Common
 open Lwt
 
-module My_appl =
-  Eliom_output.Eliom_appl (
+module My_app =
+  Eliom_registration.App (
     struct
       let application_name = "graffiti"
     end)
@@ -50,7 +50,7 @@ let launch_server_canvas () =
 let graffiti_info = Hashtbl.create 0
 
 let imageservice =
-  Eliom_output.Text.register_service
+  Eliom_registration.Text.register_service
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
     ~get_params:(let open Eliom_parameter in string "name" ** int "q")
@@ -139,11 +139,11 @@ let check_pwd name pwd =
   with
     Not_found -> Lwt.return false
 
-let () = Eliom_output.Action.register
+let () = Eliom_registration.Action.register
   ~service:create_account_service
   (fun () (name, pwd) -> Ocsipersist.add user_table name pwd)
 
-let () = Eliom_output.Action.register
+let () = Eliom_registration.Action.register
   ~service:connection_service
   (fun () (name, password) ->
     match_lwt check_pwd name password with
@@ -151,7 +151,7 @@ let () = Eliom_output.Action.register
       | false -> Lwt.return ())
 
 let () =
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:disconnection_service
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ())
 
@@ -188,7 +188,7 @@ let default_content () =
 
 module Connected_translate =
 struct
-  type page = string -> My_appl.page Lwt.t
+  type page = string -> My_app.page Lwt.t
   let translate page =
     Eliom_reference.get username >>=
       function
@@ -197,7 +197,7 @@ struct
 end
 
 module Connected =
-  Eliom_output.Customize ( My_appl ) ( Connected_translate )
+  Eliom_registration.Customize ( My_app ) ( Connected_translate )
 
 let ( !% ) f = fun a b -> return (fun c -> f a b c)
 

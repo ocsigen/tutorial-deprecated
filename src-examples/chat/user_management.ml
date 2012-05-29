@@ -92,13 +92,13 @@ module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
           Some user -> do_logout user
         | None -> Lwt.return ()
     in
-    Eliom_output.Action.register ~service:login login_handler;
-    Eliom_output.Action.register ~service:logout logout_handler;
+    Eliom_registration.Action.register ~service:login login_handler;
+    Eliom_registration.Action.register ~service:logout logout_handler;
     ()
 
   module Connected_translate_Html5 = struct
 
-    type page = logout_form:Html5_types.form Html5.elt -> User.t -> Eliom_output.Html5.page Lwt.t
+    type page = logout_form:Html5_types.form Html5.elt -> User.t -> Eliom_registration.Html5.page Lwt.t
 
     let translate page =
       let login_form =

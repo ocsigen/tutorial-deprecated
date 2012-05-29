@@ -93,7 +93,7 @@ let create_account_form () =
 
 (* Registration of services *)
 let _ = 
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
       lwt cf = connection_box () in
@@ -103,38 +103,38 @@ let _ =
                      cf;
                      user_links ()])));
 
-  Eliom_output.Any.register
+  Eliom_registration.Any.register
     ~service:user_service
     (fun name () ->
       if List.exists (fun (n, _) -> n = name) !users
       then begin
         lwt cf = connection_box () in
-        Eliom_output.Html5.send
+        Eliom_registration.Html5.send
           (html (head (title (pcdata name)) [])
              (body [h1 [pcdata name];
                     cf;
                     p [a ~service:main_service [pcdata "Home"] ()]]))
       end
       else
-        Eliom_output.Html5.send
+        Eliom_registration.Html5.send
           ~code:404
           (html (head (title (pcdata "404")) [])
              (body [h1 [pcdata "404"];
                     p [pcdata "That page does not exist"]]))
     );
 
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:connection_service
     (fun () (name, password) ->
       if check_pwd name password
       then Eliom_reference.set username (Some name)
       else Eliom_reference.set wrong_pwd true);
 
-  Eliom_output.Action.register
+  Eliom_registration.Action.register
     ~service:disconnection_service
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ());
 
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:new_user_form_service
     (fun () () ->
       Lwt.return
@@ -143,11 +143,11 @@ let _ =
                      create_account_form ();
                     ])));
 
-  Eliom_output.Html5.register
+  Eliom_registration.Html5.register
     ~service:account_confirmation_service
     (fun () (name, pwd) ->
       let create_account_service =
-        Eliom_output.Action.register_coservice
+        Eliom_registration.Action.register_coservice
           ~fallback:main_service
           ~get_params:Eliom_parameter.unit
           ~timeout:60.

@@ -26,7 +26,6 @@ open Lwt
 open Eliom_content.Html5.D
 open Eliom_service
 open Eliom_parameter
-open Eliom_output.Html5
 
 let main_service =
   register_service ~path:["graff"] ~get_params:unit
@@ -38,7 +37,7 @@ The same, written with fully qualified names (without {{{open}}}):
 <<code language="ocaml"|
 open Eliom_content
 let main_service =
-  Eliom_output.Html5.register_service
+  Eliom_registration.Html5.register_service
     ~path:["graff"] 
     ~get_params:Eliom_parameter.unit
     (fun () () ->
@@ -122,7 +121,7 @@ at compile time that the HTML will be correct.  Eliom provides several
 modules to do that, either using OcamlDuce (if you have it installed)
 or using OCaml's polymorphic variants.  This tutorial is using the
 second solution, using the module <<a_api project="eliom"
-version="dev"| module Eliom_output.Html5 >>. This module defines a
+| module Eliom_content.Html5.D >>. This module defines a
 construction function for each HTML5 tag.
 
 //Note that it is also possible to use the usual HTML syntax (see
@@ -204,10 +203,10 @@ Calling Javascript methods with Js_of_ocaml\\
 >>
 
 To create our first service, we used the function <<a_api
-project="eliom" | val Eliom_output.Html5.register_service>>, as we
+project="eliom" | val Eliom_registration.Html5.register_service>>, as we
 wanted to return HTML5. But actually we want our service to send an
 Eliom application.  To do that, we will create our own registration
-module by using the functor {{{Eliom_output.Eliom_appl}}}:
+module by using the functor {{{Eliom_registration.App}}}:
 
 <<|BB
   This is a bit fast, especially if you just came to Ocsigen. The following
@@ -216,19 +215,19 @@ module by using the functor {{{Eliom_output.Eliom_appl}}}:
 >>
 
 <<code language="ocaml"|
-module My_appl =
-  Eliom_output.Eliom_appl (struct
+module My_app =
+  Eliom_registration.App (struct
       let application_name = "graffiti"
     end)
 >>
 
 It is now possible to use {{{MyAppl}}} instead of
-{{{Eliom_output.Html5}}} for registering our main service
+{{{Eliom_registration.Html5}}} for registering our main service
 (now at URL {{{/}}}):
 
 <<code language="ocaml"|
 let main_service =
-  My_appl.register_service ~path:[""]
+  My_app.register_service ~path:[""]
     ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
@@ -343,7 +342,7 @@ let count = ref 0
 
 <<code language="ocaml"|
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let count = incr count; !count in
       Eliom_service.onload {{
@@ -403,7 +402,7 @@ a copy of the {{{<body>}}} element. Hence, the actual page's
 
 <<code language="ocaml"|
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
       Eliom_service.onload {{
@@ -435,8 +434,8 @@ style="color:#ffaa33;"|orange>> line. Here is the (full) new version
 of the program:
 
 <<code language="ocaml"|
-module My_appl =
-  Eliom_output.Eliom_appl (
+module My_app =
+  Eliom_registration.App (
     struct
       let application_name = "graffiti"
     end)
@@ -475,7 +474,7 @@ let onload_handler = {{
 }}
 
 let main_service =
-  My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       Eliom_service.onload onload_handler;
       Lwt.return page)
@@ -748,20 +747,20 @@ let page =
   html
     (head
        (title (pcdata "Graffiti"))
-       [ Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
+       [ css_link
+	   ~uri:(make_uri (Eliom_service.static_dir ())
 		  ["css";"common.css"]) ();
-	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
+	 css_link
+	   ~uri:(make_uri (Eliom_service.static_dir ())
 		  ["css";"hsvpalette.css"]) ();
-	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
+	 css_link
+	   ~uri:(make_uri (Eliom_service.static_dir ())
 		  ["css";"slider.css"]) ();
-	 Eliom_output.Html5_forms.css_link
-	   ~uri:(Eliom_output.Html5.make_uri (Eliom_service.static_dir ())
+	 css_link
+	   ~uri:(make_uri (Eliom_service.static_dir ())
 		  ["css";"graffiti.css"]) ();
-	 Eliom_output.Html5_forms.js_script
-	   ~uri:(Eliom_output.Html5.make_uri  (Eliom_service.static_dir ())
+	 js_script
+	   ~uri:(make_uri  (Eliom_service.static_dir ())
 		  ["graffiti_oclosure.js"]) ();
        ])
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
@@ -771,7 +770,7 @@ let page =
 
 The previous code will not work with Eliom ≤ 2.0.1. With those
 versions, the function <<a_api project="eliom" subproject="server"|
-val Eliom_output.Html5.make_uri >> could not be used outside a service
+val Eliom_content.Html5.D.make_uri >> could not be used outside a service
 handler. To delay the URI calculation you need to replace the constant
 {{{page}}} with a function that take {{{unit}}} and returns the page.
 
@@ -781,7 +780,7 @@ let page () =
 
 ...
 
-My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       Eliom_service.onload onload_handler;
       Lwt.return (page ()))
@@ -900,7 +899,7 @@ We also define a service that send the picture:
 
 <<code language="ocaml"|
 let imageservice =
-  Eliom_output.String.register_service
+  Eliom_registration.String.register_service
     ~path:["image"]
     ~get_params:Eliom_parameter.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))
@@ -909,32 +908,32 @@ let imageservice =
 <<wip|
 
 With Eliom ≤ 2.0.1, the module <<a_api project="eliom"
-subproject="server"| module Eliom_output.String >> was named <<a_api
+subproject="server"| module Eliom_registration.String >> was named <<a_api
 project="eliom" subproject="server" version="2.0.1"| module
-Eliom_output.Text>>.
+Eliom_registration.Text>>.
 
 >>
 
 <<concept
 
-  title="Eliom_output"|
+  title="Eliom_registration"|
 
-  The module {{{Eliom_output}}} defines several modules with
+  The module {{{Eliom_registration}}} defines several modules with
   registration functions for a variety of data types. We have already
-  seen {{{Eliom_output.Html5}}} and {{{Eliom_output.Eliom_appl}}}.
-  The module {{{Eliom_output.String}}} sends any byte output
+  seen {{{Eliom_registration.Html5}}} and {{{Eliom_registration.App}}}.
+  The module {{{Eliom_registration.String}}} sends any byte output
   (represented with an OCaml string). The handler function must return
   a pair consisting of the content and the content-type.
 
   There are also several other output modules, for example:
 
-* {{{Eliom_output.Files}}} to send static files
-* {{{Eliom_output.Redirection}}} to create a redirection towards another page
-* {{{Eliom_output.Any}}} to create services that choose themselves what
+* {{{Eliom_registration.Files}}} to send static files
+* {{{Eliom_registration.Redirection}}} to create a redirection towards another page
+* {{{Eliom_registration.Any}}} to create services that choose themselves what
 they want to send
-* {{{Eliom_output.Caml}}} to send any OCaml data to be used in a
+* {{{Eliom_registration.Ocaml}}} to send any OCaml data to be used in a
 client side program
-* {{{Eliom_output.Action}}} to create service with no output
+* {{{Eliom_registration.Action}}} to create service with no output
 (the handler function just performs a side effect on the server)
 and reload the current page (or not). We will see an example of actions
 in the next chapter.
@@ -950,7 +949,7 @@ creation of the slider:
 let img =
   Html5.To_dom.of_img
     (img ~alt:"canvas"
-       ~src:(Eliom_output.Html5.make_uri ~service:%imageservice ())
+       ~src:(make_uri ~service:%imageservice ())
        ())
 in
 img##onload <- Dom_html.handler
