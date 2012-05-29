@@ -22,9 +22,9 @@ end
 module type ACTION = sig
   type user
   val register :
-    ?scope:[< Eliom_common.scope ] -> ?options:Eliom_output.Action.options -> ?charset:string ->
+    ?scope:[< Eliom_common.scope ] -> ?options:Eliom_registration.Action.options -> ?charset:string ->
     ?code:int -> ?content_type:string -> ?headers:Http_headers.t -> ?secure_session:bool ->
-    service:('a, 'b, [< Eliom_service.internal_service_kind ], [< Eliom_service.suff ], 'c, 'd, [ `Registrable ], Eliom_output.Action.return) Eliom_service.service ->
+    service:('a, 'b, [< Eliom_service.internal_service_kind ], [< Eliom_service.suff ], 'c, 'd, [ `Registrable ], Eliom_registration.Action.return) Eliom_service.service ->
     ?error_handler:((string * exn) list -> (user -> unit Lwt.t) Lwt.t) ->
     ('a -> 'b -> (user -> unit Lwt.t) Lwt.t) -> unit
 end

@@ -13,7 +13,7 @@ open Eliom_content
 }}
 
 module ##MODULE_NAME##_appl =
-  Eliom_output.Eliom_appl (struct
+  Eliom_registration.App (struct
     let application_name = "##PROJECT_NAME##"
   end)
 
@@ -101,10 +101,10 @@ let connect_service_handler () (email, pwd) =
   try_lwt
     lwt id = Database.check_pwd email pwd in
     lwt () = Eliom_reference.set userid (Some id) in
-    Eliom_output.Redirection.send Eliom_service.void_hidden_coservice'
+    Eliom_registration.Redirection.send Eliom_service.void_hidden_coservice'
   with Not_found ->
     lwt () = Eliom_reference.set wrongpassword true in
-    Eliom_output.Action.send ()
+    Eliom_registration.Action.send ()
 
 let signout_service_handler () () =
   Eliom_reference.unset userid
@@ -143,9 +143,9 @@ let main_handler () () =
 
 let () =
 #ifdef BASIC_USER
-  Eliom_output.Any.register ~service:Services.connect_service
+  Eliom_registration.Any.register ~service:Services.connect_service
     connect_service_handler;
-  Eliom_output.Action.register ~service:Services.signout_service
+  Eliom_registration.Action.register ~service:Services.signout_service
     signout_service_handler;
   Services.##MODULE_NAME##_appl.register ~service:Services.important_service
     (connect_wrapper important_service_handler);

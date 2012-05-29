@@ -127,18 +127,18 @@ module My_user_management = User_management.Make (Users') (My_scope) (My_context
 
 module Connected_action = struct
   type user = Users.User.t
-  include Eliom_output.Customize (Eliom_output.Action) (My_user_management.Connected_translate_action)
+  include Eliom_registration.Customize (Eliom_registration.Action) (My_user_management.Connected_translate_action)
 end
 module My_chat = Chat.Make (Users.User) (Connected_action) (My_scope)
 
 
-module Chat_appl =
-  Eliom_output.Eliom_appl (
+module Chat_app =
+  Eliom_registration.App (
     struct
       let application_name = "chat_site"
     end
   )
-module Connected_chat_appl = Eliom_output.Customize (Chat_appl) (My_user_management.Connected_translate_Html5)
+module Connected_chat_appl = Eliom_registration.Customize (Chat_app) (My_user_management.Connected_translate_Html5)
 
 let main_service = Eliom_service.service ~path:[] ~get_params:Eliom_parameter.unit ()
 
