@@ -5,22 +5,29 @@ module Lwt_thread = struct
   include Lwt
   include Lwt_chan
 end
-module Lwt_PGOCaml = PGOCaml_generic.Make(Lwt_thread)
-module Lwt_Query = Query.Make_with_Db(Lwt_thread)(Lwt_PGOCaml)
+module Lwt_pgocaml = PGOCaml_generic.Make(Lwt_thread)
+module Lwt_query = Query.Make_with_Db(Lwt_thread)(Lwt_pgocaml)
 
-let get_db : unit -> unit Lwt_PGOCaml.t Lwt.t =
-  let db_handler = ref None in
-  fun () ->
-    match !db_handler with
-      | Some h -> Lwt.return h
-      | None ->
-          Lwt_PGOCaml.connect
-            ~database:!Config.db_name
-            ~user:!Config.db_user
-            ()
+(****************************** Connection pool ******************************)
+
+let connection_pool : (Lwt_pgocaml.pa_pg_data Lwt_pgocaml.t) Lwt_pool.t =
+  let connect () =
+    Lwt_pgocaml.connect
+      ~database:!Config.db_name
+      ~user:!Config.db_user
+      ()
+  in
+  let validate dbh =
+    try
+      lwt () = Lwt_pgocaml.ping dbh in
+      Lwt.return true
+    with _ ->
+      Lwt.return false
+  in
+  Lwt_pool.create 13 ~validate connect
 
 #ifdef BASIC_USER
-(********* Tables *********)
+(*********************************** Tables **********************************)
 
 let users_table = <:table< users (
   userid bigint NOT NULL,
@@ -30,48 +37,50 @@ let users_table = <:table< users (
   lastname text NOT NULL
 ) >>
 
-(********* Queries *********)
+(********************************** Queries **********************************)
 
 let check_pwd email pwd =
-  lwt dbh = get_db () in
-  match_lwt
-    Lwt_Query.query dbh
-      <:select< u
-      | u in $users_table$;
-      u.email = $string:email$;
-      u.pwd = $string:pwd$; >>
-  with
-    | [] -> Lwt.fail Not_found
-    | [a] -> Lwt.return (a#!userid)
-    | _ -> Lwt.fail (Failure "Several users have the same email")
+  Lwt_pool.use connection_pool
+    (fun dbh ->
+       match_lwt
+         Lwt_query.query dbh
+           <:select< u |
+               u in $users_table$;
+               u.email = $string:email$;
+               u.pwd = $string:pwd$; >>
+       with
+         | [] -> Lwt.fail Not_found
+         | [a] -> Lwt.return (a#!userid)
+         | _ -> Lwt.fail (Failure "Several users have the same email"))
 
 
 let get_user id =
-  lwt dbh = get_db () in
-  match_lwt
-    Lwt_Query.query dbh
-      <:select< u |
-        u in $users_table$;
-        u.userid = $int64:id$ >>
-  with
-    | [] -> Lwt.fail Not_found
-    | [user] -> Lwt.return user
-    | _ -> Lwt.fail (Failure "Several users have the same userid")
+  Lwt_pool.use connection_pool
+    (fun dbh ->
+       match_lwt
+         Lwt_query.query dbh
+           <:select< u |
+               u in $users_table$;
+               u.userid = $int64:id$ >>
+       with
+         | [] -> Lwt.fail Not_found
+         | [user] -> Lwt.return user
+         | _ -> Lwt.fail (Failure "Several users have the same userid"))
 
 let () =
-  Lwt.ignore_result (
-    lwt dbh = get_db () in
-    match_lwt
-      Lwt_Query.query dbh
-        <:select< u |
-          u in $users_table$; >>
-    with
-      | [] ->
-          Lwt.return (print_endline "Create a user first!") (* TODO *)
-      | _ -> Lwt.return ()
-  )
+  Lwt.ignore_result
+    (Lwt_pool.use connection_pool
+       (fun dbh ->
+          match_lwt
+            Lwt_query.query dbh
+              <:select< u |
+                u in $users_table$; >>
+          with
+            | [] ->
+                Lwt.return (print_endline "Create a user first!") (* TODO *)
+            | _ -> Lwt.return ()))
 #else /* BASIC_USER */
-(********* Tables *********)
+(*********************************** Tables **********************************)
 
 let articles_table = <:table< articles (
   id bigint NOT NULL,
@@ -79,23 +88,25 @@ let articles_table = <:table< articles (
   content text NOT NULL
 ) >>
 
-(********* Queries *********)
+(********************************** Queries **********************************)
 
 let get_articles () =
-  lwt dbh = get_db () in
-  Lwt_Query.query dbh
-    <:select< article |
-      article in $articles_table$ >>
+  Lwt_pool.use connection_pool
+    (fun dbh ->
+       Lwt_query.query dbh
+         <:select< article |
+           article in $articles_table$ >>)
 
 let get_article id =
-  lwt dbh = get_db () in
-  match_lwt
-    Lwt_Query.query dbh
-      <:select< article |
-        article in $articles_table$;
-        article.id = $int64:id$ >>
-  with
-    | [] -> Lwt.fail Not_found
-    | [article] -> Lwt.return article
-    | _ -> Lwt.fail (Failure "Several articles with the same id")
+  Lwt_pool.use connection_pool
+    (fun dbh ->
+       match_lwt
+         Lwt_query.query dbh
+           <:select< article |
+             article in $articles_table$;
+             article.id = $int64:id$ >>
+       with
+         | [] -> Lwt.fail Not_found
+         | [article] -> Lwt.return article
+         | _ -> Lwt.fail (Failure "Several articles with the same id"))
 #endif /* else BASIC_USER */
