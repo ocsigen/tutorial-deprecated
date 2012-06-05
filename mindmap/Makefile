@@ -1,4 +1,4 @@
-all: services content communication utils
+all: services content communication utils caption
 
 services:
 	 pdflatex $@.tex
