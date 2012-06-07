@@ -208,11 +208,11 @@ module Make (ForeignUser : USER) (Action : ACTION with type user = ForeignUser.t
                   (event_to_string ev) (User.name user) user_info.User_info.id
               in
               lwt () = Lwt_stream.junk_old stream in
-              let channel = Eliom_comet.Channels.create ~name:"channel" ~scope stream in
+              let channel = Eliom_comet.Channel.create ~name:"channel" ~scope stream in
               lwt () = Eliom_reference.set channel_ref (Some channel) in
               let () = add_client_process user in
               Lwt.ignore_result (
-                lwt () = Eliom_comet.Channels.wait_timeout ~scope !client_process_timout in
+                lwt () = Eliom_comet.Channel.wait_timeout ~scope !client_process_timout in
                 lwt () = Eliom_reference.set channel_ref None in
                 lwt () = Eliom_state.discard ~scope () in
                 Lwt.return (on_timeout_client_process user)
