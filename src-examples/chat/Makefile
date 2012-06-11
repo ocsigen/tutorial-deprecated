@@ -11,11 +11,11 @@ INSTALLDIR   ?= $(shell pwd)/local
 VARDIR       ?= $(shell pwd)/local/var
 
 PORT         ?= 8080
-COMMAND_PIPE ?= $(INSTALLDIR)/ocsigenserver_command
 STATICDIR    ?= ${INSTALLDIR}/static
 LIBDIR       ?= ${INSTALLDIR}/lib
 LOGDIR       ?= ${VARDIR}/log
 RUNDIR       ?= ${VARDIR}/run
+COMMAND_PIPE ?= $(RUNDIR)/ocsigenserver_command
 CONFDIR      ?= ${INSTALLDIR}
 
 SERVER_LIB   := $(LIB_NAME)_server
@@ -67,7 +67,7 @@ JS_OF_ELIOM := js_of_eliom
 #####################################
 
 all: byte opt
-	
+
 libraries.byte: ${SERVER_LIB}.cmo ${CLIENT_LIB}.cmo
 libraries.opt: ${SERVER_LIB}.cmx ${CLIENT_LIB}.cmo
 
@@ -152,10 +152,12 @@ clean:
 	-rm -f *.type_mli
 	-rm -f ${APP_NAME}.js
 	-rm -rf ${ELIOM_CLIENT_DIR} ${ELIOM_SERVER_DIR}
+	-rm -rf ${STATICDIR} ${LIBDIR} ${RUNDIR}
 
 distclean: clean
 	-rm -f *~ \#* .\#*
 	-rm -f .depend $(APP_NAME).conf
+	-rm -rf ${INSTALLDIR}
 
 ## Dependencies
 
@@ -190,13 +192,13 @@ $(STATICDIR):
 $(LIBDIR):
 	mkdir -p $@
 
-install.byte: byte $(STATICDIR) $(LIBDIR) $(APP_NAME).conf
+install.byte: byte $(STATICDIR) $(LIBDIR) $(LOGDIR) $(RUNDIR) $(APP_NAME).conf
 	install -m 664 $(INSTALL_USER) $(APP_NAME).js $(STATICDIR)
 	install -m 664 $(INSTALL_USER) static/* $(STATICDIR)
 	install -m 664 $(INSTALL_USER) $(APP_NAME).cma $(LIBDIR)
 	install -m 664 $(INSTALL_USER) $(APP_NAME).conf $(CONFDIR)
 
-install.opt: opt $(STATICDIR) $(LIBDIR) $(APP_NAME).conf
+install.opt: opt $(STATICDIR) $(LIBDIR) $(LOGDIR) $(RUNDIR) $(APP_NAME).conf
 	install -m 664 $(INSTALL_USER) $(APP_NAME).js $(STATICDIR)
 	install -m 664 $(INSTALL_USER) static/* $(STATICDIR)
 	install -m 664 $(INSTALL_USER) $(APP_NAME).cmxa $(LIBDIR)
