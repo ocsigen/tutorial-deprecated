@@ -1,11 +1,12 @@
 {shared{
+  open Eliom_content
   open Eliom_content.Html5.D
   let width = 700
   let height = 400
 }}
 
 module My_appl =
-  Eliom_output.Eliom_appl (
+  Eliom_registration.App (
     struct
       let application_name = "graffiti"
     end)
@@ -60,7 +61,7 @@ let draw_server, image_string =
 let _ = Lwt_stream.iter draw_server (Eliom_bus.stream bus)
 
 let imageservice =
-  Eliom_output.Text.register_service
+  Eliom_registration.Text.register_service
     ~path:["image"]
     ~get_params:Eliom_parameter.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))

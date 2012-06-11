@@ -182,22 +182,29 @@ let login_name_form service button_text =
 let oclosure_script =
   Html5.Id.create_global_elt
     (js_script
-       ~uri:(uri_of_string "./graffiti_oclosure.js") ())
+       ~uri:(make_uri  (Eliom_service.static_dir ())
+               ["graffiti_oclosure.js"]) ())
 
 let make_page content =
   Lwt.return
     (html
        (head
 	  (title (pcdata "Graffiti"))
- 	  [
-	    css_link ~uri:(uri_of_string"./css/closure/common.css") ();
-	    css_link ~uri:(uri_of_string"./css/closure/hsvpalette.css") ();
-	    css_link ~uri:(uri_of_string"./css/slider.css") ();
-            oclosure_script;
-            css_link ~uri:(uri_of_string"./css/graffiti.css") ();
-          ])
+       [ css_link
+           ~uri:(make_uri (Eliom_service.static_dir ())
+                  ["css";"common.css"]) ();
+         css_link
+           ~uri:(make_uri (Eliom_service.static_dir ())
+                  ["css";"hsvpalette.css"]) ();
+         css_link
+           ~uri:(make_uri (Eliom_service.static_dir ())
+                  ["css";"slider.css"]) ();
+         oclosure_script;
+         css_link
+           ~uri:(make_uri (Eliom_service.static_dir ())
+                  ["css";"graffiti.css"]) ();
+       ])
        (body content))
-
 
 let default_content () =
   make_page

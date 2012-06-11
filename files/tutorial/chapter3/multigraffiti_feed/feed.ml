@@ -66,12 +66,12 @@ let rec entries name list = function
       | (n,saved)::q ->
 	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_content.Xhtml.F.make_uri ~absolute:true ~service:(Eliom_service.static_dir ())
+	  Xhtml.F.make_uri ~absolute:true ~service:(Eliom_service.static_dir ())
 	    (local_filename name n)
 	in
 	let entry =
 	  Atom_feed.entry ~title ~id:uri ~updated:saved
-            [Atom_feed.xhtmlC [ XHTML.M.img ~src:uri ~alt:"image" ()]] in
+            [Atom_feed.xhtmlC [ Xhtml.F.img ~src:uri ~alt:"image" ()]] in
 	entry::(entries name q (len - 1))
 
 let feed name () =

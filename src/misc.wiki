@@ -53,6 +53,7 @@ with the difference that what was previously in
 {{{ Eliom_service.onload {{ }} }}} is now in the function {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|
+open Eliom_content
 open Common
 open Event_arrows
 
@@ -145,6 +146,7 @@ let launch_client_canvas bus image_elt canvas_elt =
 
 It contains almost all the server parts of the code.
 <<code language="ocaml"|
+open Eliom_content
 open Eliom_content.Html5.D
 open Common
 open Lwt
@@ -674,6 +676,7 @@ and we do nothing.
 We will add this code in a new file:
 ===={{{feed.ml}}}====
 <<code language="ocaml"|
+open Eliom_content
 open Eliom_content.Html5.D
 open Server
 
@@ -758,7 +761,7 @@ let rec entries name list = function
 	in
 	let entry =
 	  Atom_feed.entry ~title ~id:uri ~updated:saved
-            [Atom_feed.xhtmlC [ XHTML.M.img ~src:uri ~alt:"image" ()]] in
+            [Atom_feed.xhtmlC [ Xhtml.F.img ~src:uri ~alt:"image" ()]] in
 	entry::(entries name q (len - 1))
 
 let feed name () =
@@ -860,7 +863,7 @@ content of the page and the url change.
 We first create the player node at toplevel.
 <<code language="ocaml"|
 let player =
-  create_global_elt
+  Eliom_content.Html5.Id.create_global_elt
     (audio
        ~srcs:(make_uri (Eliom_service.static_dir ())
                   ["music.ogg"],

@@ -1,7 +1,7 @@
 open Lwt
-open Eliom_service
 open Eliom_parameter
 open Eliom_content.Html5.D
+open Eliom_registration.Html5
 
 let main_service =
   register_service ~path:["graff"] ~get_params:unit

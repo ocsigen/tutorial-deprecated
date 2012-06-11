@@ -1,3 +1,4 @@
+open Eliom_content
 open Common
 open Event_arrows
 

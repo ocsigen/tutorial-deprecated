@@ -6,7 +6,6 @@
   open Client
 }}
 open Server
-open Feed
 
 let start_drawing name image canvas =
   let bus = get_bus name in
@@ -19,10 +18,10 @@ let start_drawing name image canvas =
 let counter = ref 0
 
 let player =
-  create_global_elt
+  Eliom_content.Html5.Id.create_global_elt
     (audio
        ~srcs:(make_uri (Eliom_service.static_dir ())
-                  ["free-software-song.ogg"],[])
+                  ["music.ogg"],[])
        ~a:[a_autoplay (`Autoplay);a_controls (`Controls)]
        [pcdata "Your browser does not support audio element" ])
     
@@ -40,10 +39,6 @@ let () = Connected.register ~service:multigraffiti_service
       [h1 [pcdata name];
        disconnect_box ();
        choose_drawing_form ();
-       a feed_service [pcdata "atom feed"] name;
-       div ( if name = username
-	 then [save_image_box name]
-	 else [pcdata "no saving"] );
        canvas;
        player])
 

@@ -270,7 +270,7 @@ let _ =
       Lwt.return
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
-                     p [a ~service:main_service [pcdata "Home"] ()]])))
+                     p [a ~service:main_service [pcdata "Home"] ()]])));
 >>
 
 <<concept title="Mutually recursive services" |
@@ -534,7 +534,7 @@ let connection_box () =
       Lwt.return
         (html (head (title (pcdata "")) [])
               (body [h1 [pcdata message];
-                     user_links ()])))
+                     user_links ()])));
 >>
 
 <<concept title="More on Lwt" |
@@ -676,7 +676,7 @@ of the connection service by:
     (fun () (name, password) ->
       if check_pwd name password
       then Eliom_reference.set username (Some name)
-      else Lwt.return ())
+      else Lwt.return ());
 >>
 
 Now the main page is displayed after connection.
@@ -741,7 +741,6 @@ let connection_service =
 Now you can add the connection box on user pages.
 
 <<code language="ocaml"|
-let connection_service =
   Eliom_registration.Html5.register
     ~service:user_service
     (fun name () ->
@@ -957,7 +956,7 @@ Eliom_registration.Html5.register
              p [a ~service:create_account_service [pcdata "Yes"] ();
                 pcdata " ";
                 a ~service:main_service [pcdata "No"] ()]
-            ])))
+            ])));
 >>
 
 Also remove the registration of the {{{create_account_service}}}
@@ -1233,7 +1232,7 @@ let _ = Connected.register_service
   (fun () () ->
     Lwt.return
      (fun username ->
-        Lwt.return (html (head mytitle [])
+        Lwt.return (html (head (title (pcdata "")) [])
                    (body [h1 [pcdata ("Welcome " ^ username) ]; ]))))
 >>
 
@@ -1242,11 +1241,11 @@ heavy notation: {{{Lwt.return (fun username -> Lwt.return...)}}}. We
 can make it lighter using
 
 <<code language="ocaml"|
-let ( !% ) f = fun a b -> return (fun c -> f a b c)
+let ( !% ) f = fun a b ->  Lwt.return (fun c -> f a b c)
 
 let _ = Connected.register_service 
   ~path:[""] ~get_params:unit
   !% (fun () () username ->
-    return (html (head mytitle [])
+     Lwt.return (html (head  (title (pcdata "")) [])
 	      (body [h1 [pcdata ("Welcome " ^ username) ]; ])))
 >>
