@@ -1,8 +1,8 @@
 
 # This Makefile may help to mainain a directory of versions of the tutorial like
 #
-# $ tree -L 2 /tmp/tuto
-#   /tmp/tuto
+# $ tree -L 2 $(TUTORIAL_DIR)
+#   $(TUTORIAL_DIR)
 #   ├── 1.2.3
 #   │   ├── files
 #   │   └── src

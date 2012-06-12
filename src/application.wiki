@@ -1,6 +1,6 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested with the 2.1 release of
+//The code of this tutorial has been tested with the 2.2 release of
   the Ocsigen bundle.//\\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
