@@ -100,6 +100,7 @@ let logout_handler () () =
   match_lwt Eliom_reference.get user_ref with
     | Some user ->
         lwt () = Eliom_state.discard ~scope:Eliom_common.session () in
+        lwt () = Eliom_state.discard ~scope:Eliom_common.client_process () in
         Eliom_registration.Redirection.send Eliom_service.void_hidden_coservice'
     | None ->
         Eliom_registration.Action.send ()
