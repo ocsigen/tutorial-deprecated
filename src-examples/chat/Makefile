@@ -31,11 +31,11 @@ CLIENT_PACKAGES :=
 
 ## Source files for the server part
 
-SERVER_FILES := utils.ml shared.ml user_management.ml weak_info.ml chat.eliom chat_site.eliom
+SERVER_FILES := utils.ml shared.ml widgets.eliom user_management.ml chat.eliom chat_site.eliom
 
 ## Source files for the client part
 
-CLIENT_FILES := utils.ml shared.ml client.ml chat.eliom
+CLIENT_FILES := utils.ml shared.ml widgets.eliom client.ml chat.eliom chat_site.eliom
 
 ## Where to put intermediate object files.
 ## - ELIOM_{SERVER,CLIENT}_DIR must be distinct
@@ -78,9 +78,9 @@ $(RUNDIR):
 	mkdir -p $(RUNDIR)
 
 run.byte: byte install.byte $(LOGDIR) $(RUNDIR)
-	ocsigenserver -c $(CONFDIR)/$(APP_NAME).conf
+	ocsigenserver ${SERVER_PARAM} -c $(CONFDIR)/$(APP_NAME).conf
 run.opt: opt install.opt $(LOGDIR) $(RUNDIR)
-	ocsigenserver.opt -c $(CONFDIR)/$(APP_NAME).conf
+	ocsigenserver.opt ${SERVER_PARAM} -c $(CONFDIR)/$(APP_NAME).conf
 
 restart: all
 	@if [ -e $(COMMAND_PIPE) ]; then; echo reload >  $(COMMAND_PIPE); fi
@@ -170,6 +170,9 @@ depend: .depend
 -include .depend
 _server/chat_site.cmo: _server/chat.cmo
 _client/chat_site.cmo: _client/chat.cmo
+_client/client.cmo: _client/widgets.cmo
+_client/chat.cmo: _client/widgets.cmo
+_server/chat.cmo: _server/widgets.cmo
 
 ## installation #########
 

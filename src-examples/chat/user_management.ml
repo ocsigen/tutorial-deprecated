@@ -1,158 +1,115 @@
 
-open Eliom_content
 open Utils
+open Shared
 
-let debug fmt = debug_prefix "User_management" fmt
+(* Services *)
 
-module type USERS = sig
+let login_service =
+  Eliom_service.post_coservice'
+    ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
-  module User : sig
-    type t
-    val name : t -> string
-    val verify : user_name:string -> password:string -> t option Lwt.t
-    val make_session_group_name : (t -> string) option
-    val compare : t -> t -> int (* TODO Remove with get_volatile_data_session_group_size *)
-  end
+let logout_service =
+  Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
 
+(* References *)
 
-  module Callback : sig
-    val post_login : User.t -> unit Lwt.t
-    val pre_logout : session_group_size:int -> User.t -> unit Lwt.t
-  end
+let user_ref = Eliom_reference.eref ~scope:Eliom_common.session None
+let login_error_ref = Eliom_reference.eref ~scope:Eliom_common.request None
 
-end
+(* Connected handler auxiliaries *)
 
-module type SCOPE = sig
-  val session : Eliom_common.session_scope
-end
+let connected handler disconnected =
+  fun get post ->
+    match_lwt Eliom_reference.get user_ref with
+      | Some user ->
+          handler user get post
+      | None ->
+          disconnected get post
 
-module No_callback = struct
-  let post_login _ = Lwt.return ()
-  let pre_logout _ _ = Lwt.return ()
-end
+let connected_html5_elt connected_widget disconnected_widget handler =
+  connected
+    (fun user get post ->
+       lwt content = handler user get post in
+       Lwt.return **>
+         connected_widget user content)
+    (fun get post ->
+       lwt message = (Eliom_reference.get login_error_ref : string option Lwt.t) in
+       Lwt.return **>
+         disconnected_widget ~message)
 
-module type CONTEXT = sig
-  val disconnected : Html5_types.div_content_fun Html5.elt list -> Html5_types.body_content_fun Html5.elt list Lwt.t
-end
+let connected_action handler =
+  connected handler
+    (fun get post ->
+       Lwt.fail Eliom_common.Eliom_Session_expired)
 
-module Identity_context = struct
-  let disconnected elts = Lwt.return elts
-end
+(* Connections *)
 
-module Make (Users : USERS) (Scope : SCOPE) (Context : CONTEXT) = struct
+let on_create_first_connection = ref **> fun _ -> failwith "User_management.on_create_first_connection"
+let on_drop_last_connection = ref **> fun _ -> failwith "User_management.on_drop_last_connection"
 
-  open Users
+let on_create_connection, on_loose_connection, users_signal =
+  let users_signal, set_users_signal = React.S.create User_set.empty in
+  let module Connection_count = Map.Make (User) in
+  let connection_count = ref Connection_count.empty in
+  let get user = try Connection_count.find user !connection_count with Not_found -> 0 in
+  let modify f user =
+    connection_count :=
+      Connection_count.filter (fun _ -> (<>) 0) **>
+        Connection_count.add user (f (get user)) !connection_count;
+    debug "connection_count: %s" **>
+      String.concat ", " **>
+        List.map (fun (u, c) -> Printf.sprintf "%s: %d" u.User.name c) **>
+          Connection_count.bindings !connection_count;
+  in
+  let add user =
+    modify succ user;
+    if get user = 1 then
+      let () = !on_create_first_connection user in
+      set_users_signal (User_set.add user (React.S.value users_signal))
+  in
+  let remove user =
+    modify pred user;
+    if get user = 0 then
+      let () = !on_drop_last_connection user in
+      set_users_signal (User_set.remove user (React.S.value users_signal))
+  in
+  add, remove, users_signal
 
-  let modify_session_count, get_session_count =
-    let module User_map = Map.Make (User) in
-    let user_session_count_ref = ref User_map.empty in
-    let get_session_count user =
-      try User_map.find user !user_session_count_ref
-      with Not_found -> 0
-    in
-    let modify_session_count f user =
-      modify user_session_count_ref **>
-        User_map.add user **> f (get_session_count user)
-    in
-    modify_session_count, get_session_count
+let init_connection user =
+  on_create_connection user;
+  Lwt.ignore_result (
+    lwt () = Eliom_comet.Channel.wait_timeout 1.0 in
+    debug "wait_timeout for user %s" user.User.name;
+    on_loose_connection user;
+    Lwt.return ()
+  )
 
-  let login = Eliom_service.post_coservice' ~post_params:Eliom_parameter.(string "name" ** string "password") ()
-  let logout = Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
+(* Handlers *)
 
-  let user_ref = Eliom_reference.eref ~scope:Scope.session None
-  let message_ref = Eliom_reference.eref ~scope:Eliom_common.request None
+let login_handler user_verify () (user_name, password) =
+  match_lwt user_verify ~user_name ~password with
+    | Some user ->
+        Eliom_state.set_volatile_data_session_group ~scope:Eliom_common.session user.User.name;
+        lwt () = Eliom_reference.set user_ref (Some user) in
+        Eliom_registration.Redirection.send Eliom_service.void_hidden_coservice'
+    | None ->
+        Eliom_registration.Action.send ()
 
-  let do_login user =
-    iter_option (fun f -> Eliom_state.set_volatile_data_session_group ~scope:Scope.session (f user)) Users.User.make_session_group_name;
-    lwt () = Eliom_reference.set user_ref (Some user) in
-    lwt () = Callback.post_login user in
-    Lwt.return **> modify_session_count succ user
+let logout_handler () () =
+  debug "logout_handler";
+  match_lwt Eliom_reference.get user_ref with
+    | Some user ->
+        lwt () = Eliom_state.discard ~scope:Eliom_common.session () in
+        Eliom_registration.Redirection.send Eliom_service.void_hidden_coservice'
+    | None ->
+        Eliom_registration.Action.send ()
 
-  let do_logout user =
-    (* TODO let session_group_size = Eliom_state.get_volatile_data_session_group_size ~scope:Scope.session in *)
-    let session_group_size = get_session_count user in
-    debug "Discard session (in session group of %d)" session_group_size;
-    lwt () = Callback.pre_logout ~session_group_size user in
-    lwt () = Eliom_state.discard_all_scopes () in
-    Lwt.return **> modify_session_count pred user
+(* Registration *)
 
-  let _ =
-    let login_handler () (user_name, password) =
-      match_lwt Eliom_reference.get user_ref with
-          None -> begin
-            match_lwt User.verify ~user_name ~password with
-                Some user -> do_login user
-              | None -> Eliom_reference.set message_ref (Some "Invalid credentials")
-          end
-        | Some _ -> Lwt.return ()
-    in
-    let logout_handler () () =
-      debug "logout_handler";
-      match_lwt Eliom_reference.get user_ref with
-          Some user -> do_logout user
-        | None -> Lwt.return ()
-    in
-    Eliom_registration.Action.register ~service:login login_handler;
-    Eliom_registration.Action.register ~service:logout logout_handler;
-    ()
-
-  module Connected_translate_Html5 = struct
-
-    type page = logout_form:Html5_types.form Html5.elt -> User.t -> Eliom_registration.Html5.page Lwt.t
-
-    let translate page =
-      let login_form =
-        let open Html5.D in
-        post_form ~a:[a_class ["login"]] ~service:login
-          (fun (user_name, password) -> [
-            table
-              (tr [
-                td [label ~a:[Raw.a_for "name"] [pcdata "Name"]];
-                td [string_input ~a:[a_id "name"] ~input_type:`Text ~name:user_name ()]
-               ])
-              [tr [
-                td [label ~a:[Raw.a_for "password"] [pcdata "Password"]];
-                td [string_input ~a:[a_id "password"] ~input_type:`Password ~name:password ()]
-               ];
-               tr [
-                 td [];
-                 td [string_input ~input_type:`Submit ~value:"Login" ()]
-               ]]
-          ]) ()
-      in
-      let logout_form user =
-        let open Html5.D in
-        post_form ~a:[a_class ["logout"]] ~service:logout ~xhr:false
-          (fun () ->
-             [pcdata "Logged in as ";
-              span [pcdata **> User.name user];
-              string_input ~input_type:`Submit ~value:"Logout" ()])
-          ()
-      in
-      match_lwt Eliom_reference.get user_ref with
-          None ->
-            let open Html5.D in
-            lwt message =
-              match_lwt Eliom_reference.get message_ref with
-                  None -> Lwt.return []
-                | Some msg -> Lwt.return [p [pcdata msg]]
-            in
-            lwt body_content = Context.disconnected (login_form :: message) in
-            Lwt.return **>
-              html
-                (head (title (pcdata "login")) [])
-                (body body_content)
-        | Some user ->
-            page ~logout_form:(logout_form user :> Html5_types.form Html5.elt) user
-  end
-
-  module Connected_translate_action = struct
-
-    type page = User.t -> unit Lwt.t
-
-    let translate page =
-      match_lwt Eliom_reference.get user_ref with
-          None -> raise Eliom_common.Eliom_Session_expired
-        | Some user -> page user
-  end
-end
+let register user_verify on_create_first_connection' on_drop_last_connection' =
+  on_create_first_connection := on_create_first_connection';
+  on_drop_last_connection := on_drop_last_connection';
+  let on_users_change = debug "Active user connection: %s" -| User_set.to_string in
+  Lwt_react.S.(keep **> map on_users_change users_signal);
+  Eliom_registration.Any.register ~service:login_service (login_handler user_verify);
+  Eliom_registration.Any.register ~service:logout_service logout_handler

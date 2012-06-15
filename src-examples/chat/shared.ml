@@ -1,90 +1,66 @@
 
-open Eliom_content
 open Utils
-open Eliom_lib
+open Eliom_content
 
-(* The Chat application needs it's own user because the original one is trapped
-   within the [Chat.Make] functor. *)
 module User = struct
   type t = {
     id : int;
     name : string;
     color : string;
   } deriving (Json)
-  let id { id } = id
-  let name { name } = name
-  let compare = on id compare
-  let hash = Hashtbl.hash -| id
-  let equal = on id (=)
+  let compare = on (fun { id } -> id) compare
+  let equal = on (fun { id } -> id) (=)
+  let hash { id } = id
+  let create =
+    let counter = ref 0 in
+    fun name ->
+      let id = incr counter; !counter in
+      let color =
+        Printf.sprintf "#%02x%02x%02x"
+          (56+Random.int 200) (56+Random.int 200) (56+Random.int 200)
+      in
+      { id; name; color }
   let parameter = flip Eliom_parameter.caml Json.t<t>
 end
+
 module User_set = struct
   include Set.Make (User)
   let to_string =
-    String.concat ", " -| List.map User.name -| elements
+    String.concat ", " -| List.map (fun { User.name } -> name) -| elements
+  let of_elements elts =
+    List.fold_right add elts empty
 end
 
-module Conversation = struct 
+let participants_data =
+  Html5.Custom_data.create_json ~name:"participants"
+    Json.t<User.t list>
 
-  type message = {
-    msg_author : User.t;
-    msg_content : string;
-  } deriving (Json)
+type message = {
+  author : User.t;
+  content : string;
+} deriving (Json)
 
-  type t = {
-    id : int;
-    bus : message Eliom_bus.t;
-    users : User_set.t;
-  }
+type conversation_event =
+  | Message of message
+  deriving (Json)
 
-  let create =
-    let counter = ref 0 in
-    fun bus users ->
-      let id = incr counter; !counter in
-      { id; bus; users }
+type conversation = {
+  id : int;
+  bus : conversation_event Eliom_bus.t;
+  users : User_set.t;
+}
 
-  let users { users } = users
-  let compare = on users User_set.compare
+let create_conversation =
+  let counter = ref 0 in
+  fun bus users ->
+    let id = incr counter; !counter in
+    debug "create_conversation %d" id;
+    { id; bus; users }
 
-end
+let id_of_conversation { id } = "conversation_"^string_of_int id
 
-(* The application-wide events *)
-type event =
-  | Append_conversation of Conversation.t
-  | Remove_conversation of Conversation.t
+type chat_event =
+  | Append_conversation of conversation * User_set.t
+  | Remove_conversation of conversation
 
-let event_to_string = function
-  | Append_conversation conv ->
-      Printf.sprintf "Append_conversation %d" conv.Conversation.id
-  | Remove_conversation conv ->
-      Printf.sprintf "Remove_conversation %d" conv.Conversation.id
-
-(* HTML generation functions shared between client and server *)
-
-let user_span ?self user =
-  let open Html5.F in
-  let self_class =
-    let self_class user' = if User.equal user user' then ["self"] else [] in
-    Option.get (fun () -> []) **> Option.map self_class self
-  in
-  span ~a:([a_class ("user_name" :: self_class); a_style ("background-color: "^user.User.color)]) [
-    pcdata user.User.name
-  ]
-
-let create_user_li ?self =
-  Html5.F.li -| singleton -| user_span ?self
-
-(* Translate changes in a users signal into events removing/adding users. *)
-let user_added_event, user_removed_event =
-  let diff_users_event order =
-    let get_diff before_after =
-      let res = uncurry User_set.diff (order before_after) in
-      match User_set.cardinal res with
-          0 -> None
-        | 1 -> Some (User_set.choose res)
-        | _ -> failwith "users signal should only be modified by one user each"
-    in
-    Lwt_react.(E.fmap get_diff -| S.diff pair)
-  in
-  diff_users_event identity, diff_users_event flip_pair
 

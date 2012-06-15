@@ -16,3 +16,9 @@
 .logout input {
   margin-left: 1em;
 }
+
+.server_info {
+  color: gray;
+  padding: 0.5em;
+  font-size: small;
+}
