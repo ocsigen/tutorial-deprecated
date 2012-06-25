@@ -120,7 +120,7 @@ defines the possible parameter types. For example if you write:
 
 Eliom will try to find a parameter called {{{i}}} and to translate it
 into an {{{int}}}.  In that case, the handler function will accept an
-{{{int}}} as the second parameter.
+{{{int}}} as the first parameter.
 
 If you want to accept several parameters, you can do, for example:
 
@@ -527,8 +527,8 @@ let connection_box () =
       lwt message =
         if check_pwd name password
         then begin
-          Eliom_reference.set username (Some name) ~>>
-          Lwt.return ("Hello "^name)
+          Eliom_reference.set username (Some name) ~>>=
+            (fun _ -> Lwt.return ("Hello "^name))
         end else
 	  Lwt.return "Wrong name or password" in
       Lwt.return
@@ -769,7 +769,7 @@ Example:
 let redir_service = Eliom_registration.Redirection.register_service
     ~path:["redir"]
     ~get_params:Eliom_parameter.unit
-   (fun sp () () -> Lwt.return main_service)
+   (fun () () -> Lwt.return main_service)
 >>
 
 (If you want to give parameters to the service you return, use <<a_api
