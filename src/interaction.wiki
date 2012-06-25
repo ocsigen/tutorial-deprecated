@@ -835,7 +835,7 @@ the "database":
 
 <<code language="ocaml"|
 let new_user_form_service =
-  Eliom_service.service ~path:["create account"] ~get_params:unit ()
+  Eliom_service.service ~path:["registration"] ~get_params:unit ()
 
 let create_account_service = 
   Eliom_service.post_coservice
