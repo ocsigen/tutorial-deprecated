@@ -1150,7 +1150,7 @@ Eliom_registration.Any.register
 <<concept title="Eliom_registration.Any" |
 
 The module <<a_api project="eliom" version="dev" | module
-Eliom_registration.App >> can be used to create services that are
+Eliom_registration.Any >> can be used to create services that are
 flexible to choose the kind of output they want to send.
 
 Use the {{{send}}} function from the module you want to send the
