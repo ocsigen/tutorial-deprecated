@@ -7,7 +7,7 @@
 
 ==Multi-user collaborative drawing application==
 
-We now want to take back our collaborative drawing application and 
+We now want to take back our collaborative drawing application and
 turn it to a multi user one. Each user will have his own drawing,
 where everyone can draw, and the owner will have the ability to save
 the drawing he wants and create an Atom feed containing all saved drawings.
@@ -249,7 +249,7 @@ let choose_drawing_form () =
            br ();
            string_input ~input_type:`Submit ~value:"Go" ()
           ]])
-    
+
 let oclosure_script =
   Html5.Id.create_global_elt
     (js_script

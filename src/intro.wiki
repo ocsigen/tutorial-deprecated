@@ -9,7 +9,7 @@ This tutorial is an overview of the main features of the Ocsigen framework.
 It explains how to program Web sites and client-server Web applications in
 //OCaml// using //Eliom//, //Lwt//, //Js~_of~_ocaml// and the other
 software of the Ocsigen project.
-Read it to understand the basics, 
+Read it to understand the basics,
 then refer to each project's manual for more detail.
 
 //Warning:// This programming guide assumes you know the //OCaml//
@@ -41,7 +41,7 @@ step by step a small client/server Web application.
 Manuals are permanently under evolution.
 Please report any error, mistake, and send us your comments and suggestions!
 >>
-            
+
 ==Ocsigen software projects==
 
 Most projects are independent and can be used for non Eliom-releated
@@ -62,31 +62,31 @@ It implements most features of the HTTP protocol, and has a very powerful
 extension mechanism that make very easy to plug your own OCaml modules
 for generating pages. Many extensions are already written:
 ;<<a_manual project="ocsigenserver" chapter="staticmod"|Staticmod>>
-:    is an extension to serve static files. 
+:    is an extension to serve static files.
 ;[[wiki(15):|Eliom]]
-:    is an extension to create reliable client/server Web applications 
-     or Web sites in OCaml using advanced high level concepts. 
+:    is an extension to create reliable client/server Web applications
+     or Web sites in OCaml using advanced high level concepts.
 ;<<a_manual project="ocsigenserver" chapter="extendconfiguration"|Extendconfiguration>>
-:    allows for more options in the configuration file. 
+:    allows for more options in the configuration file.
 ;<<a_manual project="ocsigenserver" chapter="accesscontrol"|Accesscontrol>>
-:    allows to restrict the access to the sites from the config file (to request coming from a subnet, containing some headers, etc.). 
+:    allows to restrict the access to the sites from the config file (to request coming from a subnet, containing some headers, etc.).
 ;<<a_manual project="ocsigenserver" chapter="authbasic"|Authbasic>>
-:    allows to restrict the access to the sites from the config file using Basic HTTP Authentication. 
+:    allows to restrict the access to the sites from the config file using Basic HTTP Authentication.
 ;<<a_manual project="ocsigenserver" chapter="cgimod"|CGImod>>
-:    is an extension to serve CGI scripts. It may also be used to serve PHP through CGI. 
+:    is an extension to serve CGI scripts. It may also be used to serve PHP through CGI.
 ;<<a_manual project="ocsigenserver" chapter="deflatemod"|Deflatemod>>
-:    is an extension used to compress data before sending to the client. 
+:    is an extension used to compress data before sending to the client.
 ;<<a_manual project="ocsigenserver" chapter="redirectmod"|Redirectmod>>
-:    is an extension to set redirections towards other Web sites from the configuration file. 
+:    is an extension to set redirections towards other Web sites from the configuration file.
 ;<<a_manual project="ocsigenserver" chapter="revproxy"|Revproxy>>
 :    is a reverse proxy for Ocsigen server.
-      It allows to ask another server to handle the request. 
+      It allows to ask another server to handle the request.
 ;<<a_manual project="ocsigenserver" chapter="rewritemod"|Rewritemod>>
-:    is a module to make changes in incoming requests before sending them to other extensions. 
+:    is a module to make changes in incoming requests before sending them to other extensions.
 ;<<a_manual project="ocsigenserver" chapter="outputfilter"|Outputfilter>>
-:    allows to rewrite some parts of the output before sending it to the client. 
+:    allows to rewrite some parts of the output before sending it to the client.
 ;<<a_manual project="ocsigenserver" chapter="userconf"|Userconf>>
-:    allows users to have their own configuration files. 
+:    allows users to have their own configuration files.
 ;<<a_manual project="ocsigenserver" chapter="comet"|Comet>>
 :    makes server to client communications possible.
 
@@ -95,10 +95,10 @@ complex configurations of sites.
 
 
 ===Eliom===
-            
+
 Eliom is an extension for //Ocsigen server//
 that allows the creation of reliable client/server Web applications (or traditional dynamic Websites) in OCaml.
-It implements many new concepts, and as a result, its approach to application development is very different 
+It implements many new concepts, and as a result, its approach to application development is very different
 from all other Web programming tools.
 
 ====Expressiveness====

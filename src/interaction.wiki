@@ -250,7 +250,7 @@ let user_service =
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
 let user_links () =
-  ul (List.map (fun (name, _) -> 
+  ul (List.map (fun (name, _) ->
                   li [a
                         ~service:user_service [pcdata name] name])
                !users)
@@ -453,7 +453,7 @@ don't need to remember the parameter names you chose while creating
 the service, and you can change them easily without having to update
 every form in your application.
 
-In the example, note that the service is expecting a pair 
+In the example, note that the service is expecting a pair
 {{{(string * string)}}}.  The function given to {{{post_form}}} takes two
 parameters corresponding to the names of each field.
 
@@ -542,7 +542,7 @@ let connection_box () =
 Function {{{Eliom_reference.get}}} has type
 {{{'a Eliom_reference.eref -> 'a Lwt.t}}}.  The only way to use the result
 of such functions (ones that return values in the //Lwt monad//), is
-to use {{{Lwt.bind}}}. 
+to use {{{Lwt.bind}}}.
 
 <<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
 Lwt.t>> It is convenient to define an infix operator like this: <<code
@@ -624,7 +624,7 @@ Example: Grouping all the sessions for one user in a group of session makes poss
 An Eliom reference is defined with the function
 {{{Eliom_reference.eref}}}, specifying the scope of this reference
 and the default value. The function {{{Eliom_reference.get}}}
-retrieves the value of this reference for the current scope. 
+retrieves the value of this reference for the current scope.
 The default value is used for
 all sessions (or client process or group of sessions) for which it has not
 been changed using {{{Eliom_reference.set}}}.
@@ -837,7 +837,7 @@ the "database":
 let new_user_form_service =
   Eliom_service.service ~path:["registration"] ~get_params:unit ()
 
-let create_account_service = 
+let create_account_service =
   Eliom_service.post_coservice
     ~fallback:main_service
     ~post_params:(string "name" ** string "password") ()
@@ -1208,7 +1208,7 @@ struct
 	     ]]) ()
       in
       Lwt.return
-        (html 
+        (html
 	  (head (title (pcdata "")) [])
           (body [h1 [pcdata "Hello"];
 	         connection_box;]))
@@ -1227,7 +1227,7 @@ module Connected =
   Eliom_registration.Customize
     (Eliom_registration.Html5) (Connected_translate)
 
-let _ = Connected.register_service 
+let _ = Connected.register_service
   ~path:[""] ~get_params:unit
   (fun () () ->
     Lwt.return
@@ -1243,7 +1243,7 @@ can make it lighter using
 <<code language="ocaml"|
 let ( !% ) f = fun a b ->  Lwt.return (fun c -> f a b c)
 
-let _ = Connected.register_service 
+let _ = Connected.register_service
   ~path:[""] ~get_params:unit
   !% (fun () () username ->
      Lwt.return (html (head  (title (pcdata "")) [])
