@@ -62,6 +62,12 @@ then compile it with the following command ; it produce a file called
 ocamlfind ocamlc -thread -package eliom.server -c graffiti.ml
 }}}
 
+or,
+
+{{{
+eliomc -c graffiti.ml
+}}}
+
 Download the configuration file <<a_file
 src="tutorial/chapter1/start/graffiti.conf"|graffiti.conf>>, then launch
 Ocsigen server, with the following command:
