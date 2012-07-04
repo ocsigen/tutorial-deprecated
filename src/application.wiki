@@ -38,7 +38,7 @@ The same, written with fully qualified names (without {{{open}}}):
 <<code language="ocaml"|
 let main_service =
   Eliom_registration.Html5.register_service
-    ~path:["graff"] 
+    ~path:["graff"]
     ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
