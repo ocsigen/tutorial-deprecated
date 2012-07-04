@@ -224,7 +224,7 @@ module My_app =
     end)
 >>
 
-It is now possible to use {{{MyAppl}}} instead of
+It is now possible to use {{{My_app}}} instead of
 {{{Eliom_registration.Html5}}} for registering our main service
 (now at URL {{{/}}}):
 
