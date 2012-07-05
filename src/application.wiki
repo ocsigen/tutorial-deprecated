@@ -22,15 +22,12 @@ creating a very basic page.  We define the service that will implement
 this page by the following declaration:
 
 <<code language="ocaml" |
-open Lwt
 open Eliom_content.Html5.D
-open Eliom_service
-open Eliom_parameter
-open Eliom_registration.Html5
 
 let main_service =
-  register_service ~path:["graff"] ~get_params:unit
-    (fun () () -> return (html (head (title (pcdata "Page title")) [])
+  Eliom_registration.Html5.register_service
+    ~path:["graff"] ~get_params:Eliom_parameter.unit
+    (fun () () -> Lwt.return (html (head (title (pcdata "Page title")) [])
                                (body [h1 [pcdata "Graffiti"]])))>>
 
 The same, written with fully qualified names (without {{{open}}}):
@@ -450,14 +447,12 @@ module My_app =
     end)
 
 {shared{
-  open Eliom_content
   open Eliom_content.Html5.D
   let width = 700
   let height = 400
 }}
 
 {client{
-  open Eliom_content
   let draw ctx (color, size, (x1, y1), (x2, y2)) =
     ctx##strokeStyle <- (Js.string color);
     ctx##lineWidth <- float size;
@@ -478,7 +473,7 @@ let page =
            canvas_elt] ) )
 
 let onload_handler = {{
-  let canvas = Html5.To_dom.of_canvas %canvas_elt in
+  let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
   draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
@@ -533,7 +528,7 @@ following piece of code, then compile and draw !
 <<code language="ocaml"|
 let onload_handler = {{
 
-  let canvas = Html5.To_dom.of_canvas %canvas_elt in
+  let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
 
@@ -958,7 +953,7 @@ creation of the slider:
 <<code language="ocaml"|
 (* The initial image: *)
 let img =
-  Html5.To_dom.of_img
+  Eliom_content.Html5.To_dom.of_img
     (img ~alt:"canvas"
        ~src:(make_uri ~service:%imageservice ())
        ())

@@ -237,14 +237,13 @@ program:
 
 <<code language="ocaml"|
 open Eliom_content.Html5.D
-open Eliom_parameter
 
 let main_service =
-  Eliom_service.service ~path:[""] ~get_params:unit ()
+  Eliom_service.service ~path:[""] ~get_params:Eliom_parameter.unit ()
 
 let user_service =
   Eliom_service.service
-    ~path:["users"] ~get_params:(suffix (string "name")) ()
+    ~path:["users"] ~get_params:Eliom_parameter.(suffix (string "name")) ()
 
 (* User names and passwords: *)
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
@@ -331,7 +330,7 @@ these parameters:
 let connection_service =
   Eliom_service.post_service
     ~fallback:main_service
-    ~post_params:(string "name" ** string "password")
+    ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
 >>
 
@@ -734,7 +733,7 @@ Transform the connection service into a non-attached coservice:
 <<code language="ocaml"|
 let connection_service =
   Eliom_service.post_coservice'
-    ~post_params:(string "name" ** string "password")
+    ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
 >>
 
@@ -793,7 +792,7 @@ data.
 
 <<code language="ocaml"|
 let disconnection_service =
-  Eliom_service.post_coservice' ~post_params:unit ()
+  Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
 
 let disconnect_box () =
   post_form disconnection_service
@@ -835,12 +834,12 @@ the "database":
 
 <<code language="ocaml"|
 let new_user_form_service =
-  Eliom_service.service ~path:["registration"] ~get_params:unit ()
+  Eliom_service.service ~path:["registration"] ~get_params:Eliom_parameter.unit ()
 
 let create_account_service =
   Eliom_service.post_coservice
     ~fallback:main_service
-    ~post_params:(string "name" ** string "password") ()
+    ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
 let create_account_form () =
   post_form ~service:create_account_service
@@ -925,7 +924,7 @@ new POST attached coservice called {{{account_confirmation_service}}}:
 let account_confirmation_service =
   Eliom_service.post_coservice
     ~fallback:new_user_form_service
-    ~post_params:(string "name" ** string "password")
+    ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
 >>
 
@@ -1228,7 +1227,7 @@ module Connected =
     (Eliom_registration.Html5) (Connected_translate)
 
 let _ = Connected.register_service
-  ~path:[""] ~get_params:unit
+  ~path:[""] ~get_params:Eliom_parameter.unit
   (fun () () ->
     Lwt.return
      (fun username ->
@@ -1244,7 +1243,7 @@ can make it lighter using
 let ( !% ) f = fun a b ->  Lwt.return (fun c -> f a b c)
 
 let _ = Connected.register_service
-  ~path:[""] ~get_params:unit
+  ~path:[""] ~get_params:Eliom_parameter.unit
   !% (fun () () username ->
      Lwt.return (html (head  (title (pcdata "")) [])
 	      (body [h1 [pcdata ("Welcome " ^ username) ]; ])))
