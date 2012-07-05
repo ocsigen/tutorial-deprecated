@@ -1,0 +1,11 @@
+=Connection with external accounts=
+<<concepts |openID>>
+
+<<wip |Eliom has an openID module. This section has not been written yet.
+It will show an example of use of this module.>>
+
+<<code language="ocaml"|
+>>
+
+<<concept title=""|
+>>
