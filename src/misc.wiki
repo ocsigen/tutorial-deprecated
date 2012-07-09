@@ -495,3 +495,5 @@ and add a call to {{{disconnect_box}}}
        choose_drawing_form ();
        canvas;])
 >>
+
+[[site:tutorial/interaction|prev]]

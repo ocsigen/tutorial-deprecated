@@ -1248,3 +1248,6 @@ let _ = Connected.register_service
      Lwt.return (html (head  (title (pcdata "")) [])
 	      (body [h1 [pcdata ("Welcome " ^ username) ]; ])))
 >>
+
+[[site:tutorial/application|prev]]
+[[site:tutorial/misc|next]]

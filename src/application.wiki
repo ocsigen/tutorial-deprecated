@@ -992,3 +992,6 @@ src="tutorial.tar.gz"| Download the code>>.>>
   (Use the function {{{Dom_html.pixel_get}}}).
 
 >>
+
+[[site:tutorial/intro|prev]]
+[[site:tutorial/interaction|next]]
