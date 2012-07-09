@@ -35,7 +35,7 @@ OCLOSURE_REQ := oclosure_req
 
 export ELIOM_SERVER_DIR := _server
 export ELIOM_CLIENT_DIR := _client
-export ELIOM_TYPE_DIR   := .
+export ELIOM_TYPE_DIR   := ${ELIOM_SERVER_DIR}
 
 #####################################
 
@@ -104,8 +104,9 @@ clean:
 	-rm -rf ${ELIOM_CLIENT_DIR} ${ELIOM_SERVER_DIR}
 	-rm -f $(APP_NAME)_oclosure.js
 
-distclean: clean.local
+distclean: clean
 	-rm -f *~ \#* .\#*
+	-rm -f .depend
 
 ## Dependencies
 
@@ -116,7 +117,7 @@ depend: .depend
 
 ## Warning: Dependencies towards *.eliom are not handled by eliomdep yet.
 
--include .depend
+include .depend
 
 ## installation #########
 
@@ -128,7 +129,6 @@ $(STATICDIR):
 install: all $(STATICDIR)
 	cp $(APP_NAME)_oclosure.js $(STATICDIR)/$(APP_NAME)_oclosure.js
 	cp $(APP_NAME).js $(STATICDIR)/$(APP_NAME).js
-	cp -r static/* $(STATICDIR)
 
 ## oclosure #############
 
