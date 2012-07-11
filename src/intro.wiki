@@ -52,7 +52,7 @@ applications, for example:
 * the Js_of_ocaml compiler (from Ocaml bytecode to Javascript),
 * the O'Closure library, a binding for the Google closure Javascript widget
 library to be used with Js_of_ocaml,
-* the Ocsigen server Web server.
+* the Ocsigen Web server.
 
 
 ===Ocsigen server===
