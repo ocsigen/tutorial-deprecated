@@ -420,7 +420,6 @@ let main_service =
            (container) ) )
 >>
 
->>
 
 ==@@id="graffiti"@@ Collaborative drawing application==
 
@@ -500,6 +499,7 @@ let main_service =
 ===Single user drawing application===
 
 <<concepts|
+Lwt\\
 Mouse events with Lwt
 >>
 
@@ -540,9 +540,9 @@ let onload_handler = {{
 
   let open Lwt_js_events in
   ignore (mousedowns canvas
-            (fun ev -> set_coord ev; line ev >>= fun () ->
+            (fun ev -> set_coord ev; line ev ~>>= fun () ->
               Lwt.pick [mousemoves Dom_html.document line;
-		        mouseup Dom_html.document >>= line]));
+		        mouseup Dom_html.document ~>>= line]));
 
 }}
 
