@@ -5,4 +5,12 @@
 ==[[misc|Miscellaneous features]]
 = Examples: Learning by example
 ==[[chat|Chat]]
+= Mini-tutorials: Some little examples
+==[[macaque|MaCaQue: SQL queries]]
+==[[custom-conf|Custom configuration]]
+==[[external-account|External accounts]]
+==[[ocsipersist|Light database]]
+==[[pictures|Upload pictures]]
+==[[music|Playing music]]
+==[[hash-password|Protecting passwords]]
 == More coming soon ...
