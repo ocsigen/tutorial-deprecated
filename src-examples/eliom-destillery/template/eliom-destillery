@@ -167,5 +167,5 @@ mkdir -p $DESTINATION_DIR/static/css
 generate "static/css/PROJECT_NAME.css" "static/css/$PROJECT_NAME.css"
 
 #-dropdb $(APP_NAME)
-#sudo -u postgres createdb -O $(DB_USER) $(APP_NAME)
+#sudo -u postgres createdb --encoding UNICODE -O $(DB_USER) $(APP_NAME)
 #psql -U $(DB_USER) $(APP_NAME) < createdb.sql

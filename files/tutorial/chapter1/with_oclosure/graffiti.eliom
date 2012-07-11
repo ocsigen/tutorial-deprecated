@@ -141,16 +141,17 @@ let onload_handler = {{
   let line ev =
     let v = compute_line ev in
     let _ = Eliom_bus.write %bus v in
-    draw ctx v
+    draw ctx v;
+    Lwt.return ()
   in
 
   let _ = Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus) in
 
-  let open Event_arrows in
-  ignore (run (mousedowns canvas
-                 (arr (fun ev -> set_coord ev; line ev)
-                                 >>> first [mousemoves Dom_html.document (arr line);
-                                            mouseup Dom_html.document >>> (arr line)])) ());
+  let open Lwt_js_events in
+  ignore (mousedowns canvas
+            (fun ev -> set_coord ev; line ev >>= fun () ->
+              Lwt.pick [mousemoves Dom_html.document line;
+		        mouseup Dom_html.document >>= line]));
 }}
 
 let main_service =

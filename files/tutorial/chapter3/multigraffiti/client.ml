@@ -1,6 +1,5 @@
 open Eliom_content
 open Common
-open Event_arrows
 
 let draw ctx (color, size, (x1, y1), (x2, y2)) =
   ctx##strokeStyle <- (Js.string color);
@@ -15,14 +14,14 @@ let draw ctx (color, size, (x1, y1), (x2, y2)) =
 type drawing_canceller =
     { drawing_thread : unit Lwt.t;
       (* the thread reading messages from the bus *)
-      drawing_arrow : Event_arrows.canceller;
-      (* the arrow handling mouse events *)
+      drawing_event_thread : unit Lwt.t;
+      (* the thread handling mouse events *)
     }
 
-let stop_drawing { drawing_thread; drawing_arrow } =
+let stop_drawing { drawing_thread; drawing_event_thread } =
   Lwt.cancel drawing_thread;
   (* cancelling this thread also close the bus *)
-  Event_arrows.cancel drawing_arrow
+  Lwt.cancel drawing_event_thread
 
 let launch_client_canvas bus image_elt canvas_elt =
   let canvas = Html5.To_dom.of_canvas canvas_elt in
@@ -65,13 +64,16 @@ let launch_client_canvas bus image_elt canvas_elt =
   let line ev =
     let v = compute_line ev in
     let _ = Eliom_bus.write bus v in
-    draw ctx v
+    draw ctx v;
+    Lwt.return ()
   in
   let t = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
-  let drawing_arrow =
-    run (mousedowns canvas
-           (arr (fun ev -> set_coord ev; line ev) >>>
-              first [mousemoves Dom_html.document (arr line);
-                     mouseup Dom_html.document >>> (arr line)])) () in
+  let drawing_event_thread =
+    let open Lwt_js_events in
+    mousedowns canvas
+      (fun ev -> set_coord ev; line ev >>= fun () ->
+        Lwt.pick [mousemoves Dom_html.document line;
+		  mouseup Dom_html.document >>= line])
+  in
   { drawing_thread = t;
-    drawing_arrow = drawing_arrow }
+    drawing_event_thread = drawing_event_thread }
