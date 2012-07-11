@@ -993,5 +993,5 @@ src="tutorial.tar.gz"| Download the code>>.>>
 
 >>
 
-[[site:tutorial/intro|prev]]
-[[site:tutorial/interaction|next]]
+[[intro|prev]]
+[[interaction|next]]
