@@ -500,7 +500,7 @@ let main_service =
 ===Single user drawing application===
 
 <<concepts|
-Mouse events with arrows
+Mouse events with Lwt
 >>
 
 We now want to catch mouse events to draw lines with the mouse like
@@ -510,17 +510,8 @@ example by using the function <<a_api project="js_of_ocaml"| val
 Dom_events.listen >> that is the Js_of_ocaml's equivalent of
 {{{addEventListener}}}. However, this solution is at least as much
 verbose than the Javascript equivalent, hence not
-satisfactory. Another idea is to use the expressivity allowed by the
-functional part of OCaml to hide the complexity behind a nice
-combinator library and dramaticaly reduce the code size. In this
-tutorial, we will use the //experimental// <<a_api
-project="js_of_ocaml"| module Event_arrows >> module from the
-Js_of_ocaml's library.
-
-<<wip|**Warning** The event arrows are an experimental
-      feature. Feedbacks and suggestions sent to the
-      [[https://sympa.mancoosi.univ-paris-diderot.fr/wws/info/ocsigen|Ocsigen
-      mailing-list]] will help to improve the API. >>
+satisfactory. Js_of_ocaml's library provides a much easier way to do that,
+together with Lwt.
 
 Replace the {{{onload_handler}}} of the previous example by the
 following piece of code, then compile and draw !
@@ -545,13 +536,14 @@ let onload_handler = {{
     ("#ff9933", 5, (oldx, oldy), (!x, !y))
   in
 
-  let line ev = draw ctx (compute_line ev) in
+  let line ev = draw ctx (compute_line ev); Lwt.return () in
 
-  let open Event_arrows in
-  ignore (run (mousedowns canvas
-                 (arr (fun ev -> set_coord ev; line ev) >~>>
-                  first [mousemoves Dom_html.document (arr line);
-                         mouseup Dom_html.document >~>> (arr line)])) ())
+  let open Lwt_js_events in
+  ignore (mousedowns canvas
+            (fun ev -> set_coord ev; line ev >>= fun () ->
+              Lwt.pick [mousemoves Dom_html.document line;
+		        mouseup Dom_html.document >>= line]));
+
 }}
 
 >>
@@ -565,52 +557,92 @@ coordinates--the event data sent as a parameter.
 The last four lines of code, that implements the event handling loop, could be
 read as: for each {{{mousedown}}} event on the canvas, do
 {{{set_coord}}} then {{{line}}} (this will draw a dot), then
-({{{>>>}}}) behave as the {{{first}}} of the two following lines to
+behave as the {{{first}}} of the two following lines to
 terminate:
 
 * For each mousemove event on the document, call {{{line}}} (never terminates)
 * If there is a mouseup event on the document, call {{{line}}}.
 
+<<concept title="More on Lwt" |
+
+Function {{{Eliom_reference.get}}} has type
+{{{'a Eliom_reference.eref -> 'a Lwt.t}}}.  The only way to use the result
+of such functions (ones that return values in the //Lwt monad//), is
+to use {{{Lwt.bind}}}.
+
+<<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
+Lwt.t>> It is convenient to define an infix operator like this: <<code
+language="ocaml"| let (~>>=) = Lwt.bind>> Then the code <<code
+language="ocaml"| f () ~>>= fun x -> >> has to be read as <<code
+language="ocaml"| let x = f () in>> but only for functions returning a
+value in the Lwt monad.\\
+
+For more clarity, there is a syntax extension for Lwt, defining a
+new keyword {{{lwt}}} to be used instead of {{{let}}} for Lwt
+functions: <<code language="ocaml"| lwt x = f () in>>
+
+{{{Lwt.return}}} creates a terminated thread from a value (without
+inserting a cooperation point):
+<<code language="ocaml"| Lwt.return : 'a -> 'a Lwt.t>>
+Use it when you must return something in the Lwt
+monad (for example in a service handler, or often after a
+{{{Lwt.bind}}}).
+
+=====Why Lwt?=====
+
+An Eliom application is a cooperative program, as the server must be
+able to handle several requests at the same time.  Ocsigen is using
+cooperative threading instead of the more widely used preemptive
+threading paradigm. It means that no scheduler will interrupt your
+functions whenever it wants. Switching from one thread to another is
+done only when there is a //cooperation point//.
+
+We will use the term //cooperative functions// to identify functions
+implemented in cooperative way, that is: if something takes
+(potentially a long) time to complete (for example reading a value
+from a database), they insert a cooperation point to let other threads
+run.  Cooperative functions return a value in the Lwt monad
+(that is, a value of type {{{'a Lwt.t}}} for some type {{{'a}}}).
+
+In our example, the function {{{Eliom_state.get}}} may introduce a
+cooperation point, because if your Eliom reference is persistent (see
+below), it is stored in a database on the hard drive. That's why it
+returns a value in the Lwt monad.
+
+Using cooperative threads has a huge advantage: as you know precisely
+where cooperation points are, //you need very few mutexes// and you
+have //very few risks of deadlocks//!
+
+Using Lwt is very easy and does not cause troubles, provided you never
+use //blocking functions// (non cooperative functions).  //Blocking
+functions can cause the entre server to hang!// Remember:
+
+* Use the functions from module {{{Lwt_unix}}} instead of module
+ {{{Unix}}},
+* Use cooperative database libraries (like PG'Ocaml for Lwt),
+* If you want to use a non-cooperative function, detach it in another
+  preemptive thread using <<a_api project="lwt" | val
+  Lwt_preemptive.detach >>,
+* If you want to launch a long-running computation, manually insert
+  cooperation points using {{{Lwt_unix.yield}}},
+* {{{Lwt.bind}}} does not introduce any cooperation point.
+
+>> <<| END "encadre" >>
+
 <<concept
 
-  title="Handling events with arrows"|
+  title="Handling events with Lwt"|
 
-  The module <<a_api project="js_of_ocaml" | module Event_arrows>>
-  allows us to define event listeners easily (using arrows). An arrow
-  from {{{'a}}} to {{{'b}}} has type {{{('a, 'b) Event_arrows.t}}}.
-  The operator {{{> > >}}} is used to bind the output
-  of an arrow to the input of the following one.
+  The module <<a_api project="js_of_ocaml" | module Lwt_js_events>>
+  allows to define event listeners easily using Lwt. 
+  For example <<a_api project="js_of_ocaml" | val Lwt_js_events.click >>
+  takes a DOM element and returns a Lwt thread that will wait until
+  a click occures on this element.
 
-  For example {{{(mouseup Dom_html.document)}}} is an arrow from
-  {{{'a}}} to {{{Dom_html.mouseEvent Js.t}}}.
+  Functions with an ending "s" (<<a_api project="js_of_ocaml" | val Lwt_js_events.clicks >>, <<a_api project="js_of_ocaml" | val Lwt_js_events.mousedowns >>, ...) start again waiting after the handler terminates.
 
-  The combinator <<a_api project="js_of_ocaml" | val
-  Event_arrows.arr >> transforms a function of type {{{'a -> 'b}}} into
-  an arrow of type {{{('a, 'b) Event_arrows.t}}}. There is also a
-  combinator <<a_api project="js_of_ocaml" | val
-  Event_arrows.lwt_arr >> to transform a function of type {{{'a -> 'b Lwt.t}}}
-  into an arrow of type {{{('a, 'b) Event_arrows.t}}}.
-
-  Combinators like <<a_api project="js_of_ocaml" | val
-  Event_arrows.mousedowns>> or <<a_api project="js_of_ocaml" | val
-  Event_arrows.mousemoves>> (ending by "s") take as parameters the
-  target of the event and an arrow that will be called each time the
-  event occures.
-
-  The function <<a_api project="js_of_ocaml" | val Event_arrows.run >>
-  (of type {{{('a, unit) t -> 'a -> canceller}}}) sets up an event
-  handler. It returns a "canceller" that you can use to cancel it:
-
-
-<<code language="ocaml"|
-let c = Event_arrows.run ( ... ) in
-...
-Event_arrows.cancel c
->>
-
-  The combinator <<a_api project="js_of_ocaml" | val
-  Event_arrows.first>> takes a list of arrows and behaves as the first
-  to terminate. All the other arrows in the list are cancelled.
+  <<a_api project="lwt" | val Lwt.pick >> behaves as the first thread in the
+  list to terminate, and cancels the others.
 
 >>
 

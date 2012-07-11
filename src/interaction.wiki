@@ -467,8 +467,7 @@ Eliom_content.Html5.D.int_input >> as it is a name for a string.  >>
 
 <<concepts|
 
-Session data, Eliom references\\
-Lwt
+Session data, Eliom references
 
 >>
 
@@ -536,71 +535,6 @@ let connection_box () =
                      user_links ()])));
 >>
 
-<<concept title="More on Lwt" |
-
-Function {{{Eliom_reference.get}}} has type
-{{{'a Eliom_reference.eref -> 'a Lwt.t}}}.  The only way to use the result
-of such functions (ones that return values in the //Lwt monad//), is
-to use {{{Lwt.bind}}}.
-
-<<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
-Lwt.t>> It is convenient to define an infix operator like this: <<code
-language="ocaml"| let (~>>=) = Lwt.bind>> Then the code <<code
-language="ocaml"| f () ~>>= fun x -> >> has to be read as <<code
-language="ocaml"| let x = f () in>> but only for functions returning a
-value in the Lwt monad.\\
-
-For more clarity, there is a syntax extension for Lwt, defining a
-new keyword {{{lwt}}} to be used instead of {{{let}}} for Lwt
-functions: <<code language="ocaml"| lwt x = f () in>>
-
-{{{Lwt.return}}} creates a terminated thread from a value (without
-inserting a cooperation point):
-<<code language="ocaml"| Lwt.return : 'a -> 'a Lwt.t>>
-Use it when you must return something in the Lwt
-monad (for example in a service handler, or often after a
-{{{Lwt.bind}}}).
-
-=====Why Lwt?=====
-
-An Eliom application is a cooperative program, as the server must be
-able to handle several requests at the same time.  Ocsigen is using
-cooperative threading instead of the more widely used preemptive
-threading paradigm. It means that no scheduler will interrupt your
-functions whenever it wants. Switching from one thread to another is
-done only when there is a //cooperation point//.
-
-We will use the term //cooperative functions// to identify functions
-implemented in cooperative way, that is: if something takes
-(potentially a long) time to complete (for example reading a value
-from a database), they insert a cooperation point to let other threads
-run.  Cooperative functions return a value in the Lwt monad
-(that is, a value of type {{{'a Lwt.t}}} for some type {{{'a}}}).
-
-In our example, the function {{{Eliom_state.get}}} may introduce a
-cooperation point, because if your Eliom reference is persistent (see
-below), it is stored in a database on the hard drive. That's why it
-returns a value in the Lwt monad.
-
-Using cooperative threads has a huge advantage: as you know precisely
-where cooperation points are, //you need very few mutexes// and you
-have //very few risks of deadlocks//!
-
-Using Lwt is very easy and does not cause troubles, provided you never
-use //blocking functions// (non cooperative functions).  //Blocking
-functions can cause the entre server to hang!// Remember:
-
-* Use the functions from module {{{Lwt_unix}}} instead of module
- {{{Unix}}},
-* Use cooperative database libraries (like PG'Ocaml for Lwt),
-* If you want to use a non-cooperative function, detach it in another
-  preemptive thread using <<a_api project="lwt" | val
-  Lwt_preemptive.detach >>,
-* If you want to launch a long-running computation, manually insert
-  cooperation points using {{{Lwt_unix.yield}}},
-* {{{Lwt.bind}}} does not introduce any cooperation point.
-
->> <<| END "encadre" >>
 
 <<concept title="Eliom references and extended sessions" |
 

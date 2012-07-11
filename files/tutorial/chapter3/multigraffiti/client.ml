@@ -20,7 +20,7 @@ type drawing_canceller =
 
 let stop_drawing { drawing_thread; drawing_event_thread } =
   Lwt.cancel drawing_thread;
-  (* cancelling this thread also close the bus *)
+  (* cancelling this thread also closes the bus *)
   Lwt.cancel drawing_event_thread
 
 let launch_client_canvas bus image_elt canvas_elt =
