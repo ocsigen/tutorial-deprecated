@@ -1183,5 +1183,5 @@ let _ = Connected.register_service
 	      (body [h1 [pcdata ("Welcome " ^ username) ]; ])))
 >>
 
-[[application|prev]]
-[[misc|next]]
+[[href:application|prev]]
+[[href:misc|next]]

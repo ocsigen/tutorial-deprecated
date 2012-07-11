@@ -1025,5 +1025,5 @@ src="tutorial.tar.gz"| Download the code>>.>>
 
 >>
 
-[[intro|prev]]
-[[interaction|next]]
+[[href:intro|prev]]
+[[href:interaction|next]]
