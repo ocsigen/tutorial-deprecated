@@ -150,7 +150,6 @@ It contains almost all the server parts of the code.
 open Eliom_content
 open Eliom_content.Html5.D
 open Common
-open Lwt
 
 module My_app =
   Eliom_registration.App (
@@ -454,7 +453,7 @@ end
 module Connected =
   Eliom_registration.Customize ( My_app ) ( Connected_translate )
 
-let ( !% ) f = fun a b -> return (fun c -> f a b c)
+let ( !% ) f = fun a b -> Lwt.return (fun c -> f a b c)
 
 >>
 
