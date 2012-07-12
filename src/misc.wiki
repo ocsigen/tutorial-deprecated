@@ -135,9 +135,9 @@ let launch_client_canvas bus image_elt canvas_elt =
   let drawing_event_thread =
     let open Lwt_js_events in
     mousedowns canvas
-      (fun ev -> set_coord ev; line ev >>= fun () ->
+      (fun ev -> set_coord ev; line ev ~>>= fun () ->
         Lwt.pick [mousemoves Dom_html.document line;
-		  mouseup Dom_html.document >>= line])
+		  mouseup Dom_html.document ~>>= line])
   in
   { drawing_thread = t;
     drawing_event_thread = drawing_event_thread }
