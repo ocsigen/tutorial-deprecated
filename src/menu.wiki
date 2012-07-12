@@ -8,7 +8,6 @@
 = Mini-tutorials: Some little examples
 ==[[macaque|MaCaQue: SQL queries]]
 ==[[custom-conf|Custom configuration]]
-==[[external-accounts|External accounts]]
 ==[[ocsipersist|Light database]]
 ==[[pictures|Upload pictures]]
 ==[[music|Playing music]]
