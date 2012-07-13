@@ -292,7 +292,7 @@ The function {{{register_service}}} is just a shortcut for these two functions.
 Ultimately we'll want to use a more sophisticated database module for
 managing user information, which we will write later in this tutorial.
 You can use any OCaml database binding (for example
-[[http://developer.berlios.de/projects/pgocaml/|PGOcaml]] to program
+[[http://pgocaml.forge.ocamlcore.org/|PGOcaml]] to program
 database queries). We will use our own database library called
 [[wiki(25):|Macaque]], which implements typed requests using
 //comprehensions//.
