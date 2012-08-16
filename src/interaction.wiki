@@ -1169,19 +1169,5 @@ let _ = Connected.register_service
                    (body [h1 [pcdata ("Welcome " ^ username) ]; ]))))
 >>
 
-The type of {{{Connected.register_service}}} forces us to have the
-heavy notation: {{{Lwt.return (fun username -> Lwt.return...)}}}. We
-can make it lighter using
-
-<<code language="ocaml"|
-let ( !% ) f = fun a b ->  Lwt.return (fun c -> f a b c)
-
-let _ = Connected.register_service
-  ~path:[""] ~get_params:Eliom_parameter.unit
-  !% (fun () () username ->
-     Lwt.return (html (head  (title (pcdata "")) [])
-	      (body [h1 [pcdata ("Welcome " ^ username) ]; ])))
->>
-
 [[href:application|prev]]
 [[href:misc|next]]

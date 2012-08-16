@@ -453,8 +453,6 @@ end
 module Connected =
   Eliom_registration.Customize ( My_app ) ( Connected_translate )
 
-let ( !% ) f = fun a b -> Lwt.return (fun c -> f a b c)
-
 >>
 
 We replace the previous {{{main_service}}} registration :
@@ -470,25 +468,16 @@ by :
 
 <<code language="ocaml"|
 let () = Connected.register ~service:main_service
-  !% (fun () () username ->
-    make_page
-      [h1 [pcdata ("Welcome to Multigraffiti " ^ username)];
-       choose_drawing_form ()])
+  (fun () () ->
+    Lwt.return
+      (fun username ->
+        make_page
+          [h1 [pcdata ("Welcome to Multigraffiti " ^ username)];
+          choose_drawing_form ()]))
 >>
 
-to use that, in {{{graffiti.eliom}}} we just replace
-
-<<code language="ocaml"|
-let () = My_app.register ~service:multigraffiti_service
-  (fun name () -> ... )
->>
-by
-<<code language="ocaml"|
-let () = Connected.register ~service:multigraffiti_service
-  !% (fun name () username -> ...
->>
-
-and add a call to {{{disconnect_box}}}
+to use that, in {{{graffiti.eliom}}} we just replace add a call
+to {{{disconnect_box}}}
 <<code language="ocaml"|
       [h1 [pcdata name];
        disconnect_box ();
