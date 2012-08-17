@@ -2,8 +2,6 @@
 
 <<concepts |Type safe database requests>>
 
-In this section we will replace our dumb user handling code ({{{check_pwd}}}, {{{connection_service}}} and {{{create_account_service}}}) by one using a real database backend.
-
 We will implement our database access function using
 the Macaque library, that allows easy manipulation of Postgresql
 database fully compatible with Lwt. (For more information see
@@ -14,7 +12,7 @@ database. For more information on how to set up and run it, see
 [[http://www.postgresql.org/docs/9.0/static/index.html|Postgresql
 manual]].
 
-When the base is up and running, we create the base by running is a shell:
+When the base is up and running, we create the base by running in a shell:
 <<code language="sh"|
 $ createdb testbase
 >>
@@ -24,7 +22,8 @@ Then we create the {{{users}}} table, by executing this sql script:
 <<code language="sql"| CREATE TABLE users (
        login text NOT NULL,
        password text NOT NULL
-); >>
+);
+>>
 
 We save it under {{{create_table.sql}}} and run
 
@@ -60,7 +59,7 @@ let get_db : unit -> unit Lwt_PGOCaml.t Lwt.t =
 >>
 
 Then we declare the table on which we will work and the different
-requests we do on it. (We no longer need the {{{users}}} array reference)
+requests we do on it.
 
 <<code language="ocaml"|
 let table = <:table< users (
@@ -112,11 +111,11 @@ let () = Eliom_registration.Action.register
 	| false -> Lwt.return ()))
 >>
 
-We need to reference {{{macaque}}} in the {{{makefile}}} :
+We need to reference {{{macaque}}} in the {{{Makefile}}} :
 {{{
-SERVER_PACKAGE := cairo, unix, macaque.syntax
+SERVER_PACKAGE := macaque.syntax
 }}}
-and in {{{graffiti.conf.in}}} :
+and in {{{ocsigenserver.conf}}} :
 {{{
 <extension findlib-package="macaque"/>
 }}}

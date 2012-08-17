@@ -10,7 +10,7 @@ We first create a table holding ocaml values:
 let user_table = Ocsipersist.open_table "user_table"
 >>
 
-Then we can easily replace the user management code:
+Then we can easily handle the user management code:
 
 <<code language="ocaml"|
 let check_pwd name pwd =

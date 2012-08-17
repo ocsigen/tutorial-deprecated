@@ -7,16 +7,14 @@ image. The images will be saved to the filesystem using the module
 with the saved images using <<a_api project="eliom" version="dev"| module Atom_feed >>.
 
 We save the images in the directory containing the static contents
-under the directory {{{graffiti_saved/username}}}. The {{{username}}}
+under the directory {{{images_saved/username}}}. The {{{username}}}
 directory is created if needed. If it already exists {{{mkdir}}} fails
 and we do nothing.
 
 We will add this code in a new file:
 ===={{{feed.ml}}}====
 <<code language="ocaml"|
-open Eliom_content
 open Eliom_content.Html5.D
-open Server
 
 let static_dir = "/tmp/static/"
 
@@ -46,7 +44,9 @@ let image_info_table = Ocsipersist.open_table "image_info_table"
 
 For each user, we stock a value of type\\
 {{{ int * CalendarLib.Calendar.t * ((int * CalendarLib.Calendar.t) list)}}}.
-The first integer is the name under which will be saved the image, the first time is the last update for that user and the list contains the names and times of old images. We need those times to timestamp the entries of the feed.
+The first integer is the name under which will be saved the image, the first
+time is the last update for that user and the list contains the names and
+times of old images. We need those times to timestamp the entries of the feed.
 
 <<code language="ocaml"|
 let save_image username =
@@ -93,7 +93,7 @@ let rec entries name list = function
 	let title = Atom_feed.plain
 	  ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Eliom_content.Xhtml.F.make_uri ~absolute:true
+	  make_uri ~absolute:true
 	    ~service:(Eliom_service.static_dir ())
 	    (local_filename name n)
 	in
@@ -103,7 +103,7 @@ let rec entries name list = function
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = Eliom_content.Xhtml.F.make_uri
+  let id = make_uri
     ~absolute:true
     ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
@@ -119,29 +119,12 @@ let feed name () =
 let () = Eliom_atom.Reg.register ~service:feed_service feed
 >>
 
-
-In {{{graffiti.eliom}}}, we add a link to the feed and a save button
-that appears only if the user owns the page.
+And then use the new module as follow:
 
 <<code language="ocaml"|
-open Server
-open Feed
-
-...
-
-
-  disconnect_box ();
-  choose_drawing_form ();
-  a feed_service [pcdata "atom feed"] name;
+  [ a Feed.feed_service [pcdata "atom feed"] name;
     div (if name = username
-      then [save_image_box name]
+      then [Feed.save_image_box name]
       else [pcdata "no saving"]);
-    canvas;])
+  ]
 >>
-
-Before running, make sure {{{feed}}} is targeted in the Makefile :
-{{{
-SERVER_FILES = common.ml server.ml feed.ml ${wildcard *.eliom}
-}}}
-and edit
-{{{let static_dir = "/tmp/static/"}}} to adapt to your configuration.

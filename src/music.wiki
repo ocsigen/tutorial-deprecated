@@ -6,8 +6,6 @@ changes. This emphasises the fact that browsing inside an application
 does not stop the client side code: the music keeps playing when the
 content of the page and the url change.
 
-===={{{graffiti.eliom}}}====
-
 We first create the player node at toplevel.
 <<code language="ocaml"|
 let player =
@@ -20,13 +18,7 @@ let player =
        [pcdata "Your browser does not support audio element" ])
 >>
 
-And we insert the player in the page:
-
-<<code language="ocaml"|
-       ...
-       canvas;
-       player])
->>
+And we insert the player in the page.
 
 And that's all ! Since the {{{player}}} node is declared unique, no new
 player is created when the page changed: this is exact same node.
@@ -36,5 +28,6 @@ element is manipulated. That happens when we change the page: to
 continue playing the player should not be present as an element of the
 page>>
 
-To run this example, you will need to add an ogg file in the static directory. If you can't find one, there is one here:
+To run this example, you will need to add an ogg file in the static directory.
+If you can't find one, there is one here:
 [[http://www.gnu.org/music/free-software-song.html]].
