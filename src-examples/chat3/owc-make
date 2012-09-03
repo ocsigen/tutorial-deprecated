@@ -1,0 +1,83 @@
+#! /bin/bash
+
+HELP(){
+echo
+echo "owc-make is a wrapper over Makefile. You can call any rule the same way
+you'd do with Makefile. Its interest is double: you need owc-make to configure
+the Makefile the first time you use it and you will also need it in case you
+have several sub-directories containing (.ml|.eliom) files you want compiled,
+because the Makefiles on their own don't handle that on their own. So it is
+mandatory that you use owc-make instead of make in that case. Remember you
+*cannot* have two source files named identically."
+echo
+echo "Usage:"
+echo "  owc-make setup <appName>        Configures the Makefiles with <appName>."
+echo "  owc-make <rule>                 Runs make <rule>."
+echo "  owc-make help                   Displays this message."
+echo
+}
+
+if [ $# = 1 ] && [ $1 = help ]; then HELP; exit 0; fi
+
+if [ $# = 2 ] && [ $1 = setup ]; then
+    appName="$2"
+    vars=$(head -19 Makefile | tail -11 | sed 's| *:= |=|g')
+    set ${vars}
+    for var in $@; do eval ${var}; done
+    if [ -f Makefile.common ]; then
+        echo "owc-make: Makefile.common already exists. I won't generate mine."
+    else
+        m4 -D appName="${appName}" Makefile.common.m4 > Makefile.common
+        if [ $? = 0 ]; then echo "owc-make: Created Makefile.common."; fi
+    fi
+    if [ -f "${appName}".conf ]; then
+        echo "owc-make: ${appName}.conf already exists. I won't generate mine."
+    else
+        m4 \
+            -D appName="${appName}" \
+            -D STATIC_DIR=$(pwd)/${STATIC_DIR} \
+            -D DATA_DIR=$(pwd)/${DATA_DIR} \
+            -D LOG_DIR=$(pwd)/${LOG_DIR} \
+            -D COMMAND_PIPE=$(pwd)/${RUN_DIR}/${OCS_COM} \
+            -D PORT=${PORT} \
+            APPNAME.conf.m4 > "${appName}".conf
+        if [ $? = 0 ]; then echo "owc-make: Created ${appName}.conf."; fi
+    fi
+    mkdir -pv ${LOCAL_DIR}
+    mkdir -pv ${STATIC_DIR}
+    mkdir -pv ${VAR_DIR}
+    mkdir -pv ${DATA_DIR}
+    mkdir -pv ${LOG_DIR}
+    mkdir -pv ${RUN_DIR}
+    exit 0
+fi
+
+find . -maxdepth 1 -name "*.ml" > .srcsHere
+find . -maxdepth 1 -name "*.eliom" >> .srcsHere
+find . -mindepth 2 -name "*.ml" > .srcsBelow
+find . -mindepth 2 -name "*.eliom" >> .srcsBelow
+
+if [ "$(cat .srcsBelow)" ]; then
+    cat .srcsHere .srcsBelow  > .srcsAll
+    dups=$(while read src; do basename ${src}; done < .srcsAll | sort | uniq -d)
+    if [ "${dups}" ]; then
+	echo "owc-make: Error: clash name with the following files:"
+	for dup in ${dups}; do
+	    cat .srcsAll | grep ${dup}; echo;
+	done
+	exit 1;
+    else
+	while read file; do
+	    cp ${file} .
+	    touch -r ${file} $(basename ${file})
+	done < .srcsBelow
+    fi
+fi
+
+make $@
+
+while read below; do basename ${below}; done < .srcsBelow | xargs rm
+rm .srcs*
+
+
+

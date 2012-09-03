@@ -1,0 +1,111 @@
+
+.conversation {
+  vertical-align:text-top;
+  border: 1px dotted gray;
+  display: inline-block;
+  width: 200px;
+  max-height: 400px;
+  margin: 10px;
+}
+
+.conversation.disabled {
+  background-color: rgba(0,0,0,0.35);
+}
+
+.conversation .close {
+  color: rgba(0,0,0,0.7);
+  background-color: rgba(0,0,0,0.37);
+  float: right;
+  padding: 0.5em 1em 0.5em 1em;
+  cursor: pointer;
+}
+
+.conversation .close:after {
+  content: "\00274C";
+}
+
+.conversation .participants {
+  display: inline-block;
+  list-style: none;
+  padding: 0.5em;
+  margin: 0;
+}
+
+.participants_complete {
+  border-bottom: 1px dotted gray;
+  padding: 0;
+  margin: 0;
+}
+
+.conversation .prompt {
+  width: 99%;
+}
+
+.conversation .messages {
+  list-style: none;
+  margin: 0.5em;
+  padding: 0;
+}
+
+.conversation .messages .content {
+  margin-left: 0.5em;
+}
+
+.conversation .messages .user_name:after {
+  content: ":";
+}
+
+.note {
+  color: gray;
+}
+
+body h5 {
+  margin: 0;
+}
+
+.info_label {
+  font-weight: bold;
+}
+
+.users_list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  vertical-align:text-top;
+  width: auto;
+}
+.users_list li {
+  padding: 0;
+  margin: 0 0.2em 0 0.2em;
+  display: inline;
+}
+.users_list li .user_name {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.conversations {
+  width: 800px;
+  display: inline-block;
+  vertical-align:text-top;
+}
+
+.user_name {
+  user-select: none;
+  font-style: italic;
+  border-radius: 4px;
+  color: black;
+  white-space: nowrap;
+  padding: 0;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+}
+
+.logout_form {
+  display: inline;
+}
