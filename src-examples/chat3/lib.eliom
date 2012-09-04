@@ -1,6 +1,7 @@
 
 {shared{
 
+  open Eliom_content
   open Eliom_lib
   open Lwt_ops
   module Int_set = struct
@@ -144,7 +145,6 @@
 }}
 
 {client{
-  open Eliom_content
   let reflect_list_signal : Html5_types.ul Html5.D.elt -> ('a -> Html5_types.li_content Html5.elt list) -> 'a list React.S.t -> unit =
     fun li_element li_content signal ->
       Lwt_react.S.keep
@@ -155,6 +155,27 @@
                 (List.map (fun element -> Html5.F.li (li_content element)) elements))
            signal)
 
+}}
+
+let messages_id = Html5.Id.new_elt_id ()
+let messages =
+  Html5.Id.create_named_elt ~id:messages_id
+    (Html5.D.(ul ~a:[a_class ["messages"]] []))
+
+{client{
+
+  let show_message fmt =
+    Printf.ksprintf
+      (fun str ->
+         Eliom_client.withdom
+           (fun () ->
+              let li = Html5.D.(li [pcdata str]) in
+              Html5.Manip.Named.appendChild %messages_id li;
+              Lwt.ignore_result
+                (lwt () = Lwt_js.sleep 3.0 in
+                 Html5.Manip.Named.removeChild %messages_id li;
+                 Lwt.return ())))
+      fmt
 }}
 
 (*
@@ -228,3 +249,4 @@
 }}
 
  *)
+

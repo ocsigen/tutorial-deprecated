@@ -109,3 +109,13 @@ body h5 {
 .logout_form {
   display: inline;
 }
+
+ul.messages {
+  color: rgba(0,0,0,0.7);
+  padding-left: 0;
+  font-size: small;
+}
+
+ul.messages li {
+  list-style: none;
+}

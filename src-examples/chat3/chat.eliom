@@ -144,9 +144,14 @@ let init_dialog =
                 let conversation = create_conversation users in
                 user_info.send_chat_event (Append_conversation (conversation, other));
                 other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
+                ignore {unit{
+                  show_message "Dialog with %s created" (User.to_string %other)
+                }};
                 Lwt.return ()
             | None ->
-                (* ignore {unit{ show_messege "Could not create dialog"; }}; *)
+                ignore {unit{
+                  show_message "Could not create dialog"
+                }};
                 Lwt.return ()))
 
 let cancel_dialog =
@@ -166,9 +171,14 @@ let cancel_dialog =
                                Lwt.return ()
                            | None -> Lwt.return ()))
                    conversation.users;
+                 ignore {unit{
+                   show_message "Dialog with %s canceled" (User_set.to_string %(conversation.users))
+                 }};
                  Lwt.return ()
              | None ->
-                 (* ignore {unit{ show_messege "Could not cancel dialog"; }}; *)
+                 ignore {unit{
+                   show_message "Could not cancel dialog"
+                 }};
                  Lwt.return ())))
 
 
@@ -481,6 +491,7 @@ let connected_main_handler { user; chat_events } =
             connected_users_list;
           ];
           conversations_elt;
+          messages;
         ]))
 
 let disconnected_main_handler () () =
@@ -495,7 +506,7 @@ let disconnected_main_handler () () =
               table
                 (tr [
                   td [label ~a:[a_for username] [pcdata "Name"]];
-                  td [string_input ~a:[a_id "name"] ~input_type:`Text ~name:username ()]
+                  td [string_input ~a:[a_id "name"; a_autofocus `Autofocus] ~input_type:`Text ~name:username ()]
                 ])
                 [tr [
                   td [label ~a:[a_for password] [pcdata "Password"]];
