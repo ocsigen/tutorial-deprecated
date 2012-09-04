@@ -58,7 +58,7 @@
 
   module Client_processes = struct
 
-    module Make (Info : sig type t val get : unit -> t Lwt.t val to_string : t -> string end) : sig
+    module Make (Info : sig type t val get : unit -> t Lwt.t end) : sig
       val signal : Info.t Int_map.t React.S.t
       val assert_process : unit -> (int * bool) Lwt.t
       val erase_process : unit -> unit
@@ -72,9 +72,7 @@
       let signal, modify =
         let signal, set = React.S.create ~eq:(Int_map.equal (fun _ _ -> true)) Int_map.empty in
         let modify f =
-          let ps = f (React.S.value signal) in
-          debug "Client_processes: %s" (Int_map.to_string Info.to_string ps);
-          set ps
+          set (f (React.S.value signal))
         in
         signal, modify
 
@@ -111,9 +109,13 @@
                      Dom_html.window##onfocus <-
                        Dom.handler
                          (fun _ ->
-                            debug "onfocus";
                             Lwt.ignore_result
-                              ( %(server_function (assert_process ~id)) ());
+                              (try_lwt
+                                 lwt _ = %(server_function (assert_process ~id)) () in
+                                 Lwt.return ()
+                               with exn ->
+                                 debug_exn "Cannot assert process" exn;
+                                 Lwt.return ());
                             Js._true))
               }};
               modify (Int_map.add id info);
@@ -124,16 +126,18 @@
     end
 
     include Make (struct type t = unit let get () = Lwt.return () let to_string () = "()" end)
+
     let signal : Int_set.t React.S.t =
       React.S.map
         (fun map ->
-           let res = List.fold_right Int_set.add
+           List.fold_right Int_set.add
              (List.map fst (Int_map.bindings map))
-             Int_set.empty
-           in
-           debug "Client_processes.signal: %s" (Int_set.to_string res);
-           res)
+             Int_set.empty)
         signal
+
+    let accumulate_infos f =
+      (fun client_process_info ->
+         f (List.map snd (Int_map.bindings client_process_info)))
 
   end
 

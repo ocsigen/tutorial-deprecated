@@ -8,6 +8,9 @@
 
 }}
 
+(******************************************************************************)
+(*                               User management                              *)
+
 {shared{
 
   module User = struct
@@ -66,64 +69,54 @@ let user_verify ~username ~password =
   }
 
   type chat_event =
-    | Append of conversation * User.t
-    | Remove of conversation
+    | Append_conversation of conversation * User.t
+    | Remove_conversation of conversation
 
 }}
 
 type user_info = {
   user : User.t;
-  chat_events : chat_event Eliom_react.Down.t;
+  chat_events : chat_event React.E.t;
   send_chat_event : chat_event -> unit;
 }
 
 let create_user_info user =
-  let event, send = React.E.create () in
-  { user;
-    chat_events = Eliom_react.Down.of_react event;
-    send_chat_event = fun x -> send x }
+  let chat_events, send_chat_event = React.E.create () in
+  { user; chat_events; send_chat_event }
 
-module Conversation_table =
-  Weak.Make
-    (struct
-       type t = conversation
-       let equal c1 c2 = c1.id = c2.id
-       let hash { id } = id
-     end)
+(******************************************************************************)
+(*                         Book keeping conversations                         *)
 
-let conversation_table = Conversation_table.create 13
+let conversation_table = Hashtbl.create 13
 
 let create_conversation =
   let next = counter () in
   fun users ->
+    let id = next () in
     let conversation = {
-      id = next ();
+      id; users;
       bus = Eliom_bus.create ~scope:Eliom_common.site Json.t<conversation_event>;
-      users;
-      elt_id = Html5.Id.new_elt_id ();
-      prompt_id = Html5.Id.new_elt_id ();
+      elt_id = Html5.Id.new_elt_id ~global:false ();
+      prompt_id = Html5.Id.new_elt_id ~global:false ();
     } in
-    Conversation_table.add conversation_table conversation;
+    Hashtbl.replace conversation_table id conversation;
     conversation
 
-let fold_conversations f x =
-  Conversation_table.fold f conversation_table x
-
 let get_conversation id =
-  let find conversation sofar =
-    if conversation.id = id then
-      Some conversation
-    else sofar
-  in
-  fold_conversations find None
+  try Some (Hashtbl.find conversation_table id)
+  with Not_found -> None
 
 let get_conversations user =
-  fold_conversations
-    (fun conversation sofar ->
-       if User_set.mem user conversation.users then
-         conversation :: sofar
-       else sofar)
-    []
+  let f _ conversation sofar =
+    if User_set.mem user conversation.users then
+      conversation :: sofar
+    else sofar
+  in
+  List.rev (Hashtbl.fold f conversation_table [])
+
+let forget_conversation conversation =
+  Hashtbl.remove conversation_table conversation.id
+
 (******************************************************************************)
 (*                                 User info                                  *)
 
@@ -132,6 +125,13 @@ let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
 let get_other_user_info other =
   let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
   Eliom_reference.Ext.get state user_info_eref
+
+let set_other_user_info other value =
+  let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
+  Eliom_reference.Ext.set state user_info_eref value
+
+(******************************************************************************)
+(*                 RPC Functions for starting/ending dialogs                  *)
 
 let init_dialog =
   server_function
@@ -142,30 +142,34 @@ let init_dialog =
             | Some other_user_info ->
                 let users = User_set.from_list [user_info.user; other] in
                 let conversation = create_conversation users in
-                user_info.send_chat_event (Append (conversation, other));
-                other_user_info.send_chat_event (Append (conversation, user_info.user));
-                Lwt.return true
+                user_info.send_chat_event (Append_conversation (conversation, other));
+                other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
+                Lwt.return ()
             | None ->
-                Lwt.fail (Failure "init_dialog")))
+                (* ignore {unit{ show_messege "Could not create dialog"; }}; *)
+                Lwt.return ()))
 
 let cancel_dialog =
   server_function
     (get_eref_option user_info_eref
        (fun _ -> Lwt.fail Not_allowed)
        (fun { user } conversation_id ->
-          match get_conversation conversation_id with
-            | Some conversation ->
-                (match User_set.elements (User_set.remove user conversation.users) with
-                   | [other] ->
+          (match get_conversation conversation_id with
+             | Some conversation ->
+                 forget_conversation conversation;
+                 User_set.iter
+                   (fun other ->
+                      Lwt.ignore_result
                         (match_lwt get_other_user_info other with
                            | Some other_user_info ->
-                               other_user_info.send_chat_event (Remove conversation);
+                               other_user_info.send_chat_event (Remove_conversation conversation);
                                Lwt.return ()
-                           | None ->
-                               Lwt.fail (Failure "cancel_dialog: Cannot get other user info"))
-                   | _ -> Lwt.fail (Failure "cancel_dialog: Not a dialog"))
-            | None ->
-                Lwt.return ()))
+                           | None -> Lwt.return ()))
+                   conversation.users;
+                 Lwt.return ()
+             | None ->
+                 (* ignore {unit{ show_messege "Could not cancel dialog"; }}; *)
+                 Lwt.return ())))
 
 
 (******************************************************************************)
@@ -174,45 +178,55 @@ let cancel_dialog =
 module Client_processes_user =
   Client_processes.Make
     (struct
-       include User
+       type t = User.t
        let get () =
          match_lwt Eliom_reference.get user_info_eref with
            | Some { user } -> Lwt.return user
-           | None -> failwith "Client_processes_user.get"
+           | None -> Lwt.fail (Failure "Client_processes_user.get")
      end)
 
 let connected_users =
   React.S.map ~eq:User_set.equal
-    (fun client_processes_user ->
-       User_set.from_list
-         (List.map snd
-            (Int_map.bindings client_processes_user)))
+    (Client_processes.accumulate_infos User_set.from_list)
     Client_processes_user.signal
 
+(* Debug user client processes *)
 let () =
   Lwt_react.E.keep
     (React.E.map
-       (fun user ->
-          debug "Removal of user %s" (User.to_string user);
-          List.iter
-            (fun conversation ->
-               User_set.iter
-                 (fun other ->
-                    Lwt.ignore_result
-                      (debug "HIC 0: %s" other.User.name;
-                       match_lwt get_other_user_info other with
-                         | Some other_user_info ->
-                             debug "HIC 1";
-                             other_user_info.send_chat_event (Remove conversation);
-                             Lwt.return ()
-                         | None ->
-                             debug "HIC 2";
-                             Lwt.return ()))
-                 conversation.users)
-            (get_conversations user))
+       (fun processes ->
+          debug "Client processes: %s"
+            (String.concat ", "
+               (List.map (fun (id, user) -> Printf.sprintf "%d:%s" id (User.to_string user))
+                  (Int_map.bindings processes))))
+       (React.S.changes Client_processes_user.signal))
+
+(* Remove all conversations of a user when is disappears. *)
+let () =
+  let remove_other_from_conversation conversation other =
+    Lwt.ignore_result
+      (match_lwt get_other_user_info other with
+         | Some other_user_info ->
+             other_user_info.send_chat_event (Remove_conversation conversation);
+             Lwt.return ()
+         | None ->
+             Lwt.return ())
+  in
+  let remove_conversation user conversation =
+    User_set.iter
+      (remove_other_from_conversation conversation)
+      conversation.users;
+    forget_conversation conversation
+  in
+  let remove_user user =
+    List.iter (remove_conversation user) (get_conversations user)
+  in
+  Lwt_react.E.keep
+    (React.E.map
+       remove_user
        (removals User_set.diff User_set.elements connected_users))
 
-let connected_users_down = Eliom_react.S.Down.of_react connected_users
+let connected_users_down = Eliom_react.S.Down.of_react ~scope:Eliom_common.site connected_users
 
 (******************************************************************************)
 (*                              User service                                  *)
@@ -229,7 +243,8 @@ let login_message_eref = Eliom_reference.Volatile.eref ~scope:Eliom_common.reque
 let login_handler () (username, password) =
   match user_verify username password with
     | Some user ->
-        Eliom_state.set_volatile_data_session_group ~scope:Eliom_common.session (User.group_name user);
+        Eliom_state.set_volatile_data_session_group
+          ~scope:Eliom_common.session (User.group_name user);
         (match_lwt Eliom_reference.get user_info_eref with
            | Some _ ->
                Eliom_reference.Volatile.set login_message_eref (Some "Already logged in");
@@ -254,9 +269,8 @@ let logout_handler () () =
 (******************************************************************************)
 (*                                  Widgets                                   *)
 
-let info = Html5.D.(div [])
-let connected_users_list = Html5.D.(ul ~a:[a_class ["users_list"]] [])
-let conversations_id = Html5.Id.new_elt_id ()
+let conversations_id = Html5.Id.new_elt_id ~global:true ()
+let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 
 {shared{
 
@@ -285,6 +299,19 @@ let conversations_id = Html5.Id.new_elt_id ()
 }}
 
 {client{
+
+  let user_list_user_widget user other =
+    let onclick ev =
+      Lwt.ignore_result ( %init_dialog other)
+    in
+    let open Html5.F in
+    span ~a:[a_class ["user"]; a_onclick onclick]
+      [ user_widget ~self:user other ]
+
+}}
+
+{client{
+  (* To access those variables in the client_value within the shared section below *)
   let cancel_dialog = %cancel_dialog
   let conversations_id = %conversations_id
 }}
@@ -301,12 +328,13 @@ let conversations_id = Html5.Id.new_elt_id ()
       Html5.D.ul ~a:[a_class ["participants"]] elts
     in
     let close =
-      Html5.D.span ~a:[a_class ["close"]] [pcdata ""] (*WTF entity "#10060" - inserted in CSS*)
+      Html5.D.span ~a:[a_class ["close"]] [pcdata ""]
+      (*WTF entity "#10060" - inserted in CSS*)
     in
     let messages = Html5.D.ul ~a:[a_class ["messages"]] [] in
     let prompt =
       Html5.Id.create_named_elt ~id:conversation.prompt_id
-        (Html5.D.input ~a:[a_class ["prompt"]] ())
+        (Html5.D.input ~a:[a_class ["prompt"]; a_autofocus `Autofocus] ())
     in
     let conversation_elt =
       let participants_complete =
@@ -318,83 +346,74 @@ let conversations_id = Html5.Id.new_elt_id ()
       in
       Html5.Id.create_named_elt ~id:conversation.elt_id
         (Html5.D.div ~a:[a_class ["conversation"]]
-           [ participants_complete; messages; (prompt :> Html5_types.div_content_fun Html5.elt); ])
+           [ participants_complete; messages;
+             (prompt :> Html5_types.div_content_fun Html5.elt); ])
     in
-    let cancel_dialog = %cancel_dialog in
-    let conversations_id = %conversations_id in
     ignore {unit{
       Eliom_client.withdom
         (fun () ->
-           ignore
-             (Html5.Manip.addEventListener %prompt Dom_html.Event.keypress
-              (fun _ ev ->
-                 if ev##keyCode = 13 then
-                   (debug "Handle enter key press";
-                    let prompt_dom = Html5.To_dom.of_input %prompt in
-                    let content = Js.to_string prompt_dom##value in
-                    prompt_dom##value <- Js.string "";
-                    Lwt.ignore_result
-                      (Eliom_bus.write %(conversation.bus)
-                         (Message { author = %user; content }));
-                    false)
-                 else true));
-           ignore
-             (Html5.Manip.addEventListener %close Dom_html.Event.click
-                (fun _ ev ->
-                   let conversation_dom = Html5.To_dom.of_element %conversation_elt in
-                   if Js.to_bool (conversation_dom##classList##contains(Js.string "disabled")) then
-                      Html5.Manip.Named.removeChild %conversations_id %conversation_elt
-                   else
-                     Lwt.ignore_result
-                       (try_lwt
-                          lwt () = %cancel_dialog %(conversation.id) in
-                          Html5.Manip.removeChild %conversation_elt %prompt;
-                          conversation_dom##classList##add(Js.string "disabled");
-                          Lwt.return ()
-                        with exc ->
-                          Eliom_lib.debug_exn "Cannot cancel dialog" exc;
-                          Eliom_lib.error "Cannot cancel dialog");
-                   true));
-           let dispatch_message = function
-             | Message msg ->
-                 Html5.Manip.appendChild %messages (message_widget %user msg);
-                 (let messages_dom = Html5.To_dom.of_element %messages in
-                  messages_dom##scrollTop <- messages_dom##scrollHeight)
-           in
            Lwt.ignore_result
-              (Lwt_stream.iter dispatch_message
-                 (Eliom_bus.stream %(conversation.bus))))
+             (let dispatch_message = function
+                | Message msg ->
+                    Html5.Manip.appendChild %messages (message_widget %user msg);
+                    (let messages_dom = Html5.To_dom.of_element %messages in
+                     messages_dom##scrollTop <- messages_dom##scrollHeight)
+              in
+              try_lwt
+                Lwt_stream.iter dispatch_message
+                 (Eliom_bus.stream %(conversation.bus))
+              with exn ->
+                debug_exn "Error during streaming conversation %d" exn %(conversation.id);
+                error "Error during streaming conversation %d" %(conversation.id));
+           Lwt_js_events.async
+             (fun () ->
+                Lwt_js_events.keypresses (Html5.To_dom.of_element %prompt)
+                  (fun ev ->
+                     if ev##keyCode = 13 then
+                       (let prompt_dom = Html5.To_dom.of_input %prompt in
+                        let content = Js.to_string prompt_dom##value in
+                        prompt_dom##value <- Js.string "";
+                        Eliom_bus.write %(conversation.bus)
+                          (Message { author = %user; content }))
+                      else Lwt.return ()));
+           Lwt_js_events.async
+             (fun () ->
+                Lwt_js_events.clicks (Html5.To_dom.of_element %close)
+                  (fun ev ->
+                     let is_disabled =
+                       (Html5.To_dom.of_element %conversation_elt)##
+                         classList##contains(Js.string "disabled")
+                     in
+                     if Js.to_bool is_disabled then
+                       (Html5.Manip.Named.removeChild conversations_id %conversation_elt;
+                        Lwt.return ())
+                     else
+                       %cancel_dialog %(conversation.id)));
+           ())
     }};
     conversation_elt
 }}
 
 {client{
 
-  let focus_conversation conversation =
-    (Html5.To_dom.of_input (Html5.Id.get_element conversation.prompt_id))##focus ()
-
-  let user_list_user_widget user other =
-    let onclick ev =
-      Lwt.ignore_result ( %init_dialog other)
-    in
-    let open Html5.F in
-    span ~a:[a_class ["user"]; a_onclick onclick]
-      [ user_widget ~self:user other ]
-}}
-
-{client{
-
   let append_conversation conversation user other =
-    Html5.Manip.Named.appendChild %conversations_id
-      (conversation_widget user (User_set.from_list [other]) conversation);
-    focus_conversation conversation
+    (* Add conversation *)
+    Html5.Manip.Named.appendChild conversations_id
+      (conversation_widget user (User_set.from_list [other]) conversation)
 
   let remove_conversation conversation user =
+    (* Disable conversation *)
     let conversation_elt = Html5.Id.get_element conversation.elt_id in
     (Html5.To_dom.of_element conversation_elt)##classList##add(Js.string "disabled");
+    (* Remove conversation prompt *)
     Html5.Manip.removeChild conversation_elt
       (Html5.Id.get_element conversation.prompt_id)
 
+  let dispatch_chat_event user = function
+    | Append_conversation (conversation, other) ->
+        append_conversation conversation user other
+    | Remove_conversation conversation ->
+        remove_conversation conversation user
 }}
 
 (******************************************************************************)
@@ -410,47 +429,58 @@ let connected_main_handler { user; chat_events } =
       ignore {unit{
         Eliom_client.onload
           (fun () ->
-             reflect_list_signal %connected_users_list
-               (fun other -> [user_list_user_widget %user other])
-               (React.S.map (fun users -> User_set.(elements (remove %user users)))
-                  %connected_users_down);
              Lwt_react.E.keep
                (React.E.map
-                  (function | Append (conversation, other) ->
-                         append_conversation conversation %user other
-                     | Remove conversation ->
-                         remove_conversation conversation %user)
-                  %chat_events);
-             ())
+                  (dispatch_chat_event %user)
+                  %(Eliom_react.Down.of_react chat_events)))
       }};
-    let conversations =
-      Html5.D.div
-        (List.map
-           (fun conversation ->
-              conversation_widget user
-                (User_set.remove user conversation.users)
-                conversation)
-           (get_conversations user))
+    let connected_users_list =
+      let onload = {{
+        fun ev ->
+          reflect_list_signal
+            (Html5.Id.get_element %connected_users_list_id)
+            (fun other -> [user_list_user_widget %user other])
+            (React.S.map (fun users -> User_set.(elements (remove %user users)))
+               %connected_users_down)
+      }} in
+      Html5.Id.create_named_elt ~id:connected_users_list_id
+        (Html5.D.ul ~a:Html5.F.([a_class ["users_list"]; a_onload onload]) [])
+    in
+    let conversations_elt =
+      Html5.Id.create_named_elt ~id:conversations_id
+        (Html5.D.div
+           ~a:Html5.F.([
+             a_class ["conversations"];
+           ])
+           (List.map
+              (fun conversation ->
+                 conversation_widget user
+                   (User_set.remove user conversation.users)
+                   conversation)
+              (get_conversations user)))
     in
     Lwt.return Html5.F.(
       html
         (Eliom_tools.Html5.head ~title:"Chat" ~css:[["chat.css"]] ())
         (body [
-          p [a ~service:Eliom_service.void_coservice' [pcdata "Reload in app"] ()];
+          (* FIXME reload does not retain all conversations *)
+          (* p [a ~service:Eliom_service.void_coservice' [pcdata "Reload in app"] ()]; *)
           div [
-            b [pcdataf "Hello "];
-            user_widget user;
-            pcdataf " (at %d)" id;
-            post_form ~xhr:false ~a:[a_class ["logout_form"]] ~service:logout_service
+            span [
+              b [pcdataf "Hello "];
+              user_widget user;
+              pcdata " ";
+            ];
+            post_form ~a:[a_class ["logout_form"]] ~service:logout_service
               (fun () -> [
                 string_input ~input_type:`Submit ~value:"Logout" ();
-              ]) ()
+              ]) ();
           ];
           div [
             b [pcdata "Users "];
             connected_users_list;
           ];
-          Html5.Id.create_named_elt ~id:conversations_id conversations;
+          conversations_elt;
         ]))
 
 let disconnected_main_handler () () =
@@ -460,14 +490,21 @@ let disconnected_main_handler () () =
       (body [
         h1 [pcdata "Chat"];
         div [
-          post_form ~service:login_service
+          post_form ~xhr:false ~service:login_service
             (fun (username, password) -> [
-              string_input ~input_type:`Text ~name:username ();
-              br ();
-              string_input ~input_type:`Text ~name:password ();
-              br ();
-              string_input ~input_type:`Submit ~value:"Login" ();
-              br ();
+              table
+                (tr [
+                  td [label ~a:[a_for username] [pcdata "Name"]];
+                  td [string_input ~a:[a_id "name"] ~input_type:`Text ~name:username ()]
+                ])
+                [tr [
+                  td [label ~a:[a_for password] [pcdata "Password"]];
+                  td [string_input ~a:[a_id "password"] ~input_type:`Password ~name:password ()]
+                ];
+                 tr [
+                   td [];
+                   td [string_input ~input_type:`Submit ~value:"Login" ()]
+                 ]]
             ] @
             (match Eliom_reference.Volatile.get login_message_eref with
                | Some msg -> [div [pcdata msg]]
