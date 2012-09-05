@@ -138,7 +138,7 @@ let connected_server_function f =
        (fun _ -> Lwt.fail Not_allowed)
        f)
 
-let rpc_init_dialog =
+let rpc_create_dialog =
   connected_server_function
     (fun user_info other ->
        match_lwt get_user_info other with
@@ -310,16 +310,49 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
       span ~a:[a_class ["content"]]
         [pcdata message.content]
     ]
+
+  let users_attr =
+    Html5.Custom_data.create_json ~name:"users" Json.t<User.t list>
 }}
 
 {client{
 
+  let find_conversation ?disabled users =
+    let suffix =
+      match disabled with
+        | None -> ""
+        | Some true -> ".disabled"
+        | Some false -> ":not(.disabled)"
+    in
+    List.find
+      (fun conversation_dom ->
+         let users' =
+           Html5.Custom_data.get_dom conversation_dom users_attr
+         in
+         users' = User_set.elements users)
+      (Dom.list_of_nodeList
+         Dom_html.window##document##querySelectorAll
+           (js_stringf ".conversation%s" suffix))
+
   let user_list_user_widget user other =
     let onclick ev =
-      Lwt.ignore_result ( %rpc_init_dialog other)
+      Js.Optdef.iter
+        (ev##currentTarget)
+        (fun user_dom ->
+           try
+             let users = User_set.from_list [other; user] in
+             let conversation_dom = find_conversation ~disabled:false users in
+             show_message "Focus conversation with %s" (User.to_string other);
+             Js.Opt.iter
+               (Js.Opt.bind
+                  (conversation_dom##querySelector(Js.string ".prompt"))
+                  Dom_html.CoerceTo.input)
+               (fun prompt_dom -> prompt_dom##focus ())
+           with Not_found ->
+             Lwt.ignore_result ( %rpc_create_dialog other))
     in
     let open Html5.F in
-    span ~a:[a_class ["user"]; a_onclick onclick]
+      span ~a:[a_class ["user"]; a_onclick onclick]
       [ user_widget ~self:user other ]
 
 }}
@@ -338,7 +371,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 
 {shared{
 
-  let conversation_widget user others conversation =
+  let conversation_widget user others conversation old_messages =
     let open Html5.F in
     let participants =
       let elts =
@@ -351,7 +384,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
       Html5.D.span ~a:[a_class ["close"]] [pcdata ""]
       (*WTF entity "#10060" - inserted in CSS*)
     in
-    let messages = Html5.D.ul ~a:[a_class ["messages"]] [] in
+    let messages = Html5.D.ul ~a:[a_class ["messages"]] old_messages in
     let prompt =
       Html5.Id.create_named_elt ~id:conversation.prompt_id
         (Html5.D.input ~a:[a_class ["prompt"]; a_autofocus `Autofocus] ())
@@ -364,12 +397,17 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
       ]
     in
     let conversation_elt =
+      let users = User_set.elements (User_set.add user others) in
       Html5.Id.create_named_elt ~id:conversation.elt_id
-        (Html5.D.div ~a:[a_class ["conversation"]] [
-          participants_complete;
-          messages;
-          (prompt :> Html5_types.div_content_fun Html5.elt);
-        ])
+        (Html5.D.div
+           ~a:[
+             a_class ["conversation"];
+             Html5.Custom_data.attrib users_attr users
+           ] [
+             participants_complete;
+             messages;
+             (prompt :> Html5_types.div_content_fun Html5.elt);
+           ])
     in
     ignore {unit{
       Eliom_client.withdom
@@ -416,8 +454,34 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 {client{
 
   let append_conversation conversation user other =
-    Html5.Manip.Named.appendChild conversations_id
-      (conversation_widget user (User_set.from_list [other]) conversation)
+    let conversation_widget' =
+      conversation_widget user (User_set.from_list [other]) conversation
+    in
+    try
+      let old_conversation_dom = find_conversation (User_set.from_list [user; other]) in
+      let old_messages =
+        let message_doms =
+          Js.Opt.case
+            (old_conversation_dom##querySelector(Js.string ".messages"))
+            (fun () -> error "append_conversation: no messages")
+            (fun messages -> Dom.list_of_nodeList messages##childNodes)
+        in
+        List.map
+          (fun message_dom ->
+             Js.Opt.case
+               (Js.Opt.bind
+                  (Dom_html.CoerceTo.element message_dom)
+                  Dom_html.CoerceTo.li)
+               (fun () -> error "append_conversation: message not li")
+               Html5.Of_dom.of_li)
+          message_doms
+      in
+      Html5.Manip.Named.replaceChild conversations_id
+        (conversation_widget' old_messages)
+        (Html5.Of_dom.of_element old_conversation_dom)
+    with Not_found ->
+      Html5.Manip.Named.appendChild conversations_id
+        (conversation_widget' [])
 
   let remove_conversation conversation user =
     let conversation_elt = Html5.Id.get_element conversation.elt_id in
@@ -472,13 +536,15 @@ let connected_main_handler { user; chat_events } =
               (fun conversation ->
                  conversation_widget user
                    (User_set.remove user conversation.users)
-                   conversation)
+                   conversation
+                   [])
               (get_conversations user)))
     in
     Lwt.return Html5.F.(
       html
-        (Eliom_tools.Html5.head ~title:"Chat" ~css:[["chat.css"]] ())
+        (Eliom_tools.Html5.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
         (body [
+          h3 [pcdata "Chat with Eliom"];
           (* FIXME reload does not retain all conversations *)
           (* p [a ~service:Eliom_service.void_coservice' [pcdata "Reload in app"] ()]; *)
           div [
@@ -496,6 +562,8 @@ let connected_main_handler { user; chat_events } =
           div [
             b [pcdata "Users "];
             connected_users_list;
+            span ~a:[a_class["note"]]
+              [ pcdata " (Click one to start a conversation)" ];
           ];
           conversations_elt;
           messages;
@@ -504,25 +572,19 @@ let connected_main_handler { user; chat_events } =
 let disconnected_main_handler () () =
   Lwt.return Html5.F.(
     html
-      (Eliom_tools.Html5.head ~title:"Chat" ~css:[["chat.css"]] ())
+      (Eliom_tools.Html5.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
       (body [
-        h1 [pcdata "Chat"];
+        h3 [pcdata "Chat with Eliom"];
         div [
           post_form ~xhr:false ~service:login_service
             (fun (username, password) -> [
-              table
-                (tr [
-                  td [label ~a:[a_for username] [pcdata "Name"]];
-                  td [string_input ~a:[a_id "name"; a_autofocus `Autofocus] ~input_type:`Text ~name:username ()]
-                ])
-                [tr [
-                  td [label ~a:[a_for password] [pcdata "Password"]];
-                  td [string_input ~a:[a_id "password"] ~input_type:`Password ~name:password ()]
-                ];
-                 tr [
-                   td [];
-                   td [string_input ~input_type:`Submit ~value:"Login" ()]
-                 ]]
+              string_input ~a:[a_id "name"; a_autofocus `Autofocus; a_placeholder "Name"]
+                ~input_type:`Text ~name:username ();
+              br ();
+              string_input ~a:[a_id "password"; a_placeholder "Password"]
+                ~input_type:`Password ~name:password ();
+              br ();
+              string_input ~input_type:`Submit ~value:"Login" ();
             ] @
             (match Eliom_reference.Volatile.get login_message_eref with
                | Some msg -> [div [pcdata msg]]

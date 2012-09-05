@@ -149,15 +149,10 @@ let messages =
                               (try_lwt
                                  lwt _ = %(server_function (assert_process ~id':id)) () in
                                  Lwt.return ()
-                               with
-                                 | Client_process_data_not_available ->
-                                     debug "Server side client process data not available any more";
-                                     Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ();
-                                     Lwt.return ()
-                                 | exn ->
-                                     show_message ~timeout:None "Cannot assert process %s" (Printexc.to_string exn);
-                                     debug_exn "Cannot assert process" exn;
-                                     Lwt.return ());
+                               with exn ->
+                                 alert "Cannot assert process: %s" (Printexc.to_string exn);
+                                 Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ();
+                                 Lwt.return ());
                             Js._true))
               }};
               modify (Int_map.add id info);

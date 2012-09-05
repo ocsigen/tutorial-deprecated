@@ -111,7 +111,7 @@ body h5 {
 }
 
 ul.log_messages {
-  color: rgba(0,0,0,0.7);
+  color: gray;
   padding-left: 0;
 }
 
