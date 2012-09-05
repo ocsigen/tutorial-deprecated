@@ -122,65 +122,69 @@ let forget_conversation conversation =
 
 let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
 
-let get_other_user_info other =
-  let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
-  Eliom_reference.Ext.get state user_info_eref
-
-let set_other_user_info other value =
-  let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
-  Eliom_reference.Ext.set state user_info_eref value
+let get_user_info other =
+  try_lwt
+    let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
+    Eliom_reference.Ext.get state user_info_eref
+  with Eliom_reference.Eref_not_intialized ->
+    Lwt.return None
 
 (******************************************************************************)
 (*                 RPC Functions for starting/ending dialogs                  *)
 
-let init_dialog =
+let connected_server_function f =
   server_function
     (get_eref_option user_info_eref
        (fun _ -> Lwt.fail Not_allowed)
-       (fun user_info other ->
-          match_lwt get_other_user_info other with
+       f)
+
+let rpc_init_dialog =
+  connected_server_function
+    (fun user_info other ->
+       match_lwt get_user_info other with
+         | Some other_user_info ->
+             let users = User_set.from_list [user_info.user; other] in
+             let conversation = create_conversation users in
+             user_info.send_chat_event (Append_conversation (conversation, other));
+             other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
+             ignore {unit{
+               show_message "Dialog with %s created" (User.to_string %other)
+             }};
+             Lwt.return ()
+         | None ->
+            ignore {unit{
+              show_message "Could not create dialog"
+            }};
+            Lwt.return ())
+
+let cancel_dialog conversation =
+  forget_conversation conversation;
+  User_set.iter
+    (fun other ->
+       Lwt.ignore_result
+         (match_lwt get_user_info other with
             | Some other_user_info ->
-                let users = User_set.from_list [user_info.user; other] in
-                let conversation = create_conversation users in
-                user_info.send_chat_event (Append_conversation (conversation, other));
-                other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
-                ignore {unit{
-                  show_message "Dialog with %s created" (User.to_string %other)
-                }};
+                other_user_info.send_chat_event (Remove_conversation conversation);
                 Lwt.return ()
-            | None ->
-                ignore {unit{
-                  show_message "Could not create dialog"
-                }};
-                Lwt.return ()))
+            | None -> Lwt.return ()))
+    conversation.users;
+  Lwt.return ()
 
-let cancel_dialog =
-  server_function
-    (get_eref_option user_info_eref
-       (fun _ -> Lwt.fail Not_allowed)
-       (fun { user } conversation_id ->
-          (match get_conversation conversation_id with
-             | Some conversation ->
-                 forget_conversation conversation;
-                 User_set.iter
-                   (fun other ->
-                      Lwt.ignore_result
-                        (match_lwt get_other_user_info other with
-                           | Some other_user_info ->
-                               other_user_info.send_chat_event (Remove_conversation conversation);
-                               Lwt.return ()
-                           | None -> Lwt.return ()))
-                   conversation.users;
-                 ignore {unit{
-                   show_message "Dialog with %s canceled" (User_set.to_string %(conversation.users))
-                 }};
-                 Lwt.return ()
-             | None ->
-                 ignore {unit{
-                   show_message "Could not cancel dialog"
-                 }};
-                 Lwt.return ())))
-
+let rpc_cancel_dialog =
+  connected_server_function
+    (fun _ conversation_id ->
+       (match get_conversation conversation_id with
+          | Some conversation ->
+              lwt () = cancel_dialog conversation in
+              ignore {unit{
+                show_message "Dialog with %s canceled" (User_set.to_string %(conversation.users))
+              }};
+              Lwt.return ()
+          | None ->
+              ignore {unit{
+                show_message "Could not cancel dialog"
+              }};
+              Lwt.return ()))
 
 (******************************************************************************)
 (*                            Client processes                                *)
@@ -200,6 +204,8 @@ let connected_users =
     (Client_processes.accumulate_infos User_set.from_list)
     Client_processes_user.signal
 
+let connected_users_down = Eliom_react.S.Down.of_react ~scope:Eliom_common.site connected_users
+
 (* Debug user client processes *)
 let () =
   Lwt_react.E.keep
@@ -213,30 +219,28 @@ let () =
 
 (* Remove all conversations of a user when is disappears. *)
 let () =
-  let remove_other_from_conversation conversation other =
-    Lwt.ignore_result
-      (match_lwt get_other_user_info other with
-         | Some other_user_info ->
-             other_user_info.send_chat_event (Remove_conversation conversation);
-             Lwt.return ()
-         | None ->
-             Lwt.return ())
-  in
-  let remove_conversation user conversation =
-    User_set.iter
-      (remove_other_from_conversation conversation)
-      conversation.users;
-    forget_conversation conversation
-  in
   let remove_user user =
-    List.iter (remove_conversation user) (get_conversations user)
+    List.iter
+      (fun conversation ->
+         Lwt.ignore_result
+           (cancel_dialog conversation))
+      (get_conversations user)
   in
-  Lwt_react.E.keep
-    (React.E.map
-       remove_user
-       (removals User_set.diff User_set.elements connected_users))
+  let removed_users =
+    singleton_diff_event
+      (fun s1 s2 -> User_set.diff s2 s1)
+      User_set.elements connected_users
+  in
+  Lwt_react.E.keep (React.E.map remove_user removed_users)
 
-let connected_users_down = Eliom_react.S.Down.of_react ~scope:Eliom_common.site connected_users
+let () =
+  let add_user user =
+    () (* TODO Revive his dialogs *)
+  in
+  let added_users =
+    singleton_diff_event User_set.diff User_set.elements connected_users
+  in
+  Lwt_react.E.keep (React.E.map add_user added_users)
 
 (******************************************************************************)
 (*                              User service                                  *)
@@ -312,7 +316,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 
   let user_list_user_widget user other =
     let onclick ev =
-      Lwt.ignore_result ( %init_dialog other)
+      Lwt.ignore_result ( %rpc_init_dialog other)
     in
     let open Html5.F in
     span ~a:[a_class ["user"]; a_onclick onclick]
@@ -321,8 +325,14 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 }}
 
 {client{
+
+  let is_disabled dom =
+    Js.to_bool dom##classList##contains(Js.string "disabled")
+  let set_disabled dom =
+    dom##classList##add(Js.string "disabled")
+
   (* To access those variables in the client_value within the shared section below *)
-  let cancel_dialog = %cancel_dialog
+  let rpc_cancel_dialog = %rpc_cancel_dialog
   let conversations_id = %conversations_id
 }}
 
@@ -346,18 +356,20 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
       Html5.Id.create_named_elt ~id:conversation.prompt_id
         (Html5.D.input ~a:[a_class ["prompt"]; a_autofocus `Autofocus] ())
     in
+    let participants_complete =
+      div ~a:[a_class ["participants_complete"]] [
+        span ~a:[a_class ["info_label"]] [ pcdata "With " ];
+        participants;
+        close;
+      ]
+    in
     let conversation_elt =
-      let participants_complete =
-        div ~a:[a_class ["participants_complete"]] [
-          span ~a:[a_class ["info_label"]] [ pcdata "With " ];
-          participants;
-          close;
-        ]
-      in
       Html5.Id.create_named_elt ~id:conversation.elt_id
-        (Html5.D.div ~a:[a_class ["conversation"]]
-           [ participants_complete; messages;
-             (prompt :> Html5_types.div_content_fun Html5.elt); ])
+        (Html5.D.div ~a:[a_class ["conversation"]] [
+          participants_complete;
+          messages;
+          (prompt :> Html5_types.div_content_fun Html5.elt);
+        ])
     in
     ignore {unit{
       Eliom_client.withdom
@@ -390,15 +402,12 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
              (fun () ->
                 Lwt_js_events.clicks (Html5.To_dom.of_element %close)
                   (fun ev ->
-                     let is_disabled =
-                       (Html5.To_dom.of_element %conversation_elt)##
-                         classList##contains(Js.string "disabled")
-                     in
-                     if Js.to_bool is_disabled then
+                     Dom_html.stopPropagation ev;
+                     if is_disabled (Html5.To_dom.of_element %conversation_elt) then
                        (Html5.Manip.Named.removeChild conversations_id %conversation_elt;
                         Lwt.return ())
                      else
-                       %cancel_dialog %(conversation.id)));
+                       %rpc_cancel_dialog %(conversation.id)));
            ())
     }};
     conversation_elt
@@ -407,15 +416,12 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 {client{
 
   let append_conversation conversation user other =
-    (* Add conversation *)
     Html5.Manip.Named.appendChild conversations_id
       (conversation_widget user (User_set.from_list [other]) conversation)
 
   let remove_conversation conversation user =
-    (* Disable conversation *)
     let conversation_elt = Html5.Id.get_element conversation.elt_id in
-    (Html5.To_dom.of_element conversation_elt)##classList##add(Js.string "disabled");
-    (* Remove conversation prompt *)
+    set_disabled (Html5.To_dom.of_element conversation_elt);
     Html5.Manip.removeChild conversation_elt
       (Html5.Id.get_element conversation.prompt_id)
 
@@ -479,6 +485,7 @@ let connected_main_handler { user; chat_events } =
             span [
               b [pcdataf "Hello "];
               user_widget user;
+              pcdataf " (at %d)" id;
               pcdata " ";
             ];
             post_form ~a:[a_class ["logout_form"]] ~service:logout_service

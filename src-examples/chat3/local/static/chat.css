@@ -110,12 +110,14 @@ body h5 {
   display: inline;
 }
 
-ul.messages {
+ul.log_messages {
   color: rgba(0,0,0,0.7);
   padding-left: 0;
-  font-size: small;
 }
 
-ul.messages li {
+ul.log_messages li {
   list-style: none;
+  font-style: italic;
+  font-family: sans-serif;
+  font-size: x-small;
 }

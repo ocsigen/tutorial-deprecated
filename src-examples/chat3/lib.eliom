@@ -19,16 +19,43 @@
       incr n; !n
   exception Not_allowed
 
-  let removals diff elements signal =
+  let singleton_diff_event diff elements signal =
     React.E.fmap (fun x -> x)
       (React.S.diff
          (fun after before ->
-            match elements (diff before after) with
+            match elements (diff after before) with
               | [] -> None
               | [elt] -> Some elt
-              | _ -> failwith "disconnected_users")
+              | _ -> failwith "singleton_diff_event")
          signal)
 
+}}
+
+let messages_id = Html5.Id.new_elt_id ()
+let messages =
+  Html5.Id.create_named_elt ~id:messages_id
+    (Html5.D.(ul ~a:[a_class ["log_messages"]] []))
+
+{client{
+
+  let js_stringf fmt =
+    Printf.ksprintf Js.string fmt
+
+  let show_message ?timeout fmt =
+    Printf.ksprintf
+      (fun str ->
+         Eliom_client.withdom
+           (fun () ->
+              let li = Html5.D.(li [pcdata str]) in
+              Html5.Manip.Named.appendChild %messages_id li;
+              match Option.get (fun () -> Some 3.0) timeout with
+                | Some t ->
+                    Lwt.ignore_result
+                      (lwt () = Lwt_js.sleep 3.0 in
+                       Html5.Manip.Named.removeChild %messages_id li;
+                       Lwt.return ())
+                | None -> ()))
+      fmt
 }}
 
 {server{
@@ -55,6 +82,10 @@
     Eliom_lib.debug (">> " ^^ fmt ^^ "\n%!")
 }}
 
+{shared{
+  exception Client_process_data_not_available
+}}
+
 {server{
 
   module Client_processes = struct
@@ -67,6 +98,7 @@
 
       let next_process_id = counter ()
 
+      (* Reset by Eliom, on erase_process, or when channel times out *)
       let client_process_id_eref =
         Eliom_reference.Volatile.eref ~scope:Eliom_common.client_process None
 
@@ -85,26 +117,29 @@
           | None ->
               ()
 
-      let rec assert_process ?id () =
+      let rec assert_process ?id' () =
         match Eliom_reference.Volatile.get client_process_id_eref with
           | Some id ->
-              if not (Int_map.mem id (React.S.value signal)) then
-                failwithf "assert_process %d" id;
-              Lwt.return (id, false)
+              if id' = None || id' = Some id then
+                (if not (Int_map.mem id (React.S.value signal)) then
+                   Lwt.fail (Failure (Printf.sprintf "assert_process: Unknown id %d" id))
+                 else
+                   Lwt.return (id, false))
+              else
+                Lwt.fail (Failure
+                            (Printf.sprintf "assert_process: Wrong id %d vs %d"
+                               id (Option.get (fun () -> assert false) id')))
           | None ->
-              let id = Option.get next_process_id id in
+              let id = Option.get next_process_id id' in
               lwt info = Info.get () in
               Eliom_reference.Volatile.set client_process_id_eref (Some id);
               Lwt.ignore_result
                 (lwt () = Eliom_comet.Channel.wait_timeout 1.0 in
+                 debug "Client process %d timed out" id;
                  Eliom_reference.Volatile.set client_process_id_eref None;
                  modify (Int_map.remove id);
                  Lwt.return ());
               ignore {unit{
-                Eliom_comet.Configuration.(
-                  let c = new_configuration () in
-                  set_always_active c true
-                );
                 Eliom_client.onload
                   (fun () ->
                      Dom_html.window##onfocus <-
@@ -112,11 +147,17 @@
                          (fun _ ->
                             Lwt.ignore_result
                               (try_lwt
-                                 lwt _ = %(server_function (assert_process ~id)) () in
+                                 lwt _ = %(server_function (assert_process ~id':id)) () in
                                  Lwt.return ()
-                               with exn ->
-                                 debug_exn "Cannot assert process" exn;
-                                 Lwt.return ());
+                               with
+                                 | Client_process_data_not_available ->
+                                     debug "Server side client process data not available any more";
+                                     Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ();
+                                     Lwt.return ()
+                                 | exn ->
+                                     show_message ~timeout:None "Cannot assert process %s" (Printexc.to_string exn);
+                                     debug_exn "Cannot assert process" exn;
+                                     Lwt.return ());
                             Js._true))
               }};
               modify (Int_map.add id info);
@@ -155,27 +196,6 @@
                 (List.map (fun element -> Html5.F.li (li_content element)) elements))
            signal)
 
-}}
-
-let messages_id = Html5.Id.new_elt_id ()
-let messages =
-  Html5.Id.create_named_elt ~id:messages_id
-    (Html5.D.(ul ~a:[a_class ["messages"]] []))
-
-{client{
-
-  let show_message fmt =
-    Printf.ksprintf
-      (fun str ->
-         Eliom_client.withdom
-           (fun () ->
-              let li = Html5.D.(li [pcdata str]) in
-              Html5.Manip.Named.appendChild %messages_id li;
-              Lwt.ignore_result
-                (lwt () = Lwt_js.sleep 3.0 in
-                 Html5.Manip.Named.removeChild %messages_id li;
-                 Lwt.return ())))
-      fmt
 }}
 
 (*
