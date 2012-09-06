@@ -50,10 +50,11 @@ let messages =
               Html5.Manip.Named.appendChild %messages_id li;
               match Option.get (fun () -> Some 3.0) timeout with
                 | Some t ->
-                    Lwt.ignore_result
-                      (lwt () = Lwt_js.sleep 3.0 in
-                       Html5.Manip.Named.removeChild %messages_id li;
-                       Lwt.return ())
+                    Lwt.async
+                      (fun () ->
+                         lwt () = Lwt_js.sleep 3.0 in
+                         Html5.Manip.Named.removeChild %messages_id li;
+                         Lwt.return ())
                 | None -> ()))
       fmt
 }}
@@ -133,26 +134,27 @@ let messages =
               let id = Option.get next_process_id id' in
               lwt info = Info.get () in
               Eliom_reference.Volatile.set client_process_id_eref (Some id);
-              Lwt.ignore_result
-                (lwt () = Eliom_comet.Channel.wait_timeout 1.0 in
-                 debug "Client process %d timed out" id;
-                 Eliom_reference.Volatile.set client_process_id_eref None;
-                 modify (Int_map.remove id);
-                 Lwt.return ());
+              Lwt.async
+                (fun () ->
+                   lwt () = Eliom_comet.Channel.wait_timeout 1.0 in
+                   debug "Client process %d timed out" id;
+                   Eliom_reference.Volatile.set client_process_id_eref None;
+                   modify (Int_map.remove id);
+                   Lwt.return ());
               ignore {unit{
                 Eliom_client.onload
                   (fun () ->
                      Dom_html.window##onfocus <-
                        Dom.handler
                          (fun _ ->
-                            Lwt.ignore_result
-                              (try_lwt
-                                 lwt _ = %(server_function (assert_process ~id':id)) () in
-                                 Lwt.return ()
-                               with exn ->
-                                 alert "Cannot assert process: %s" (Printexc.to_string exn);
-                                 Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ();
-                                 Lwt.return ());
+                            Lwt.async
+                              (fun () ->
+                                 try_lwt
+                                   lwt _ = %(server_function (assert_process ~id':id)) () in
+                                   Lwt.return ()
+                                 with exn ->
+                                   debug "Cannot assert process: %s" (Printexc.to_string exn);
+                                   Lwt.return ());
                             Js._true))
               }};
               modify (Int_map.add id info);

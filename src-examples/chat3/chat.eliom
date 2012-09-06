@@ -161,12 +161,13 @@ let cancel_dialog conversation =
   forget_conversation conversation;
   User_set.iter
     (fun other ->
-       Lwt.ignore_result
-         (match_lwt get_user_info other with
-            | Some other_user_info ->
-                other_user_info.send_chat_event (Remove_conversation conversation);
-                Lwt.return ()
-            | None -> Lwt.return ()))
+       Lwt.async
+         (fun () ->
+            match_lwt get_user_info other with
+              | Some other_user_info ->
+                  other_user_info.send_chat_event (Remove_conversation conversation);
+                  Lwt.return ()
+              | None -> Lwt.return ()))
     conversation.users;
   Lwt.return ()
 
@@ -222,8 +223,9 @@ let () =
   let remove_user user =
     List.iter
       (fun conversation ->
-         Lwt.ignore_result
-           (cancel_dialog conversation))
+         Lwt.async
+           (fun () ->
+              cancel_dialog conversation))
       (get_conversations user)
   in
   let removed_users =
@@ -349,7 +351,8 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
                   Dom_html.CoerceTo.input)
                (fun prompt_dom -> prompt_dom##focus ())
            with Not_found ->
-             Lwt.ignore_result ( %rpc_create_dialog other))
+             Lwt.async
+               (fun () -> %rpc_create_dialog other))
     in
     let open Html5.F in
       span ~a:[a_class ["user"]; a_onclick onclick]
@@ -412,19 +415,20 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
     ignore {unit{
       Eliom_client.withdom
         (fun () ->
-           Lwt.ignore_result
-             (let dispatch_message = function
-                | Message msg ->
-                    Html5.Manip.appendChild %messages (message_widget %user msg);
-                    (let messages_dom = Html5.To_dom.of_element %messages in
-                     messages_dom##scrollTop <- messages_dom##scrollHeight)
-              in
-              try_lwt
-                Lwt_stream.iter dispatch_message
-                 (Eliom_bus.stream %(conversation.bus))
-              with exn ->
-                debug_exn "Error during streaming conversation %d" exn %(conversation.id);
-                error "Error during streaming conversation %d" %(conversation.id));
+           Lwt.async
+             (fun () ->
+                let dispatch_message = function
+                  | Message msg ->
+                      Html5.Manip.appendChild %messages (message_widget %user msg);
+                      (let messages_dom = Html5.To_dom.of_element %messages in
+                       messages_dom##scrollTop <- messages_dom##scrollHeight)
+                in
+                try_lwt
+                  Lwt_stream.iter dispatch_message
+                   (Eliom_bus.stream %(conversation.bus))
+                with exn ->
+                  debug_exn "Error during streaming conversation %d" exn %(conversation.id);
+                  error "Error during streaming conversation %d" %(conversation.id));
            Lwt_js_events.async
              (fun () ->
                 Lwt_js_events.keypresses (Html5.To_dom.of_element %prompt)
@@ -603,3 +607,11 @@ let () =
   Eliom_registration.Any.register ~service:login_service login_handler;
   Eliom_registration.Any.register ~service:logout_service logout_handler
 
+{client{
+  let () =
+    Lwt.async_exception_hook :=
+      fun exn ->
+        debug_exn "Lwt.async_exception_hook" exn;
+        alert "Error: %s" (Printexc.to_string exn);
+        Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ()
+}}
