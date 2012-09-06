@@ -18,16 +18,10 @@
       name : string;
       color : string;
     } deriving (Json)
-    let create name =
-      let color =
-        Printf.sprintf "#%02x%02x%02x"
-          (56+Random.int 200) (56+Random.int 200) (56+Random.int 200)
-      in
-      { name; color }
     let to_string { name } = name
     let group_name = to_string
-    let compare user1 user2 =
-      String.compare user1.name user2.name
+    let compare : t -> t -> int =
+      Pervasives.compare
   end
   module User_set = struct
     include Set.Make (User)
@@ -40,11 +34,6 @@
   end
 
 }}
-
-let user_verify ~username ~password =
-(*     if username = password then *)
-    Some (User.create username)
-(*     else None *)
 
 (******************************************************************************)
 (*                               Chat intestine                               *)
@@ -85,6 +74,33 @@ let create_user_info user =
   { user; chat_events; send_chat_event }
 
 (******************************************************************************)
+(*                                 User info                                  *)
+
+let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
+
+let get_user_info name =
+  try_lwt
+    let state = Eliom_state.External_states.volatile_data_group_state name in
+    Eliom_reference.Ext.get state user_info_eref
+  with Eliom_reference.Eref_not_intialized ->
+    Lwt.return None
+
+let password_matches _ _ = true
+
+let verify_user ~username ~password =
+  if password_matches username password then
+    match_lwt get_user_info username with
+      | Some { user } ->
+          Lwt.return (Some user)
+      | None ->
+          let color =
+            Printf.sprintf "#%02x%02x%02x"
+              (56+Random.int 200) (56+Random.int 200) (56+Random.int 200)
+          in
+          Lwt.return (Some { User.name = username; color })
+  else Lwt.return None
+
+(******************************************************************************)
 (*                         Book keeping conversations                         *)
 
 let conversation_table = Hashtbl.create 13
@@ -117,77 +133,19 @@ let get_conversations user =
 let forget_conversation conversation =
   Hashtbl.remove conversation_table conversation.id
 
-(******************************************************************************)
-(*                                 User info                                  *)
-
-let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
-
-let get_user_info other =
-  try_lwt
-    let state = Eliom_state.External_states.volatile_data_group_state (User.group_name other) in
-    Eliom_reference.Ext.get state user_info_eref
-  with Eliom_reference.Eref_not_intialized ->
-    Lwt.return None
-
-(******************************************************************************)
-(*                 RPC Functions for starting/ending dialogs                  *)
-
-let connected_server_function f =
-  server_function
-    (get_eref_option user_info_eref
-       (fun _ -> Lwt.fail Not_allowed)
-       f)
-
-let rpc_create_dialog =
-  connected_server_function
-    (fun user_info other ->
-       match_lwt get_user_info other with
-         | Some other_user_info ->
-             let users = User_set.from_list [user_info.user; other] in
-             let conversation = create_conversation users in
-             user_info.send_chat_event (Append_conversation (conversation, other));
-             other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
-             ignore {unit{
-               show_message "Conversation %d with %s created"
-                 %(conversation.id) (User.to_string %other)
-             }};
-             Lwt.return ()
-         | None ->
-            ignore {unit{
-              show_message "Could not create dialog"
-            }};
-            Lwt.return ())
-
-let cancel_dialog conversation =
+let cancel_conversation conversation =
   forget_conversation conversation;
   User_set.iter
     (fun other ->
        Lwt.async
          (fun () ->
-            match_lwt get_user_info other with
+            match_lwt get_user_info other.User.name with
               | Some other_user_info ->
                   other_user_info.send_chat_event (Remove_conversation conversation);
                   Lwt.return ()
               | None -> Lwt.return ()))
     conversation.users;
   Lwt.return ()
-
-let rpc_cancel_dialog =
-  connected_server_function
-    (fun _ conversation_id ->
-       (match get_conversation conversation_id with
-          | Some conversation ->
-              lwt () = cancel_dialog conversation in
-              ignore {unit{
-                show_message "Conversation %d with %s canceled"
-                  %(conversation.id) (User_set.to_string %(conversation.users))
-              }};
-              Lwt.return ()
-          | None ->
-              ignore {unit{
-                show_message "Could not cancel dialog"
-              }};
-              Lwt.return ()))
 
 (******************************************************************************)
 (*                            Client processes                                *)
@@ -227,7 +185,7 @@ let () =
       (fun conversation ->
          Lwt.async
            (fun () ->
-              cancel_dialog conversation))
+              cancel_conversation conversation))
       (get_conversations user)
   in
   let removed_users =
@@ -247,6 +205,53 @@ let () =
   Lwt_react.E.keep (React.E.map add_user added_users)
 
 (******************************************************************************)
+(*                 RPC Functions for starting/ending dialogs                  *)
+
+let connected_server_function f =
+  server_function
+    (get_eref_option user_info_eref
+       (fun _ -> Lwt.fail Not_allowed)
+       f)
+
+let rpc_create_dialog =
+  connected_server_function
+    (fun user_info other ->
+       match_lwt get_user_info other.User.name with
+         | Some other_user_info
+           when User_set.mem other (React.S.value connected_users) ->
+             let users = User_set.from_list [user_info.user; other] in
+             let conversation = create_conversation users in
+             user_info.send_chat_event (Append_conversation (conversation, other));
+             other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
+             ignore {unit{
+               show_message "Conversation %d with %s created"
+                 %(conversation.id) (User.to_string %other)
+             }};
+             Lwt.return ()
+         | _ ->
+            ignore {unit{
+              show_message "Could not create dialog"
+            }};
+            Lwt.return ())
+
+let rpc_cancel_dialog =
+  connected_server_function
+    (fun _ conversation_id ->
+       (match get_conversation conversation_id with
+          | Some conversation ->
+              lwt () = cancel_conversation conversation in
+              ignore {unit{
+                show_message "Conversation %d with %s canceled"
+                  %(conversation.id) (User_set.to_string %(conversation.users))
+              }};
+              Lwt.return ()
+          | None ->
+              ignore {unit{
+                show_message "Could not cancel dialog"
+              }};
+              Lwt.return ()))
+
+(******************************************************************************)
 (*                              User service                                  *)
 
 let login_service =
@@ -259,7 +264,7 @@ let logout_service =
 let login_message_eref = Eliom_reference.Volatile.eref ~scope:Eliom_common.request None
 
 let login_handler () (username, password) =
-  match user_verify username password with
+  match_lwt verify_user username password with
     | Some user ->
         Eliom_state.set_volatile_data_session_group
           ~scope:Eliom_common.session (User.group_name user);
@@ -457,7 +462,8 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
                 Lwt_js_events.clicks (Html5.To_dom.of_element %conversation_elt)
                   (fun ev ->
                      (match User_set.elements %others with
-                        | [other] when is_disabled (Html5.To_dom.of_element %conversation_elt) ->
+                        | [other]
+                          when is_disabled (Html5.To_dom.of_element %conversation_elt) ->
                             Dom_html.stopPropagation ev;
                             Lwt.async (fun () -> %rpc_create_dialog other)
                         | _ -> ());
