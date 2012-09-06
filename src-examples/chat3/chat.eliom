@@ -148,7 +148,8 @@ let rpc_create_dialog =
              user_info.send_chat_event (Append_conversation (conversation, other));
              other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
              ignore {unit{
-               show_message "Dialog with %s created" (User.to_string %other)
+               show_message "Conversation %d with %s created"
+                 %(conversation.id) (User.to_string %other)
              }};
              Lwt.return ()
          | None ->
@@ -178,7 +179,8 @@ let rpc_cancel_dialog =
           | Some conversation ->
               lwt () = cancel_dialog conversation in
               ignore {unit{
-                show_message "Dialog with %s canceled" (User_set.to_string %(conversation.users))
+                show_message "Conversation %d with %s canceled"
+                  %(conversation.id) (User_set.to_string %(conversation.users))
               }};
               Lwt.return ()
           | None ->
@@ -351,13 +353,17 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
                   Dom_html.CoerceTo.input)
                (fun prompt_dom -> prompt_dom##focus ())
            with Not_found ->
-             Lwt.async
-               (fun () -> %rpc_create_dialog other))
+             Lwt.async (fun () -> %rpc_create_dialog other))
     in
     let open Html5.F in
       span ~a:[a_class ["user"]; a_onclick onclick]
       [ user_widget ~self:user other ]
 
+  let dispatch_message user messages = function
+    | Message msg ->
+        Html5.Manip.appendChild messages (message_widget user msg);
+        (let messages_dom = Html5.To_dom.of_element messages in
+        messages_dom##scrollTop <- messages_dom##scrollHeight)
 }}
 
 {client{
@@ -417,19 +423,14 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
         (fun () ->
            Lwt.async
              (fun () ->
-                let dispatch_message = function
-                  | Message msg ->
-                      Html5.Manip.appendChild %messages (message_widget %user msg);
-                      (let messages_dom = Html5.To_dom.of_element %messages in
-                       messages_dom##scrollTop <- messages_dom##scrollHeight)
-                in
                 try_lwt
-                  Lwt_stream.iter dispatch_message
+                  Lwt_stream.iter (dispatch_message %user %messages)
                    (Eliom_bus.stream %(conversation.bus))
                 with exn ->
                   debug_exn "Error during streaming conversation %d" exn %(conversation.id);
                   error "Error during streaming conversation %d" %(conversation.id));
-           Lwt_js_events.async
+           (* TODO remove Lwt_js_events.async *)
+           Lwt.async
              (fun () ->
                 Lwt_js_events.keypresses (Html5.To_dom.of_element %prompt)
                   (fun ev ->
@@ -440,7 +441,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
                         Eliom_bus.write %(conversation.bus)
                           (Message { author = %user; content }))
                       else Lwt.return ()));
-           Lwt_js_events.async
+           Lwt.async
              (fun () ->
                 Lwt_js_events.clicks (Html5.To_dom.of_element %close)
                   (fun ev ->
@@ -612,6 +613,9 @@ let () =
     Lwt.async_exception_hook :=
       fun exn ->
         debug_exn "Lwt.async_exception_hook" exn;
-        alert "Error: %s" (Printexc.to_string exn);
-        Eliom_client.exit_to ~service:Eliom_service.void_coservice' () ()
+        show_message' ~timeout:None Html5.F.([
+          pcdataf "Error: %s" (Printexc.to_string exn);
+          br ();
+          a ~xhr:false ~service:Eliom_service.void_coservice' [pcdata "reload"] ();
+        ])
 }}

@@ -41,6 +41,16 @@ let messages =
   let js_stringf fmt =
     Printf.ksprintf Js.string fmt
 
+  let remove_after_timeout ?timeout parent_id child =
+    match Option.get (fun () -> Some 3.0) timeout with
+      | Some t ->
+          Lwt.async
+            (fun () ->
+               lwt () = Lwt_js.sleep 3.0 in
+               Html5.Manip.Named.removeChild parent_id child;
+               Lwt.return ())
+      | None -> ()
+
   let show_message ?timeout fmt =
     Printf.ksprintf
       (fun str ->
@@ -48,15 +58,15 @@ let messages =
            (fun () ->
               let li = Html5.D.(li [pcdata str]) in
               Html5.Manip.Named.appendChild %messages_id li;
-              match Option.get (fun () -> Some 3.0) timeout with
-                | Some t ->
-                    Lwt.async
-                      (fun () ->
-                         lwt () = Lwt_js.sleep 3.0 in
-                         Html5.Manip.Named.removeChild %messages_id li;
-                         Lwt.return ())
-                | None -> ()))
+              remove_after_timeout ?timeout %messages_id li))
       fmt
+
+  let show_message' ?timeout li_contents =
+    Eliom_client.withdom
+      (fun () ->
+         let li = Html5.D.li li_contents in
+         Html5.Manip.Named.appendChild %messages_id li;
+         remove_after_timeout ?timeout %messages_id li)
 }}
 
 {server{
