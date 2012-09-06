@@ -374,6 +374,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
     dom##classList##add(Js.string "disabled")
 
   (* To access those variables in the client_value within the shared section below *)
+  let rpc_create_dialog = %rpc_create_dialog
   let rpc_cancel_dialog = %rpc_cancel_dialog
   let conversations_id = %conversations_id
 }}
@@ -451,6 +452,16 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
                         Lwt.return ())
                      else
                        %rpc_cancel_dialog %(conversation.id)));
+           Lwt.async
+             (fun () ->
+                Lwt_js_events.clicks (Html5.To_dom.of_element %conversation_elt)
+                  (fun ev ->
+                     (match User_set.elements %others with
+                        | [other] when is_disabled (Html5.To_dom.of_element %conversation_elt) ->
+                            Dom_html.stopPropagation ev;
+                            Lwt.async (fun () -> %rpc_create_dialog other)
+                        | _ -> ());
+                     Lwt.return ()));
            ())
     }};
     conversation_elt
