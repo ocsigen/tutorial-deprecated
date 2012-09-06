@@ -1,15 +1,14 @@
-
+(* vim: set filetype=omlet foldmethod=marker: *)
+(* {{{                           Global opens                                 *)
 {shared{
-
   open Eliom_lib
   open Eliom_lib.Lwt_ops
   open Eliom_content
   open Lib
-
 }}
 
-(******************************************************************************)
-(*                               User management                              *)
+(* }}} ************************************************************************)
+(* {{{                           User management                              *)
 
 {shared{
 
@@ -35,8 +34,8 @@
 
 }}
 
-(******************************************************************************)
-(*                               Chat intestine                               *)
+(* }}} ************************************************************************)
+(* {{{                           Chat intestine                               *)
 
 {shared{
 
@@ -73,8 +72,8 @@ let create_user_info user =
   let chat_events, send_chat_event = React.E.create () in
   { user; chat_events; send_chat_event }
 
-(******************************************************************************)
-(*                                 User info                                  *)
+(* }}} ************************************************************************)
+(* {{{                             User info                                  *)
 
 let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
 
@@ -100,8 +99,8 @@ let verify_user ~username ~password =
           Lwt.return (Some { User.name = username; color })
   else Lwt.return None
 
-(******************************************************************************)
-(*                         Book keeping conversations                         *)
+(* }}} ************************************************************************)
+(* {{{                     Book keeping conversations                         *)
 
 let conversation_table = Hashtbl.create 13
 
@@ -147,8 +146,8 @@ let cancel_conversation conversation =
     conversation.users;
   Lwt.return ()
 
-(******************************************************************************)
-(*                            Client processes                                *)
+(* }}} ************************************************************************)
+(* {{{                        Client processes                                *)
 
 module Client_processes_user =
   Client_processes.Make
@@ -204,8 +203,8 @@ let () =
   in
   Lwt_react.E.keep (React.E.map add_user added_users)
 
-(******************************************************************************)
-(*                 RPC Functions for starting/ending dialogs                  *)
+(* }}} ************************************************************************)
+(* {{{             RPC Functions for starting/ending dialogs                  *)
 
 let connected_server_function f =
   server_function
@@ -251,8 +250,8 @@ let rpc_cancel_dialog =
               }};
               Lwt.return ()))
 
-(******************************************************************************)
-(*                              User service                                  *)
+(* }}} ************************************************************************)
+(* {{{                          User services                                 *)
 
 let login_service =
   Eliom_service.post_coservice'
@@ -289,8 +288,8 @@ let logout_handler () () =
     | None ->
         Eliom_registration.Action.send ()
 
-(******************************************************************************)
-(*                                  Widgets                                   *)
+(* }}} ************************************************************************)
+(* {{{                              Widgets                                   *)
 
 let conversations_id = Html5.Id.new_elt_id ~global:true ()
 let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
@@ -369,9 +368,6 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
         Html5.Manip.appendChild messages (message_widget user msg);
         (let messages_dom = Html5.To_dom.of_element messages in
         messages_dom##scrollTop <- messages_dom##scrollHeight)
-}}
-
-{client{
 
   let is_disabled dom =
     Js.to_bool dom##classList##contains(Js.string "disabled")
@@ -473,6 +469,10 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
     conversation_elt
 }}
 
+(* }}} ************************************************************************)
+(* {{{                       Chat event dispatching                           *)
+
+
 {client{
 
   let append_conversation conversation user other =
@@ -518,8 +518,8 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
         remove_conversation conversation user
 }}
 
-(******************************************************************************)
-(*                              Main service                                  *)
+(* }}} ************************************************************************)
+(* {{{                          Main service                                  *)
 
 let main_service =
   Eliom_service.service ~path:[] ~get_params:Eliom_parameter.unit ()
@@ -615,6 +615,9 @@ let disconnected_main_handler () () =
         ]
       ]))
 
+(* }}} ************************************************************************)
+(* {{{                          Registrations                                 *)
+
 module Chat_app =
   Eliom_registration.App
     (struct let application_name = "chat" end)
@@ -636,3 +639,4 @@ let () =
           a ~xhr:false ~service:Eliom_service.void_coservice' [pcdata "reload"] ();
         ])
 }}
+(* }}} ************************************************************************)
