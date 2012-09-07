@@ -152,6 +152,10 @@ let messages =
                    modify (Int_map.remove id);
                    Lwt.return ());
               ignore {unit{
+                let config = Eliom_comet.Configuration.new_configuration () in
+                Eliom_comet.Configuration.set_timeout config (15.0 *. 60.0);
+                (* Eliom_comet.Configuration.set_always_active config true; *)
+                (* Eliom_comet.Configuration.set_active_until_timeout config true; *)
                 Eliom_client.onload
                   (fun () ->
                      Dom_html.window##onfocus <-

@@ -5,6 +5,7 @@
   open Eliom_lib.Lwt_ops
   open Eliom_content
   open Lib
+  let when_show_ids x = x (* else [] *)
 }}
 
 (* }}} ************************************************************************)
@@ -12,23 +13,59 @@
 
 {shared{
 
-  module User = struct
-    type t = {
-      name : string;
-      color : string;
-    } deriving (Json)
-    let to_string { name } = name
-    let group_name = to_string
-    let compare : t -> t -> int =
-      Pervasives.compare
-  end
+  type user = {
+    id : int;
+    name : string;
+    color : string;
+  } deriving (Json)
+
+  let user_create =
+    let next = let n = ref 0 in fun () -> incr n; !n in
+    fun name ->
+      let color =
+        Printf.sprintf "#%02x%02x%02x"
+          (56+Random.int 200) (56+Random.int 200) (56+Random.int 200)
+      in
+      { id = next (); name; color }
+
+  let user_to_string { id; name } = name^"/"^string_of_int id
+
+  let user_group_name_fmt () = format_of_string "user_%d"
+
+  let user_group_name { id } =
+    Printf.sprintf (user_group_name_fmt ()) id
+
+  let user_widget ?self user =
+    let open Html5.F in
+    let self_class =
+      let self_class user' =
+        if user = user' then
+          ["self"]
+        else []
+      in
+      Option.get (fun () -> [])
+        (Option.map self_class self)
+    in
+    span
+      ~a:[
+        a_class ("user_name" :: self_class);
+        a_style ("background-color:"^user.color);
+      ]
+      (pcdata user.name ::
+       when_show_ids
+         [ sub [pcdataf "%d" user.id] ])
+
   module User_set = struct
-    include Set.Make (User)
+    include Set.Make
+      (struct
+         type t = user
+         let compare = Pervasives.compare
+       end)
     let from_list li =
       List.fold_right add li empty
     let to_string users =
       String.concat ", "
-        (List.map User.to_string
+        (List.map user_to_string
            (elements users))
   end
 
@@ -40,9 +77,17 @@
 {shared{
 
   type message = {
-    author : User.t;
+    author : user;
     content : string;
   } deriving (Json)
+
+  let message_widget user message =
+    let open Html5.F in
+    li ~a:[a_class ["message"]] [
+      user_widget ~self:user message.author;
+      span ~a:[a_class ["content"]]
+        [pcdata message.content]
+    ]
 
   type conversation_event =
     | Message of message
@@ -57,13 +102,13 @@
   }
 
   type chat_event =
-    | Append_conversation of conversation * User.t
+    | Append_conversation of conversation * user
     | Remove_conversation of conversation
 
 }}
 
 type user_info = {
-  user : User.t;
+  user : user;
   chat_events : chat_event React.E.t;
   send_chat_event : chat_event -> unit;
 }
@@ -77,27 +122,12 @@ let create_user_info user =
 
 let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
 
-let get_user_info name =
+let get_user_info user =
   try_lwt
-    let state = Eliom_state.External_states.volatile_data_group_state name in
+    let state = Eliom_state.External_states.volatile_data_group_state (user_group_name user) in
     Eliom_reference.Ext.get state user_info_eref
   with Eliom_reference.Eref_not_intialized ->
     Lwt.return None
-
-let password_matches _ _ = true
-
-let verify_user ~username ~password =
-  if password_matches username password then
-    match_lwt get_user_info username with
-      | Some { user } ->
-          Lwt.return (Some user)
-      | None ->
-          let color =
-            Printf.sprintf "#%02x%02x%02x"
-              (56+Random.int 200) (56+Random.int 200) (56+Random.int 200)
-          in
-          Lwt.return (Some { User.name = username; color })
-  else Lwt.return None
 
 (* }}} ************************************************************************)
 (* {{{                     Book keeping conversations                         *)
@@ -138,7 +168,7 @@ let cancel_conversation conversation =
     (fun other ->
        Lwt.async
          (fun () ->
-            match_lwt get_user_info other.User.name with
+            match_lwt get_user_info other with
               | Some other_user_info ->
                   other_user_info.send_chat_event (Remove_conversation conversation);
                   Lwt.return ()
@@ -152,7 +182,7 @@ let cancel_conversation conversation =
 module Client_processes_user =
   Client_processes.Make
     (struct
-       type t = User.t
+       type t = user
        let get () =
          match_lwt Eliom_reference.get user_info_eref with
            | Some { user } -> Lwt.return user
@@ -173,7 +203,7 @@ let () =
        (fun processes ->
           debug "Client processes: %s"
             (String.concat ", "
-               (List.map (fun (id, user) -> Printf.sprintf "%d:%s" id (User.to_string user))
+               (List.map (fun (id, user) -> Printf.sprintf "%d:%s" id (user_to_string user))
                   (Int_map.bindings processes))))
        (React.S.changes Client_processes_user.signal))
 
@@ -215,7 +245,7 @@ let connected_server_function f =
 let rpc_create_dialog =
   connected_server_function
     (fun user_info other ->
-       match_lwt get_user_info other.User.name with
+       match_lwt get_user_info other with
          | Some other_user_info
            when User_set.mem other (React.S.value connected_users) ->
              let users = User_set.from_list [user_info.user; other] in
@@ -223,13 +253,20 @@ let rpc_create_dialog =
              user_info.send_chat_event (Append_conversation (conversation, other));
              other_user_info.send_chat_event (Append_conversation (conversation, user_info.user));
              ignore {unit{
-               show_message "Conversation %d with %s created"
-                 %(conversation.id) (User.to_string %other)
+               show_message' Html5.F.([
+                 pcdata "Conversation with ";
+                 user_widget %other;
+                 pcdata " created";
+               ])
              }};
              Lwt.return ()
          | _ ->
             ignore {unit{
-              show_message "Could not create dialog"
+              show_message' Html5.F.([
+                pcdata "Could not create dialog, the user ";
+                user_widget %other;
+                pcdata " is gone";
+              ])
             }};
             Lwt.return ())
 
@@ -240,18 +277,52 @@ let rpc_cancel_dialog =
           | Some conversation ->
               lwt () = cancel_conversation conversation in
               ignore {unit{
-                show_message "Conversation %d with %s canceled"
-                  %(conversation.id) (User_set.to_string %(conversation.users))
+                show_message' Html5.F.(
+                  pcdata "Conversation between " ::
+                  List.map user_widget (User_set.elements %(conversation.users)) @
+                  [pcdata " canceled"]
+                )
               }};
               Lwt.return ()
           | None ->
               ignore {unit{
-                show_message "Could not cancel dialog"
+                show_message "Could not cancel conversation"
               }};
               Lwt.return ()))
 
 (* }}} ************************************************************************)
 (* {{{                          User services                                 *)
+
+let password_matches _ _ =
+  true
+
+let verify_user ~username ~password =
+  if password_matches username password then
+    (* Search for the user among the currently logged in users *)
+    lwt user_infos =
+      Lwt_list.map_s
+        (fun group_name ->
+           ignore (Scanf.sscanf group_name (user_group_name_fmt ()) (fun _ -> ()));
+           let state = Eliom_state.External_states.volatile_data_group_state group_name in
+           try
+             Eliom_reference.Ext.get state user_info_eref
+           with Eliom_reference.Eref_not_intialized ->
+             Lwt.return None)
+        (Eliom_state.External_states.get_session_group_list ())
+    in
+    let find_user = function
+      | Some { user } when user.name = username ->
+          Some user
+      | _ -> None
+    in
+    let user =
+      match List.map_filter find_user user_infos with
+        | [ user ] -> user
+        | [] -> user_create username
+        | _ -> failwith "verify_user: multiple users"
+    in
+    Lwt.return (Some user)
+  else Lwt.return None
 
 let login_service =
   Eliom_service.post_coservice'
@@ -266,7 +337,7 @@ let login_handler () (username, password) =
   match_lwt verify_user username password with
     | Some user ->
         Eliom_state.set_volatile_data_session_group
-          ~scope:Eliom_common.session (User.group_name user);
+          ~scope:Eliom_common.session (user_group_name user);
         (match_lwt Eliom_reference.get user_info_eref with
            | Some _ ->
                Eliom_reference.Volatile.set login_message_eref (Some "Already logged in");
@@ -289,38 +360,15 @@ let logout_handler () () =
         Eliom_registration.Action.send ()
 
 (* }}} ************************************************************************)
-(* {{{                              Widgets                                   *)
+(* {{{                         Conversation widget                            *)
 
 let conversations_id = Html5.Id.new_elt_id ~global:true ()
 let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 
 {shared{
 
-  let user_widget ?self user =
-    let open Html5.F in
-    let self_class =
-      let self_class user' =
-        if 0 = User.compare user user' then
-          ["self"]
-        else []
-      in
-      Option.get (fun () -> [])
-        (Option.map self_class self)
-    in
-    span ~a:[a_class ("user_name" :: self_class);
-             a_style ("background-color:"^user.User.color); ]
-      [ pcdata user.User.name ]
-
-  let message_widget user message =
-    let open Html5.F in
-    li ~a:[a_class ["message"]] [
-      user_widget ~self:user message.author;
-      span ~a:[a_class ["content"]]
-        [pcdata message.content]
-    ]
-
   let users_attr =
-    Html5.Custom_data.create_json ~name:"users" Json.t<User.t list>
+    Html5.Custom_data.create_json ~name:"users" Json.t<user list>
 }}
 
 {client{
@@ -350,7 +398,10 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
            try
              let users = User_set.from_list [other; user] in
              let conversation_dom = find_conversation ~disabled:false users in
-             show_message "Focus conversation with %s" (User.to_string other);
+             show_message' Html5.F.([
+               pcdata "Focus conversation with ";
+               user_widget other;
+             ]);
              Js.Opt.iter
                (Js.Opt.bind
                   (conversation_dom##querySelector(Js.string ".prompt"))
@@ -570,12 +621,13 @@ let connected_main_handler { user; chat_events } =
           (* FIXME reload does not retain all conversations *)
           (* p [a ~service:Eliom_service.void_coservice' [pcdata "Reload in app"] ()]; *)
           div [
-            span [
-              b [pcdataf "Hello "];
-              user_widget user;
-              pcdataf " (at %d)" id;
-              pcdata " ";
-            ];
+            span
+              (b [pcdataf "Hello "] ::
+               user_widget user ::
+               pcdata " " ::
+               when_show_ids
+                 [ span ~a:[a_class ["note"]]
+                     [pcdataf "(process %d) " id] ]);
             post_form ~a:[a_class ["logout_form"]] ~service:logout_service
               (fun () -> [
                 string_input ~input_type:`Submit ~value:"Logout" ();
@@ -636,7 +688,10 @@ let () =
         show_message' ~timeout:None Html5.F.([
           pcdataf "Error: %s" (Printexc.to_string exn);
           br ();
-          a ~xhr:false ~service:Eliom_service.void_coservice' [pcdata "reload"] ();
+          get_form ~xhr:false ~service:Eliom_service.void_coservice'
+            (fun () -> [
+              Html5.F.string_input ~input_type:`Submit ~value:"reload" ();
+            ]);
         ])
 }}
 (* }}} ************************************************************************)
