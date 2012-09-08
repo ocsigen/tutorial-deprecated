@@ -22,7 +22,7 @@
 }
 
 .conversation .close:after {
-  content: "\00274C";
+  content: "\2716";
 }
 
 .conversation .participants {
