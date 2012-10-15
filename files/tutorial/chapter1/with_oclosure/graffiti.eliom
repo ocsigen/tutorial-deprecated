@@ -1,6 +1,7 @@
 {shared{
   open Eliom_content
   open Eliom_content.Html5.D
+  open Eliom_lib.Lwt_ops
   let width = 700
   let height = 400
 }}
@@ -91,7 +92,7 @@ let page =
        ])
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
 
-let onload_handler = {{
+let init_client () = ignore {unit{
 
   (* Initialize the canvas *)
   let canvas = Html5.To_dom.of_canvas %canvas_elt in
@@ -157,6 +158,6 @@ let onload_handler = {{
 let main_service =
   My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-       Eliom_service.onload onload_handler;
+      init_client ();
       Lwt.return page)
 

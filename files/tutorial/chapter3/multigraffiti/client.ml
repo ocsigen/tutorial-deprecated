@@ -1,5 +1,6 @@
 open Eliom_content
 open Common
+open Eliom_lib.Lwt_ops
 
 let draw ctx (color, size, (x1, y1), (x2, y2)) =
   ctx##strokeStyle <- (Js.string color);

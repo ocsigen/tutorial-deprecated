@@ -1,5 +1,5 @@
 
-//The code of this tutorial has been tested with the 2.2 release of
+//The code of this tutorial has been tested with the 3~alpha release of
   the Ocsigen bundle.//\\
 
 =Introduction=

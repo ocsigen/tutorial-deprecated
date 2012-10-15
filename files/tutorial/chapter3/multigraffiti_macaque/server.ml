@@ -97,7 +97,7 @@ let disconnection_service = Eliom_service.post_coservice' ~post_params:Eliom_par
 let create_account_service =
   Eliom_service.post_coservice ~fallback:main_service ~post_params:(let open Eliom_parameter in (string "name" ** string "password")) ()
 
-let username = Eliom_reference.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 
 module Lwt_thread = struct
   include Lwt
@@ -158,7 +158,7 @@ let () = Eliom_registration.Action.register
 let () =
   Eliom_registration.Action.register
     ~service:disconnection_service
-    (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ())
+    (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
 
 let disconnect_box () =
   post_form disconnection_service

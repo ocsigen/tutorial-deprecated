@@ -35,9 +35,9 @@ let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> fals
 
 
 (* Eliom references *)
-let username = Eliom_reference.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 
-let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request false
+let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
 
 
 
@@ -132,7 +132,7 @@ let _ =
 
   Eliom_registration.Action.register
     ~service:disconnection_service
-    (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ());
+    (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ());
 
   Eliom_registration.Html5.register
     ~service:new_user_form_service

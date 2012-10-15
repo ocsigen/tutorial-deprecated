@@ -2,7 +2,7 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested with the 2.2 release of
+//The code of this tutorial has been tested with the version 3~alpha of
   the Ocsigen bundle.//\\
 
 ==Multi-user collaborative drawing application==
@@ -48,9 +48,9 @@ let height = 400>>
 
 ===={{{client.ml}}}====
 
-It is almost the same code as what was enclosed in {{{ {client{ ... }} }}}
-with the difference that what was previously in
-{{{ Eliom_service.onload {{ }} }}} is now in the function {{{ launch_client_canvas}}}.
+It is almost the same code as what was enclosed in {{{ {client{ ... }}
+}}} with the difference that what was previously in the client value
+function {{{ init_client }}} is now in the function {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|
 open Eliom_content
@@ -324,20 +324,21 @@ application.
 open Server
 >>
 
-And then we define the function adding the {{{onload}}} handler.
+And then we define a function initializing the client application by
+side effects in a client value.
 
 <<code language="ocaml"|
 let start_drawing name image canvas =
   let bus = get_bus name in
-  Eliom_service.onload
-    {{
-      let canceller = launch_client_canvas %bus %image %canvas in
-      Eliom_client.on_unload (fun () -> stop_drawing canceller)
-    }}
+  ignore {unit{
+    let canceller = launch_client_canvas %bus %image %canvas in
+    Eliom_client.onunload (fun () -> stop_drawing canceller)
+  }}
 >>
 
-The function registered by <<a_api project="eliom" subproject="server"| val Eliom_service.on_unload >> will be called when the page change
-inside the application.
+The function registered by <<a_api project="eliom"
+subproject="client"| val Eliom_service.onunload >> will be called when
+the page change inside the application.
 
 And we finally register the service sending a drawing:
 

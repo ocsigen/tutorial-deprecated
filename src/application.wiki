@@ -1,6 +1,6 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested with the 2.2 release of
+//The code of this tutorial has been tested with the version 3~alpha of
   the Ocsigen bundle.//\\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
@@ -301,7 +301,7 @@ them are available at source file toplevel:
 
 and the last one is available at the expression level:
 
-* {{{ {{ ... }} }}} for client side event handler.
+* {{{ {some-typ{ ... }} }}} for client side values of type {{{ some-typ }}}.
 
 In the default Makefile we automatically split the code, compile the server
 part as usual, and compile the client part using {{{js_of_ocaml}}},
@@ -351,7 +351,7 @@ let main_service =
   My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let count = incr count; !count in
-      Eliom_service.onload {{
+      ignore {unit{
         Dom_html.window##alert(Js.string
 	  (Printf.sprintf "You came %i times to this page" %count))
       }};
@@ -362,38 +362,27 @@ let main_service =
 >>
 
 Here, we are increasing the reference {{{count}}} each time the page
-is accessed. When the page is loaded the client execute the event
-handler registred with <<a_api project="eliom" subproject="server" |
-val Eliom_service.onload >> : this client side code access to the
-counter using the syntax extension {{{%count}}}, and displays it in a
-message box.
+is accessed. When the page is loaded the client program initializes
+the client value {{{ {unit{ ... }} }}} and thus triggers an alert
+window. More specifically, the variable {{{ count }}}, in the scope of
+the client value on the server is made available in the client value
+using the syntax extension {{{%count}}}. In doing so, the server side
+value {{{ count }}} is displayed in a message box on the client.
+
 
 <<concept
 
-  title="Executing code after loading a page" |
-
-  To execute some code on client side just after loading a page, use
-  function <<a_api project="eliom" version="dev" | val
-  Eliom_service.onload>>.  It takes as parameter an event handler
-  that you can provide using the syntax {{{ {{ ... }} }}}.
-
->>
-
-<<concept
-
-  title="Antiquotations: Using server side values in client code" |
+  title="Injections: Using server side values in client code" |
 
   Client side code can reference copies of server side values using
-  the {{{%variable}}} syntax.  It is currently limited to code
-  included in {{{ {{ ... }} }}} (and not yet available in top level
-  client code {{{ {client{ ... }} }}}). Values sent that way are
+  the {{{%variable}}} syntax.  Values sent that way are
   weakly type checked: the name of the client side type must match the
   server side one.  If you define a type and want it to be available
   on both sides, declare it in {{{ {shared{ ... }} }}}. See the Eliom
   manual, for more information anout the <<a_manual project="eliom"
-  chapter="client" fragment="syntax%" | Eliom's syntax extension >>
-  and its <<a_manual project="eliom" chapter="config"
-  fragment="compiling"|compilation process>>.
+  chapter="eliom-language" | Eliom's syntax extension >>
+  and its <<a_manual project="eliom" chapter="client-compiling"
+  fragment="compilation"|compilation process>>.
 
 >>
 
@@ -471,7 +460,7 @@ let page =
     (body [h1 [pcdata "Graffiti"];
            canvas_elt] ) )
 
-let onload_handler = {{
+let init_client () = ignore {unit{
   let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
@@ -481,6 +470,7 @@ let onload_handler = {{
 let main_service =
   My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
+      init_client ();
       Eliom_service.onload onload_handler;
       Lwt.return page)
 
@@ -804,33 +794,6 @@ let page =
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
 >>
 
-<<wip|
-
-The previous code will not work with Eliom ≤ 2.0.1. With those
-versions, the function <<a_api project="eliom" subproject="server"|
-val Eliom_content.Html5.D.make_uri >> could not be used outside a service
-handler. To delay the URI calculation you need to replace the constant
-{{{page}}} with a function that take {{{unit}}} and returns the page.
-
-<<code language="ocaml"|
-let page () =
-  html (head ...) (body ...)
-
-...
-
-My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
-    (fun () () ->
-      Eliom_service.onload onload_handler;
-      Lwt.return (page ()))
->>
-
-In the upcoming release, the URI is not immediatly computed by the
-{{{make_uri}}} function but computed each time the page is sent to the
-client. This allow the definition of "global" nodes outsides of
-service handler and still use relative URI.
-
->>
-
 You need to install the corresponding stylesheets and images into your project:
 
 The stylesheet files should go in the directory ##static/css##:
@@ -941,15 +904,6 @@ let imageservice =
     ~path:["image"]
     ~get_params:Eliom_parameter.unit
     (fun () () -> Lwt.return (image_string (), "image/png"))
->>
-
-<<wip|
-
-With Eliom ≤ 2.0.1, the module <<a_api project="eliom"
-subproject="server"| module Eliom_registration.String >> was named <<a_api
-project="eliom" subproject="server" version="2.0.1"| module
-Eliom_registration.Text>>.
-
 >>
 
 <<concept

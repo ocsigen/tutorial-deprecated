@@ -1,6 +1,8 @@
 open Eliom_content
 open Html5.D
 open Server
+open Eliom_lib
+open Eliom_lib.Lwt_ops
 
 let static_dir =
   match Eliom_config.get_config () with
@@ -14,7 +16,7 @@ let static_dir =
                ("Unexpected content inside graffiti config"))
 
 let image_dir name =
-  let dir = static_dir ^ "/graffiti_saved/" ^ (Url.encode name) in
+  let dir = static_dir ^ "/graffiti_saved/" ^ (Eliom_lib.Url.encode name) in
   (try_lwt Lwt_unix.mkdir dir 0o777 with
     | _ -> debug "could not create the directory %s" dir; Lwt.return ()) >|=
   (fun () -> dir)
@@ -66,16 +68,20 @@ let rec entries name list = function
       | (n,saved)::q ->
 	let title = Atom_feed.plain ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  Xhtml.F.make_uri ~absolute:true ~service:(Eliom_service.static_dir ())
-	    (local_filename name n)
+	  Xhtml.M.uri_of_string
+            (Eliom_uri.make_string_uri
+               ~service:(Eliom_service.static_dir ())
+               (local_filename name n))
 	in
 	let entry =
 	  Atom_feed.entry ~title ~id:uri ~updated:saved
-            [Atom_feed.xhtmlC [ Xhtml.F.img ~src:uri ~alt:"image" ()]] in
+            [Atom_feed.xhtmlC [ Xhtml.M.img ~src:uri ~alt:"image" ()]] in
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = Xhtml.F.make_uri ~absolute:true ~service:feed_service name in
+  let id = Xhtml.M.uri_of_string
+              (Eliom_uri.make_string_uri
+                 ~service:feed_service name) in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
   try_lwt
     Ocsipersist.find image_info_table name >|=
@@ -87,7 +93,8 @@ let feed name () =
     | e -> Lwt.fail e
 
 let feed name () =
-  let id = Xhtml.F.make_uri ~absolute:true ~service:feed_service name in
+  let id = Xhtml.M.uri_of_string
+              (Eliom_uri.make_string_uri ~service:feed_service name) in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
   Lwt.catch
     (fun () -> Ocsipersist.find image_info_table name >|=

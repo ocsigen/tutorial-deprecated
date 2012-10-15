@@ -1,6 +1,7 @@
 {shared{
   open Eliom_content
   open Eliom_content.Html5.D
+  open Eliom_lib.Lwt_ops
   let width = 700
   let height = 400
 }}
@@ -70,7 +71,7 @@ let page =
     (head (title (pcdata "Graffiti")) [])
     (body [h1 [pcdata "Graffiti"]])
 
-let onload_handler = {{
+let init_client () = ignore {unit{
   let canvas = Dom_html.createCanvas Dom_html.document in
   let ctx = canvas##getContext (Dom_html._2d_) in
   canvas##width <- width; canvas##height <- height;
@@ -119,5 +120,5 @@ let onload_handler = {{
 let main_service =
   My_appl.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-      Eliom_service.onload onload_handler;
+      init_client ();
       Lwt.return page)
