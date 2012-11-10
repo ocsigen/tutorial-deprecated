@@ -5,7 +5,7 @@
 
 <<|outline target="documentation">>
 
-This chapter is a tutorial explaining how to create a small Web site
+This chapter is a tutorial explaining how to create a small web site
 with several pages, users, sessions, etc. Then, in next chapter,
 we will incorporate the features of this site with the program from the
 previous chapter, to show that we can
@@ -15,7 +15,7 @@ We assume you have read at least the first section of the previous
 chapter, which explained how to create a service and constuct valid
 HTML pages.
 
-We will create a simple Web site with one main page and a page for
+We will create a simple web site with one main page and a page for
 each user (assuming we have several users already created).  Then we
 will add a login/connection form. We will also add a registration
 form, in order to learn how to create //dynamically// new services,
@@ -628,7 +628,7 @@ Redirections
 
 <<concept title="Non-attached coservices" |
 
-With many Web programming frameworks, adding a connection form on each
+With many web programming frameworks, adding a connection form on each
 page of a site is complicated, and is approached in one of two ways:
 
 * A first solution is similar to what we did for the main service, but
@@ -920,13 +920,13 @@ the right account!
 
 A working alternative would have been to generate a random key, and
 associate {{{name}}} and {{{pwd}}} with that key in a database table
-on the server. This is the way such kind of Web interaction is usually
+on the server. This is the way such kind of web interaction is usually
 implemented. However, Eliom's solution is much simpler.
 
 The ability to register new services dynamically is implemented in few
-Web frameworks, even though it simplifies a lot the programmating
-involved with that type of Web interaction.  This feature is a variant
-of what is called //continuation based Web programming//.  Think about
+web frameworks, even though it simplifies a lot the programmating
+involved with that type of web interaction.  This feature is a variant
+of what is called //continuation based web programming//.  Think about
 it when you want to //create a page that depends on previous
 interaction with the user//. Dynamic registration of services will
 automatically record the "history" of the interaction, and make
@@ -939,7 +939,7 @@ Examples of uses:
   one, etc., like our registration form with confirmation).
 
 On the other hand, if you want to implement a //shopping basket//, you
-want it to be shared between all tabs of your Web site.  To do that,
+want it to be shared between all tabs of your web site.  To do that,
 you will use session data.
 
 //Warning:// Services are kept in memory. To avoid memory leaks, you
@@ -977,7 +977,7 @@ example when she logs in.
 Scope "request"
 >>
 
-In the current version, our Web site fails silently when the password
+In the current version, our web site fails silently when the password
 is wrong.  Let's improve this behavior by displaying an error message.
 To do that, we need to pass information to the service occurring after
 the action. We record this information in an Eliom reference with

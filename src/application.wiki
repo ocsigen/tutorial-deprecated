@@ -4,9 +4,11 @@
   the Ocsigen bundle.//\\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
-drawing application]].  It is a client/server Web application
+drawing application]].  It is a client/server web application
 displaying an area where users can draw using the mouse, and see what
-other users are drawing. <<webonly| The final code is available <<a_file
+other users are drawing at the same time and in real-time.
+
+<<webonly| The final code is available <<a_file
 src="tutorial.tar.gz"|for download>>.>>
 
 <<|outline target="documentation">>
@@ -17,12 +19,14 @@ src="tutorial.tar.gz"|for download>>.>>
 
 <<concepts|Services\\Configuration file\\Static validation of HTML>>
 
-Our Web application consists of a single page for now. Let's start by
+Our web application consists of a single page for now. Let's start by
 creating a very basic page.  We define the service that will implement
 this page by the following declaration:
 
+<<code-snippet file="chapter1/start/graffiti.ml" snippet="1">>
+
 <<code language="ocaml" |
-open Eliom_content.Html5.D
+open Eliom_content.Html5.D (* provides functions to create HTML nodes *)
 
 let main_service =
   Eliom_registration.Html5.register_service
@@ -30,28 +34,7 @@ let main_service =
     (fun () () -> Lwt.return (html (head (title (pcdata "Page title")) [])
                                (body [h1 [pcdata "Graffiti"]])))>>
 
-The same, written with fully qualified names (without {{{open}}}):
-
-<<code language="ocaml"|
-let main_service =
-  Eliom_registration.Html5.register_service
-    ~path:["graff"]
-    ~get_params:Eliom_parameter.unit
-    (fun () () ->
-      Lwt.return
-        (Eliom_content.Html5.D.html
-          (Eliom_content.Html5.D.head (Eliom_content.Html5.D.title
-					 (Eliom_content.Html5.D.pcdata "")) [])
-          (Eliom_content.Html5.D.body
-	     [Eliom_content.Html5.D.h1
-		 [Eliom_content.Html5.D.pcdata "Graffiti"]])))
->>
-
-<<|BB
-  Why not just stick with one scheme of opening Ocsigen modules?
->>
-
-Copy one of the two pieces of code above in a file {{{graffiti.ml}}},
+Copy the code above in a file {{{graffiti.ml}}},
 then compile it with the following command ; it produce a file called
 {{{graffiti.cmo}}}.
 
@@ -78,13 +61,13 @@ Your page is now available at URL [[http://localhost:8080/graff|{{{http://localh
 
 <<concept title="Services"|
 
-Unlike typical Web programming techniques (CGI, PHP,~ ...), with
+Unlike typical web programming techniques (CGI, PHP,~ ...), with
 Eliom, you don't write one file for each URL, but a single OCaml module
-(*.cmo or *.cma) for the whole Web site.
+(*.cmo or *.cma) for the whole web site.
 
 The <<a_api project="eliom" | module Eliom_service >> module allows
-to create new entry points to your Web site, called //services//. In
-general, services are attached to a URL and generate a Web page.
+to create new entry points to your web site, called //services//. In
+general, services are attached to a URL and generate a web page.
 Services are represented by OCaml values, through which you must
 register a function that will generate a page.
 
@@ -122,7 +105,7 @@ These instructions tell the server to:
 <<concept title="Static validation of HTML"|
 
 There are several ways to create pages for Eliom.  You can generate
-pages as strings (as in other Web frameworks).  But we prefer checking
+pages as strings (as in other web frameworks).  But we prefer checking
 at compile time that the HTML will be correct.  Eliom provides several
 modules to do that, either using OcamlDuce (if you have it installed)
 or using OCaml's polymorphic variants.  This tutorial is using the
@@ -130,10 +113,10 @@ second solution, using the module <<a_api project="eliom"
 | module Eliom_content.Html5.D >>. This module defines a
 construction function for each HTML5 tag.
 
-//Note that it is also possible to use the usual HTML syntax (see
- <<a_api project="tyxml" | module Pa_tyxml >>).//
+//Note that it is also possible to use the usual HTML syntax directly
+ in OCaml, cf.  <<a_api project="tyxml" | module Pa_tyxml >>.//
 
-Ocsigen use the <<a_manual project="tyxml" version="dev"|TyXML>>
+Ocsigen uses the <<a_manual project="tyxml" version="dev"|TyXML>>
 library to build HTML tree.  The TyXML library is very strict and
 compels you to respect HTML5 standard (with some limitations). For
 example if you write:
@@ -189,8 +172,8 @@ module Html5.F >>.
 <<concept title="Lwt"|
 
 **Important warning:** All the functions you write must be written in
-collaborative manner using Lwt. Lwt is a very convenient way to
-implement concurrent programs in OCaml, which is now widely used even
+cooperative manner using Lwt. Lwt is a convenient way to
+implement concurrent programs in OCaml, and is now also widely used
 for applications not related to Ocsigen.
 
 For now we will just use the {{{Lwt.return}}} function as above.  We
@@ -204,14 +187,14 @@ the <<a_manual project="lwt"|Lwt programming guide>>.
 <<concepts|
 Service sending an application\\
 Client and server code\\
-Compiling a Web application with server and client parts\\
-Calling Javascript methods with Js_of_ocaml\\
+Compiling a web application with server and client parts\\
+Calling JavaScript methods with Js_of_ocaml\\
 >>
 
 To create our first service, we used the function <<a_api
 project="eliom" | val Eliom_registration.Html5.register_service>>, as we
 wanted to return HTML5. But actually we want our service to send an
-Eliom application.  To do that, we will create our own registration
+Eliom application.  To do so, we will create our own registration
 module by using the functor {{{Eliom_registration.App}}}:
 
 <<|BB
@@ -227,13 +210,13 @@ module My_app =
     end)
 >>
 
-It is now possible to use {{{My_app}}} instead of
-{{{Eliom_registration.Html5}}} for registering our main service
-(now at URL {{{/}}}):
+It is now possible to use {{{My_app}}} for registering our main
+service (now at URL {{{/}}}):
 
 <<code language="ocaml"|
 let main_service =
-  My_app.register_service ~path:[""]
+  My_app.register_service
+    ~path:[""]
     ~get_params:Eliom_parameter.unit
     (fun () () ->
       Lwt.return
@@ -246,7 +229,7 @@ We now want to add some OCaml code to be executed by the browser. For
 that purpose, Eliom provides a syntax extension to distinguish between
 server and client code in the same file. We start by a very basic
 program, that will display a message to the user by calling the
-Javascript function {{{alert}}}. Add the following lines to the
+JavaScript function {{{alert}}}. Add the following lines to the
 program,
 
 <<code language="ocaml"|
@@ -280,50 +263,67 @@ file directory//. To copy it to its rightful place, type:
 make install
 }}}
 
-And finaly, run Ocsigen server:
+And finally, run Ocsigen server:
 
 {{{
 ocsigenserver -c graffiti.conf
 }}}
 
-Your page is now available at URL {{{http://localhost:8080/}}}. It
-should open an alert box. If not, check that the static file directory
-in the configuration file is correct.
+If you visit the page at [[http://localhost:8080]] and if the static
+directory is configured correctly, the browser will now load the file
+{{graffiti.js}}, and open the alert-box accordingly.
 
-<<concept title="Client side code"|
+<<concept title="Splitting the code into server and client parts"|
 
 Eliom's syntax extension implements four kinds of quotations. Three of
 them are available at source file toplevel:
 
+At the very toplevel of your source file (i.e. //not// inside module,
+other server-/client-parts), you can use the following quotations to
+specify for which side the code should run.
+
 * {{{ {client{ ... }} }}} for client side specific code.
 * {{{ {server{ ... }} }}} (optional) for server side specific code.
 * {{{ {shared{ ... }} }}} for code that will be used both for the server and the client.
-
-and the last one is available at the expression level:
-
-* {{{ {some-typ{ ... }} }}} for client side values of type {{{ some-typ }}}.
+* Code outside of those quotations is assument to be only for server side.
 
 In the default Makefile we automatically split the code, compile the server
 part as usual, and compile the client part using {{{js_of_ocaml}}},
-to create a Javascript file.
+to create a JavaScript file.
+>>
 
+<<concept title="Client values on the server"|
+
+Additionally, it is possible to create client values within the server
+code by the following quotation:
+
+<<code language="ocaml"|
+  {typ{ client-expr }}
+>>
+
+where {{{typ}}} is the type of the {{{client-expr}}} on the client.
+Note, that such a client values is abstract on the server, but becomes
+concrete, once it is sent to the client with the next request.
+
+(The {{{typ}}} can be ommitted, when it can be inferred from the usage of the client value in the server code.)
 >>
 
 <<concept title="Js_of_ocaml"|
 
- The client-side parts of the program are compiled to Javascript by
-Js_of_ocaml, which recompiles OCaml bytecode, generating Javascript.
-It is easy to bind Javascript libraries to call Javascript functions
+The client-side parts of the program are compiled to JavaScript by
+##Js_of_ocaml##, which recompiles OCaml bytecode, to JavaScript.
+It is <<a_manual project="js_of_ocaml" chapter="bindings"|easy>>
+ to bind JavaScript libraries to call JavaScript functions
 from OCaml programs. In the example, we are using the <<a_api
 project="js_of_ocaml" | module Dom_html >> module, which is a binding
 to allow the manipulation of an HTML page.
 
-Js_of_ocaml is using a syntax extension to call Javascript methods:
+Js_of_ocaml is using a syntax extension to call JavaScript methods:
 * {{{obj##m(a, b, c)}}} to call the method {{{m}}} of object {{{obj}}}
 with parameters {{{(a, b, c)}}}
 * {{{obj##m}}} to get a property
 * {{{obj##m <- e}}} to set a property
-* {{{jsnew constr (e1, ..., en)}}} to call a Javascript constructor
+* {{{jsnew constr (e1, ..., en)}}} to call a JavaScript constructor
 
 Find more information in <<a_manual project="js_of_ocaml" |
 Js_of_ocaml's manual >>.
@@ -344,11 +344,11 @@ we can access some server variables from client code. For instance:
 
 <<code language="ocaml"|
 let count = ref 0
->>
 
-<<code language="ocaml"|
 let main_service =
-  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  My_app.register_service
+     ~path:[""]
+     ~get_params:Eliom_parameter.unit
     (fun () () ->
       let count = incr count; !count in
       ignore {unit{
@@ -362,8 +362,9 @@ let main_service =
 >>
 
 Here, we are increasing the reference {{{count}}} each time the page
-is accessed. When the page is loaded the client program initializes
-the client value {{{ {unit{ ... }} }}} and thus triggers an alert
+is accessed. When the page is loaded and the document is in-place,
+the client program initialize
+the value inside {{{ {unit{ ... }} }}} and thus triggers an alert
 window. More specifically, the variable {{{ count }}}, in the scope of
 the client value on the server is made available in the client value
 using the syntax extension {{{%count}}}. In doing so, the server side
@@ -378,11 +379,20 @@ value {{{ count }}} is displayed in a message box on the client.
   the {{{%variable}}} syntax.  Values sent that way are
   weakly type checked: the name of the client side type must match the
   server side one.  If you define a type and want it to be available
-  on both sides, declare it in {{{ {shared{ ... }} }}}. See the Eliom
+  on both sides, declare it in the section {{{ {shared{ ... }} }}}. See the Eliom
   manual, for more information anout the <<a_manual project="eliom"
   chapter="eliom-language" | Eliom's syntax extension >>
   and its <<a_manual project="eliom" chapter="client-compiling"
   fragment="compilation"|compilation process>>.
+
+  Note well, that the value of an injection into a section {{{
+  {client{ ... }} }}} is sent only once when starting the application
+  in the browser, and //not// synced automatically later (you may want
+  to use <<a_api project="eliom" subproject="server"|module
+  Eliom_react>>, however).
+
+  In contrast, the values of injections into client values which are
+  created during a request are sent alongside the next response.
 
 >>
 
@@ -420,12 +430,15 @@ Canvas
 
 >>
 
-We now want to draw something on the page using an HTML5 canvas. As a
-first-step, we define a client-side function called {{{draw}}} that
-draw a line between two given points in a canvas and we call this
-function once in the {{{onload}}} event handler to draw an <<span
-style="color:#ffaa33;"|orange>> line. Here is the (full) new version
-of the program:
+We now want to draw something on the page using an HTML5 canvas. The
+drawing primitive is defined in the client-side function called
+{{{draw}}} that just draws a line between two given points in a canvas.
+
+To start our collaborative drawing application, we define another
+client-side function {{{ init_client }}}, which just draws a single,
+<<span style="color:#ffaa33;"|orange>> line for now.
+
+Here is the (full) new version of the program:
 
 <<code language="ocaml"|
 module My_app =
@@ -459,31 +472,49 @@ let page =
     (head (title (pcdata "Graffiti")) [])
     (body [h1 [pcdata "Graffiti"];
            canvas_elt] ) )
-
-let init_client () = ignore {unit{
-  let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
-  let ctx = canvas##getContext (Dom_html._2d_) in
-  ctx##lineCap <- Js.string "round";
-  draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
+{client{
+  let init_client () =
+    let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
+    let ctx = canvas##getContext (Dom_html._2d_) in
+    ctx##lineCap <- Js.string "round";
+    draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
 }}
 
 let main_service =
   My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-      init_client ();
-      Eliom_service.onload onload_handler;
+      (* Cf. the box "Client side side-effects on the server" *)
+      ignore {unit{ init_client () }};
       Lwt.return page)
 
 >>
 
 <<concept
 
-  title="Javascript datatypes in OCaml"|
+  title="JavaScript datatypes in OCaml"|
 
   Note that we use the function <<a_api project="js_of_ocaml" | val
   Js.string>> from the Js_of_ocaml's library to convert an OCaml
   string into a JS string.
 
+>>
+
+<<concept title="Client side side-effect on the server" |
+
+  What sounds a bit weird at first, is a very convenient tool for
+  processing request in a client-server application: If a client value
+  is created while processing a request, it will be evaluated on the
+  client once he receives the response and the document is put in place;
+  with this, the corresponding side effects are executed, of course.
+
+  In the example above the line
+  <<code language="ocaml"|
+    ignore {unit{ init_client () }};
+  >>
+
+  creates such a client value which consists only of side effects, so
+  the value can be {{ignore}}d, but Eliom will evaluate the value
+  anyway, justs because it has been created!
 >>
 
 ===Single user drawing application===
@@ -495,11 +526,11 @@ Mouse events with Lwt
 
 We now want to catch mouse events to draw lines with the mouse like
 with the //brush// tools of any classical drawing application. One
-solution would be to mimic classical Javascript code in OCaml ; for
+solution would be to mimic classical JavaScript code in OCaml ; for
 example by using the function <<a_api project="js_of_ocaml"| val
 Dom_events.listen >> that is the Js_of_ocaml's equivalent of
 {{{addEventListener}}}. However, this solution is at least as much
-verbose than the Javascript equivalent, hence not
+verbose than the JavaScript equivalent, hence not
 satisfactory. Js_of_ocaml's library provides a much easier way to do that,
 together with Lwt.
 
@@ -507,7 +538,8 @@ Replace the {{{onload_handler}}} of the previous example by the
 following piece of code, then compile and draw !
 
 <<code language="ocaml"|
-let onload_handler = {{
+{client{
+let init_client () =
 
   let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
@@ -530,7 +562,8 @@ let onload_handler = {{
 
   let open Lwt_js_events in
   ignore (mousedowns canvas
-            (fun ev -> set_coord ev; line ev ~>>= fun () ->
+            (fun ev ->
+              set_coord ev; line ev ~>>= fun () ->
               Lwt.pick [mousemoves Dom_html.document line;
 		        mouseup Dom_html.document ~>>= line]));
 
@@ -539,12 +572,12 @@ let onload_handler = {{
 >>
 
 We use two references {{{x}}} and {{{y}}} to record the last mouse
-position.  The function {{{set_coord}}} updates these references from
+position.  The function {{{set_coord}}} updates those references from
 mouse event data.  The function {{{compute_line}}} computes the
 coordinates of a line from the initial (old) coordinates to the new
 coordinates--the event data sent as a parameter.
 
-The last four lines of code, that implements the event handling loop, could be
+The last four lines of code, that implement the event handling loop, could be
 read as: for each {{{mousedown}}} event on the canvas, do
 {{{set_coord}}} then {{{line}}} (this will draw a dot), then
 behave as the {{{first}}} of the two following lines to
@@ -555,10 +588,14 @@ terminate:
 
 <<concept title="More on Lwt" |
 
-Function {{{Eliom_reference.get}}} has type
-{{{'a Eliom_reference.eref -> 'a Lwt.t}}}.  The only way to use the result
-of such functions (ones that return values in the //Lwt monad//), is
-to use {{{Lwt.bind}}}.
+Functions in Eliom and Js_of_ocaml which do not implement just a
+computation or direct side effect but are waiting for user activity,
+file system access or need a unforseeable amount of time to return are
+defined //in Lwt//; instead of returning a value of type {{{a}}} they
+return an Lwt-thread of type {{{a Lwt.t}}}.
+
+The only way to use the result of such functions (ones that return
+values in the //Lwt monad//), is to use {{{Lwt.bind}}}.
 
 <<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
 Lwt.t>> It is convenient to define an infix operator like this: <<code
@@ -594,10 +631,9 @@ from a database), they insert a cooperation point to let other threads
 run.  Cooperative functions return a value in the Lwt monad
 (that is, a value of type {{{'a Lwt.t}}} for some type {{{'a}}}).
 
-In our example, the function {{{Eliom_state.get}}} may introduce a
-cooperation point, because if your Eliom reference is persistent (see
-below), it is stored in a database on the hard drive. That's why it
-returns a value in the Lwt monad.
+In our example, the function {{{Lwt_js_events.mouseup}}} may introduce
+a cooperation point, because it is unforseeable when this event
+happens. That's why it returns a value in the Lwt monad.
 
 Using cooperative threads has a huge advantage: as you know precisely
 where cooperation points are, //you need very few mutexes// and you
@@ -624,7 +660,7 @@ functions can cause the entre server to hang!// Remember:
   title="Handling events with Lwt"|
 
   The module <<a_api project="js_of_ocaml" | module Lwt_js_events>>
-  allows to define event listeners easily using Lwt. 
+  allows to define event listeners easily using Lwt.
   For example <<a_api project="js_of_ocaml" | val Lwt_js_events.click >>
   takes a DOM element and returns a Lwt thread that will wait until
   a click occures on this element.
@@ -667,7 +703,7 @@ containing exclusively basics type or other types annotated with
 deriving. See the Js_of_ocaml API, for more information on the <<a_api
 project="js_of_ocaml" | module Deriving_Json >> module.
 
-Then we create an Eliom's bus to broadcast draw orders to each client
+Then we create an Eliom bus to broadcast drawing events to all client
 with the function <<a_api project="eliom" subproject="server"| val
 Eliom_bus.create >>. This function take as parameter the type of
 values carried by the bus.
@@ -677,7 +713,7 @@ let bus = Eliom_bus.create Json.t<messages>
 >>
 
 To write draw orders into the bus, we just replace the function
-{{{line}}} of the {{{onload_handler}}} by:
+{{{line}}} in {{{init_client}}} by:
 
 <<code language="ocaml"|
 let line ev =
@@ -738,7 +774,7 @@ using the bundle, it should have been configured with the option ##--enable-oclo
 Cf. the [[wiki(36):bundle#oclosure|corresponding bundle documentation]].
 
 To create the widgets, we add the following code in the
-{{{onload_handler}}} immediatly after canvas configuration:
+{{{init_client}}} immediatly after canvas configuration:
 
 <<code language="ocaml"|
 (* Size of the brush *)
@@ -767,30 +803,23 @@ let size = int_of_float (Js.to_float (slider##getValue())) in
 >>
 
 
-As last step, we need to add some stylesheets and one JS file in the
-headers of our page:
+As last step, we need to add some stylesheets and one JavaScript file
+in the headers of our page. To ease the creation of the
+{{{head}}}-element in HTML we use the function <<a_api project="eliom"
+subproject="server"|val Eliom_tools.F.head>>:
 
 <<code language="ocaml"|
 let page =
   html
-    (head
-       (title (pcdata "Graffiti"))
-       [ css_link
-	   ~uri:(make_uri (Eliom_service.static_dir ())
-		  ["css";"common.css"]) ();
-	 css_link
-	   ~uri:(make_uri (Eliom_service.static_dir ())
-		  ["css";"hsvpalette.css"]) ();
-	 css_link
-	   ~uri:(make_uri (Eliom_service.static_dir ())
-		  ["css";"slider.css"]) ();
-	 css_link
-	   ~uri:(make_uri (Eliom_service.static_dir ())
-		  ["css";"graffiti.css"]) ();
-	 js_script
-	   ~uri:(make_uri  (Eliom_service.static_dir ())
-		  ["graffiti_oclosure.js"]) ();
-       ])
+    (Eliom_tools.F.head ~title:"Graffiti"
+       ~css:[
+         ["css";"common.css"];
+         ["css";"hsvpalette.css"];
+         ["css";"slider.css"];
+         ["css";"graffiti.css"];
+         ["graffiti_oclosure.js"];
+      ]
+      ~js:[ ["graffiti_oclosure.js"] ] ())
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
 >>
 
@@ -913,15 +942,15 @@ let imageservice =
   The module {{{Eliom_registration}}} defines several modules with
   registration functions for a variety of data types. We have already
   seen {{{Eliom_registration.Html5}}} and {{{Eliom_registration.App}}}.
-  The module {{{Eliom_registration.String}}} sends any byte output
-  (represented with an OCaml string). The handler function must return
+  The module {{{Eliom_registration.String}}} sends arbitrary byte output
+  (represented by an OCaml string). The handler function must return
   a pair consisting of the content and the content-type.
 
   There are also several other output modules, for example:
 
-* {{{Eliom_registration.Files}}} to send static files
+* {{{Eliom_registration.File}}} to send static files
 * {{{Eliom_registration.Redirection}}} to create a redirection towards another page
-* {{{Eliom_registration.Any}}} to create services that choose themselves what
+* {{{Eliom_registration.Any}}} to create services that decide late what
 they want to send
 * {{{Eliom_registration.Ocaml}}} to send any OCaml data to be used in a
 client side program
