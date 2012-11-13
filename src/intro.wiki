@@ -1,6 +1,5 @@
 
-//The code of this tutorial has been tested with the 3~alpha release of
-  the Ocsigen bundle.//\\
+//The code of this tutorial has been tested Eliom 3.// \\
 
 =Introduction=
 

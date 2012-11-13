@@ -1,15 +1,15 @@
 =Implementing Web Interaction Using Eliom=
 
-//The code of this tutorial has been tested with the 3~alpha release of
-  the Ocsigen bundle.//\\
+//The code of this tutorial has been tested with Eliom 3.// \\
 
 <<|outline target="documentation">>
 
-This chapter is a tutorial explaining how to create a small web site
-with several pages, users, sessions, etc. Then, in next chapter,
-we will incorporate the features of this site with the program from the
-previous chapter, to show that we can
-mix this kind of interaction with client-side programs.
+This chapter of the tutorial explains how to create a small web site
+with several pages, users, sessions, and other elements of classical
+web development.  Then, in next chapter, we will incorporate the
+features of this site with the program from the previous chapter, to
+show that we can mix this kind of interaction with client-side
+programs.
 
 We assume you have read at least the first section of the previous
 chapter, which explained how to create a service and constuct valid
@@ -54,8 +54,8 @@ eliomc -c tuto.ml
 }}}
 
 Finally, modify your configuration file as explained in the previous
-chapter to load the file {{{tuto.cmo}}}. Then launch Ocsigen to run
-the site.
+chapter to load the file {{{tuto.cmo}}}. Then launch the
+Ocsigen-server to run the site.
 
 ===Adding a page for each user===
 
@@ -198,21 +198,16 @@ Change the handler of {{{user_service}}} into:
 
 <<concept title="Creating hyperlinks" |
 
-To create a link, one could use the function {{{Html5.a}}}, but this
-requires us to provide the text of the URL to put in the {{{href}}}
-attribute. A better way to create hyperlinks is to use <<a_api
-project="eliom" | val Eliom_content.Html5.D.a >>.
+The function <<a_api project="eliom" | val
+Eliom_content.Html5.D.a >> accepts the following parameters:
+* the service
+* the content of the link
+* URL parameters to be given to the service
 
 Thus, you don't have to know the precise URL of the service you want
 to link to, and if the URL changes, all links will remain valid.
 Using this function has a wonderful consequence: //You will never have
 broken links!//
-
-The function <<a_api project="eliom" version="dev" | val
-Eliom_content.Html5.D.a >> accepts the following parameters:
-* the service
-* the content of the link
-* URL parameters to be given to the service
 
 >> <<| END "encadre" >>
 
@@ -349,6 +344,9 @@ and POST parameters. In that case, GET parameters will be in the URL
 and POST parameters will probably come from a form. In HTML, it is not
 possible to mix GET and POST parameters in the same form.
 
+See also [[site:overview/cheatsheet|the cheat-sheet]] for an
+comprehensive overview on the different types of services.
+
 >>
 
 <<concept title="POST or GET?" |
@@ -366,7 +364,7 @@ Remember:
   payment, etc.).
 
 //Warning:// Even if POST parameters are not shown in the URL, they
-are sent in plain text. If you want to transmit private data (like a password),
+are sent as plain text. If you want to transmit private data (like a password),
 you must
 use HTTPS (see <<a_manual project="ocsigenserver" chapter="config" |
 the Ocsigen server manual >>).  >>
@@ -474,7 +472,7 @@ to the browser).
 
 Define your Eliom reference with a default value:
 <<code language="ocaml"|
-let username = Eliom_reference.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 >>
 
 Here is the new {{{connection_box}}} function:
@@ -542,9 +540,9 @@ Eliom is making the notion of session much more powerful by adding
 other //scopes// for Eliom references. Instead of limiting the scope
 to a session (that is: one browser), it is also possible to create
 Eliom references with scope "client-side process"
-({{{~scope:Eliom_common.client_process}}}), or "group of sessions" (see
-later) ({{{~scope:Eliom_common.session_group}}}), or "current
-request" ({{{~scope:Eliom_common.request}}}).
+({{{~scope:Eliom_common.default_process_scope}}}), or "group of sessions" (see
+later) ({{{~scope:Eliom_common.default_group_scope}}}), or "current
+request" ({{{~scope:Eliom_common.request_scope}}}).
 
 Example: Say you want to implement a game, and make possible to have several instances of the game running in several tabs of the browser. Store the score on server side, as a "client side process" Eliom reference.
 
@@ -673,7 +671,7 @@ Now you can add the connection box on user pages.
   Eliom_registration.Html5.register
     ~service:user_service
     (fun name () ->
-      connection_box () ~>>= fun cf ->
+      lwt cf = connection_box () in
       Lwt.return
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
@@ -717,7 +715,7 @@ To create a logout/disconnection form, we create another non-attached
 coservice using POST method, and register another action.  We call the
 function <<a_api project="eliom" version="dev" | val
 Eliom_state.discard >> with scope <<a_api project="eliom"
-version="dev" | val Eliom_common.session >> to remove all session
+version="dev" | val Eliom_common.default_session_scope >> to remove all session
 data.
 
 <<code language="ocaml"|
@@ -732,7 +730,7 @@ let disconnect_box () =
 let _ =
   Eliom_registration.Action.register
     ~service:disconnection_service
-    (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ())
+    (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
 >>
 
 Then add this form in the connection box:
@@ -771,7 +769,7 @@ let create_account_service =
     ~fallback:main_service
     ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
-let create_account_form () =
+let account_form =
   post_form ~service:create_account_service
     (fun (name1, name2) ->
       [fieldset
@@ -791,7 +789,7 @@ let _ =
       Lwt.return
         (html (head (title (pcdata "")) [])
               (body [h1 [pcdata "Create an account"];
-                     create_account_form ();
+                     account_form;
                     ])));
 
   Eliom_registration.Action.register
@@ -956,9 +954,9 @@ session, a group of sessions, or even a client side process (if you
 have a client side program running).  It works exactly like the scope
 of Eliom references.  To do that, just add the optional parameter
 {{{~scope}}} to the registration function.  By default, the value is
-{{{Eliom_common.global}}} (visible for everyone).  Other possible
-values: {{{Eliom_common.session}}}, {{{Eliom_common.session_group}}},
-or {{{Eliom_common.client_process}}}.
+{{{Eliom_common.global_scope}}} (visible for everyone).  Other possible
+values: {{{Eliom_common.default_session_scope}}}, {{{Eliom_common.default_group_scope}}},
+or {{{Eliom_common.default_process_scope}}}.
 
 It is possible to register again for a session, tab or group, services
 that have already been registered with public (site) visibility.  In
@@ -981,12 +979,12 @@ In the current version, our web site fails silently when the password
 is wrong.  Let's improve this behavior by displaying an error message.
 To do that, we need to pass information to the service occurring after
 the action. We record this information in an Eliom reference with
-scope {{{Eliom_common.request}}}.
+scope {{{Eliom_common.request_scope}}}.
 
 Define an Eliom reference:
 
 <<code language="ocaml"|
-let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request false
+let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
 >>
 
 Modify the connection box this way:
@@ -1073,9 +1071,6 @@ Eliom_registration.Any.register
   Why not {{{raise_lwt Eliom_common.Eliom_404}}}?
   >>
 
-<<| BB
-  Obviously, the no-wiki-tags {{{...}}} do not work in the title of concepts.
->>>
 <<concept title="Eliom_registration.Any" |
 
 The module <<a_api project="eliom" version="dev" | module

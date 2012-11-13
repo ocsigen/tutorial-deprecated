@@ -2,8 +2,7 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested with the version 3~alpha of
-  the Ocsigen bundle.//\\
+//The code of this tutorial has been tested with Eliom 3.// \\
 
 ==Multi-user collaborative drawing application==
 
@@ -39,7 +38,7 @@ containing shared types and declarations
 
 ===={{{common.ml}}}====
 
-It contains what was in {{{ {shared{ .. }} }}}
+It contains what was in {{{ {shared{ ... }} }}}
 <<code language="ocaml"|
 type messages = (string * int * (int * int) * (int * int)) deriving (Json)
 
@@ -48,13 +47,14 @@ let height = 400>>
 
 ===={{{client.ml}}}====
 
-It is almost the same code as what was enclosed in {{{ {client{ ... }}
-}}} with the difference that what was previously in the client value
+It is almost the same code as what was enclosed in {{{ {client{ ... }} }}}
+with the difference that what was previously in the client value
 function {{{ init_client }}} is now in the function {{{ launch_client_canvas}}}.
 
 <<code language="ocaml"|
 open Eliom_content
 open Common
+open Lwt
 
 let draw ctx (color, size, (x1, y1), (x2, y2)) =
   ctx##strokeStyle <- (Js.string color);
@@ -129,7 +129,8 @@ let launch_client_canvas bus image_elt canvas_elt =
   let line ev =
     let v = compute_line ev in
     let _ = Eliom_bus.write bus v in
-    draw ctx v
+    draw ctx v;
+    Lwt.return ()
   in
   let t = Lwt_stream.iter (draw ctx) (Eliom_bus.stream bus) in
   let drawing_event_thread =
@@ -382,7 +383,7 @@ let create_account_service =
   Eliom_service.post_coservice ~fallback:main_service ~post_params:
   (let open Eliom_parameter in (string "name" ** string "password")) ()
 
-let username = Eliom_reference.eref ~scope:Eliom_common.session None
+let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 
 let users = ref ["user","password";"test","test"]
 
@@ -406,7 +407,7 @@ let () = Eliom_registration.Action.register
 let () =
   Eliom_registration.Action.register
     ~service:disconnection_service
-    (fun () () -> Eliom_state.discard ~scope:Eliom_common.session ())
+    (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
 
 let disconnect_box () =
   post_form disconnection_service
@@ -445,10 +446,9 @@ module Connected_translate =
 struct
   type page = string -> My_app.page Lwt.t
   let translate page =
-    Eliom_reference.get username ~>>=
-      function
-	| None -> default_content ()
-	| Some username -> page username
+    match_lwt Eliom_reference.get username with
+      | None -> default_content ()
+      | Some username -> page username
 end
 
 module Connected =
