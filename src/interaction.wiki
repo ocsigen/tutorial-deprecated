@@ -1091,73 +1091,54 @@ In the future, we may add functions like {{{set_http_code}}} or
 
 >>
 
-===Using customized output module to simplify getting user data===
-
-<<concepts|
-
-{{{Eliom_registration.Customize}}}
-
->>
+=== Wrapping the server handler to easily get the user data
 
 When you want to assume that you have informations available in
 sessions, for instance when a site is mainly available to connected
 users, it becomes tedious to check everywhere that a reference is not
-None. We can build a version of a registration module to simplify that
-using <<a_api project="eliom" version="dev" | module
-Eliom_registration.Customize >>.
-
-We first need a translation module which checks for session
-informations and fall back to a default page if they are not
-available.
+{{{None}}}.  A simple way to distinguish authenticated and anonymous
+requests lies in the usage of <<a_api project="eliom"
+subproject="server"|val Eliom_tools.wrap_handler>>. It allows to
+provide two handler functions, one is called if a certain
+information is not made available by the first argument, the other is
+called when that information is available.
 
 <<code language="ocaml"|
-module Connected_translate =
-struct
-  type page = string -> Eliom_registration.Html5.page Lwt.t
-  let translate page =
-    lwt username = Eliom_reference.get username in
-    match username with
-    | None ->
-      let connection_box =
-        post_form ~service:connection_service
-          (fun (name1, name2) ->
-    	    [fieldset
-	      [label ~a:[a_for name1] [pcdata "login: "];
+
+let authenticated_handler f =
+  let handle_anonymous _get _post =
+    let connection_box =
+      let open Html5.F in
+      post_form ~service:connection_service
+        (fun (name1, name2) ->
+	  [fieldset
+              [label ~a:[a_for name1] [pcdata "login: "];
                string_input ~input_type:`Text ~name:name1 ();
                br ();
                label ~a:[a_for name2] [pcdata "password: "];
                string_input ~input_type:`Password ~name:name2 ();
                br ();
                string_input ~input_type:`Submit ~value:"Connect" ()
-	     ]]) ()
-      in
-      Lwt.return
-        (html
-	  (head (title (pcdata "")) [])
-          (body [h1 [pcdata "Hello"];
-	         connection_box;]))
-    | Some username -> page username
-end
->>
-
-The {{{translate}}} function takes a function {{{page}}} and apply it
-with the current username if available and falls back to a default
-login page if not.
-
-We can now make our own registration module.
-
-<<code language="ocaml"|
-module Connected =
-  Eliom_registration.Customize
-    (Eliom_registration.Html5) (Connected_translate)
-
-let _ = Connected.register_service
-  ~path:[""] ~get_params:Eliom_parameter.unit
-  (fun () () ->
+              ]]) ()
+    in
     Lwt.return
-     (fun username ->
-        Lwt.return (html (head (title (pcdata "")) [])
-                   (body [h1 [pcdata ("Welcome " ^ username) ]; ]))))
+      Html5.F.(html
+                 (head (title (pcdata "")) [])
+                 (body [h1 [pcdata "Please connect"];
+	                connection_box;]))
+    in
+    Eliom_tools.wrap_handler
+      (fun () -> Eliom_reference.get username)
+      handle_anonymous (* Called when [username] is [None] *)
+      f (* Called [username] contains something *)
+
+let _ = My_app.register ~service:main_service
+  (authenticated_handler
+    (fun username _get _post ->
+       Lwt.return
+         Html5.F.(html
+           (head (title (pcdata "")) [])
+           (body [h1 [pcdata ("Hello " ^ username) ]]))))
 >>
 
 [[href:application|prev]]
