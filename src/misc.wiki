@@ -13,7 +13,7 @@ the drawing he wants and create an Atom feed containing all saved drawings.
 
 Download the <<a_file src="tutorial.tar.gz"|full code>> of the examples
 or browse it
-[[http://ocsigen.org/darcs/tutorial/files/tutorial/chapter3/multigraffiti|online]].
+[[site:darcs/tutorial/files/tutorial/chapter3/multigraffiti|online]].
 
 ===Split application into multiple files and using several canvas===
 <<concepts | Complex eliom project\\Unique elements>>

@@ -15,11 +15,12 @@ that you have a working installation of //Ocsigen server//, //Eliom//,
 //Lwt//, //Js_of_ocaml//, (and //O'Closure// for some examples). In
 particular, you need to have the interfaces (cmi) installed for all
 these packages (the ##-dev##-packages in some distributions).
-The [[/install|installation is described here.
+The [[site:install|installation is described here]].
 
 If you need help, you can send a mail to
-##ocsigen@sympa.mancoosi.univ-paris-diderot.fr## or chat with us on
-IRC in channel {{{#ocsigen}}} (##freenode.net##).
+{{{ocsigen@sympa.mancoosi.univ-paris-diderot.fr}}} or chat with us on
+IRC in channel {{{#ocsigen}}} on {{{freenode.net}}} (e.g. by using
+their [[http://webchat.freenode.net/?channels=ocsigen|webchat]])!
 
 The first section of this introduction lists our main
 software projects. The second section is an overview of the tutorial.
