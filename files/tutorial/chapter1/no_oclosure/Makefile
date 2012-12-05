@@ -75,6 +75,8 @@ ${ELIOM_SERVER_DIR}/%.cmx: %.eliom
 
 ##### Client side compilation ####
 
+SERVER_INC_FOR_JS_OF_ELIOM := ${addprefix -server-opt -package ,${SERVER_PACKAGES}}
+
 CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
 CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
 
@@ -88,7 +90,7 @@ ${ELIOM_CLIENT_DIR}/%.cmi: %.mli
 	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
 
 ${ELIOM_CLIENT_DIR}/%.cmo: %.eliom
-	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
+	${JS_OF_ELIOM} -c ${SERVER_INC_FOR_JS_OF_ELIOM} ${CLIENT_INC} $<
 ${ELIOM_CLIENT_DIR}/%.cmo: %.ml
 	${JS_OF_ELIOM} -c ${CLIENT_INC} $<
 
