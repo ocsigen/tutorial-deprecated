@@ -44,8 +44,7 @@ applications, for example:
 library to be used with Js_of_ocaml,
 * the Ocsigen web server.
 
-{{site:/resources/images/ocsigen-zoo.png|The Ocsigen Zoo}}
-
+{{@@style="width:100%;"@@site:/resources/images/ocsigen-zoo.png|The Ocsigen Zoo}}
 
 ===Ocsigen server===
 
