@@ -99,7 +99,7 @@ let rec entries name list = function
 	in
 	let entry =
 	  Atom_feed.entry ~title ~id:uri ~updated:saved
-            [Atom_feed.xhtmlC [ Xhtml.F.img ~src:uri ~alt:"image" ()]] in
+            [Atom_feed.xhtmlC [ Atom_feed.Xhtml.tot (Xhtml.M.toelt (Xhtml.M.img ~src:uri ~alt:"image" ()))]] in
 	entry::(entries name q (len - 1))
 
 let feed name () =
