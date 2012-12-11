@@ -93,7 +93,7 @@ let rec entries name list = function
 	let title = Atom_feed.plain
 	  ("graffiti " ^ name ^ " " ^ (string_of_int n)) in
 	let uri =
-	  make_uri ~absolute:true
+	  make_string_uri ~absolute:true
 	    ~service:(Eliom_service.static_dir ())
 	    (local_filename name n)
 	in
@@ -103,7 +103,7 @@ let rec entries name list = function
 	entry::(entries name q (len - 1))
 
 let feed name () =
-  let id = make_uri
+  let id = make_string_uri
     ~absolute:true
     ~service:feed_service name in
   let title = Atom_feed.plain ("nice drawings of " ^ name) in
