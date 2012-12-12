@@ -15,7 +15,7 @@ other users are drawing at the same time and in real-time.
 ==@@id="basics"@@ Basics==
 
 To get started, we recommend to use <<a_manual project="eliom"
-chapter="workflow/destillery"|Eliom's destillery>>, a program which
+chapter="workflow-destillery"|Eliom's destillery>>, a program which
 creates scaffolds for Eliom projects. The following command creates a
 very simplicistic project called "graffiti" in the directory
 "graffiti" (adapt it to your needs!):
