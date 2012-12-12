@@ -163,7 +163,7 @@ standard GET parameters. You can also accept, as parameters, parts of
 the path that are not a suffix of the path (using <<a_api
 project="eliom" | val Eliom_parameter.const >>).  See more information
 on suffixes in <<a_manual
-project="eliom" chapter="params" fragment="suffixes"|Eliom's manual>>.
+project="eliom" chapter="server-params" fragment="suffixes"|Eliom's manual>>.
 
 //Warning:// Even if it is not displayed in the URL, suffix parameters
 have a parameter name. This allows one to make forms that point to
@@ -363,7 +363,7 @@ Remember:
 //Warning:// Even if POST parameters are not shown in the URL, they
 are sent as plain text. If you want to transmit private data (like a password),
 you must
-use HTTPS (see <<a_manual project="ocsigenserver" chapter="config" |
+use HTTPS (see <<a_manual project="ocsigenserver" chapter="workflow-configuration" |
 the Ocsigen server manual >>).  >>
 
 Now you can register a handler for the new service:
@@ -698,7 +698,7 @@ let redir_service = Eliom_registration.Redirection.register_service
 
 (If you want to give parameters to the service you return, use <<a_api
 project="eliom" version="dev" | val Eliom_service.preapply >> ---
-more information in the <<a_manual project="eliom" chapter="services"
+more information in the <<a_manual project="eliom" chapter="server-services"
 fragment="p3preapplied" | Eliom manual >>.)
 
 If you want to do a redirection towards the current page (as in our
