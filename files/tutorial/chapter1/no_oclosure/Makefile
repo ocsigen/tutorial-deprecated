@@ -63,19 +63,19 @@ ${ELIOM_SERVER_DIR}/%.cmi: %.mli
 ${ELIOM_SERVER_DIR}/%.cmo: %.ml
 	${ELIOMC} -c ${SERVER_INC} $<
 ${ELIOM_SERVER_DIR}/%.cmo: %.eliom
-	${ELIOMC} -c -noinfer ${SERVER_INC} $<
+	${ELIOMC} -c ${SERVER_INC} $<
 
 ${ELIOM_SERVER_DIR}/%.cmx: %.ml
 	${ELIOMOPT} -c ${SERVER_INC} $<
 ${ELIOM_SERVER_DIR}/%.cmx: %.eliom
-	${ELIOMOPT} -c -noinfer ${SERVER_INC} $<
+	${ELIOMOPT} -c ${SERVER_INC} $<
 
 %.cmxs: %.cmxa
 	$(ELIOMOPT) -shared -linkall -o $@ $<
 
 ##### Client side compilation ####
 
-SERVER_INC_FOR_JS_OF_ELIOM := ${addprefix -server-opt -package ,${SERVER_PACKAGES}}
+SERVER_INC_FOR_JS_OF_ELIOM := ${addprefix -package ,${SERVER_PACKAGES}}
 
 CLIENT_LIBS := ${addprefix -package ,${CLIENT_PACKAGES}}
 CLIENT_INC  := ${addprefix -package ,${CLIENT_PACKAGES}}
