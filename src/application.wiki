@@ -8,20 +8,20 @@ displaying an area where users can draw using the mouse, and see what
 other users are drawing at the same time and in real-time.
 
 <<webonly| The final eliom code is available
-[[site:/darcs/tutorial/files/tutorial/chapter1/destillery-oclosure/|for download]]. >>
+[[site:/darcs/tutorial/files/tutorial/chapter1/distillery-oclosure/|for download]]. >>
 
 <<|outline target="documentation">>
 
 ==@@id="basics"@@ Basics==
 
 To get started, we recommend to use <<a_manual project="eliom"
-chapter="workflow-destillery"|Eliom's destillery>>, a program which
+chapter="workflow-distillery"|Eliom's distillery>>, a program which
 creates scaffolds for Eliom projects. The following command creates a
 very simplicistic project called "graffiti" in the directory
 "graffiti" (adapt it to your needs!):
 
 <<code language="shell"|
-$ eliom-destillery -name graffiti -template basic -destination graffiti
+$ eliom-distillery -name graffiti -template basic -destination graffiti
 >>
 
 ===My first page===
@@ -46,7 +46,7 @@ let main_service =
            (body [h1 [pcdata "Graffiti"]])))
 >>
 
-If you're using {{{eliom-destillery}}} just replace the content of the
+If you're using {{{eliom-distillery}}} just replace the content of the
 eliom-file by the above lines and run
 
 <<code language="shell"|
@@ -84,7 +84,7 @@ directory <<code-inline|dir>>).
 
 <<concept title="Configuration file"|
 
-In the directory of the project created by the Eliom-destillery, you
+In the directory of the project created by the Eliom-distillery, you
 can find the file {{{graffiti.conf.in}}}. From this file and the
 variables in {{{Makefile.options}}}, the configuration file for
 {{{ocsigenserver}}} are generated. After testing your application, it
@@ -266,7 +266,7 @@ to specify for which side the code should run.
 * {{{ {shared{ ... }} }}} for code that will be used both for the server and the client.
 * Code outside of those quotations is assument to be only for server side.
 
-In the Makefile created by the destillery we automatically split the
+In the Makefile created by the distillery we automatically split the
 code by a syntax extension, compile the server part as usual, and
 compile the client part using {{{js_of_ocaml}}} to create a JavaScript
 file.
@@ -766,7 +766,7 @@ are using the bundle, it should have been configured with the option
 documentation]]. Otherwise, you need to install it from
 [[wiki(33):install|source]].
 
-In the {{{Makefile.options}}}, created by Eliom's destillery, just add {{{oclosure}}} to the (currently empty) {{{CLIENT_PACKAGES}}}:
+In the {{{Makefile.options}}}, created by Eliom's distillery, just add {{{oclosure}}} to the (currently empty) {{{CLIENT_PACKAGES}}}:
 <<code language="makefile"|
 CLIENT_PACKAGES := oclosure
 >>
@@ -978,7 +978,7 @@ After compiling the project ({{{make byte}}} and the call to
 {{{oclosure_req}}}), you are ready to try your graffiti-application
 by {{{make test.byt}}}.
 
-Note, that the {{{Makefile}}} from the destillery automatically adds
+Note, that the {{{Makefile}}} from the distillery automatically adds
 the packages defined in {{{SERVER_PACKAGES}}} as an extension in your configuration file {{{local/etc/graffiti/graffiti-test.conf}}}:
 
 <<code language="xml"|
