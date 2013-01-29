@@ -136,8 +136,8 @@ let launch_client_canvas bus image_elt canvas_elt =
   let drawing_event_thread =
     let open Lwt_js_events in
     mousedowns canvas
-      (fun ev -> set_coord ev; line ev ~>>= fun () ->
-        Lwt.pick [mousemoves Dom_html.document line;
+      (fun ev _ -> set_coord ev; line ev ~>>= fun () ->
+        Lwt.pick [mousemoves Dom_html.document (fun x _ -> line x);
 		  mouseup Dom_html.document ~>>= line])
   in
   { drawing_thread = t;
@@ -203,7 +203,7 @@ let launch_server_canvas () =
 let graffiti_info = Hashtbl.create 0
 
 let imageservice =
-  Eliom_registration.Text.register_service
+  Eliom_registration.String.register_service
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
     ~get_params:(let open Eliom_parameter in string "name" ** int "q")
