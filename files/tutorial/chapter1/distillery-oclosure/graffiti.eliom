@@ -143,9 +143,9 @@ let imageservice =
       (fun () ->
         let open Lwt_js_events in
         mousedowns canvas
-          (fun ev ->
+          (fun ev _ ->
             set_coord ev; line ev >>= fun () ->
-            Lwt.pick [mousemoves Dom_html.document line;
+            Lwt.pick [mousemoves Dom_html.document (fun x _ -> line x);
     	          mouseup Dom_html.document >>= line]));
 
     Lwt.async (fun () -> Lwt_stream.iter (draw ctx) (Eliom_bus.stream %bus));

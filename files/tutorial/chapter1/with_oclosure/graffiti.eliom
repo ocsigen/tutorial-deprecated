@@ -150,8 +150,8 @@ let init_client () = ignore {unit{
 
   let open Lwt_js_events in
   ignore (mousedowns canvas
-            (fun ev -> set_coord ev; line ev >>= fun () ->
-              Lwt.pick [mousemoves Dom_html.document line;
+            (fun ev _ -> set_coord ev; line ev >>= fun () ->
+              Lwt.pick [mousemoves Dom_html.document (fun x _ -> line x);
 		        mouseup Dom_html.document >>= line]));
 }}
 
