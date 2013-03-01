@@ -1014,5 +1014,5 @@ $ sudo make install
 
 >>
 
-[[intro|prev]]
-[[interaction|next]]
+[[wiki:intro|prev]]
+[[wiki:interaction|next]]

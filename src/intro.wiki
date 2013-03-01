@@ -200,4 +200,4 @@ still can save bookmarks on pages!  This opens up a wide field of new
 possibilities, and should facilitate the emergence of new kinds of web
 applications.
 
-[[application|next]]
+[[wiki:application|next]]
