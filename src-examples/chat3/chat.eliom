@@ -120,11 +120,11 @@ let create_user_info user =
 (* }}} ************************************************************************)
 (* {{{                             User info                                  *)
 
-let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.session_group None
+let user_info_eref = Eliom_reference.eref ~scope:Eliom_common.default_group_scope None
 
 let get_user_info user =
   try_lwt
-    let state = Eliom_state.External_states.volatile_data_group_state (user_group_name user) in
+    let state = Eliom_state.Ext.volatile_data_group_state (user_group_name user) in
     Eliom_reference.Ext.get state user_info_eref
   with Eliom_reference.Eref_not_intialized ->
     Lwt.return None
@@ -140,7 +140,7 @@ let create_conversation =
     let id = next () in
     let conversation = {
       id; users;
-      bus = Eliom_bus.create ~scope:Eliom_common.site Json.t<conversation_event>;
+      bus = Eliom_bus.create ~scope:Eliom_common.site_scope Json.t<conversation_event>;
       elt_id = Html5.Id.new_elt_id ~global:false ();
       prompt_id = Html5.Id.new_elt_id ~global:false ();
     } in
@@ -194,7 +194,7 @@ let connected_users =
     (Client_processes.accumulate_infos User_set.from_list)
     Client_processes_user.signal
 
-let connected_users_down = Eliom_react.S.Down.of_react ~scope:Eliom_common.site connected_users
+let connected_users_down = Eliom_react.S.Down.of_react ~scope:Eliom_common.site_scope connected_users
 
 (* Debug user client processes *)
 let () =
@@ -303,12 +303,12 @@ let verify_user ~username ~password =
       Lwt_list.map_s
         (fun group_name ->
            ignore (Scanf.sscanf group_name (user_group_name_fmt ()) (fun _ -> ()));
-           let state = Eliom_state.External_states.volatile_data_group_state group_name in
+           let state = Eliom_state.Ext.volatile_data_group_state group_name in
            try
              Eliom_reference.Ext.get state user_info_eref
            with Eliom_reference.Eref_not_intialized ->
              Lwt.return None)
-        (Eliom_state.External_states.get_session_group_list ())
+        (Eliom_state.Ext.get_session_group_list ())
     in
     let find_user = function
       | Some { user } when user.name = username ->
@@ -331,13 +331,13 @@ let login_service =
 let logout_service =
   Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
 
-let login_message_eref = Eliom_reference.Volatile.eref ~scope:Eliom_common.request None
+let login_message_eref = Eliom_reference.Volatile.eref ~scope:Eliom_common.request_scope None
 
 let login_handler () (username, password) =
   match_lwt verify_user username password with
     | Some user ->
         Eliom_state.set_volatile_data_session_group
-          ~scope:Eliom_common.session (user_group_name user);
+          ~scope:Eliom_common.default_session_scope (user_group_name user);
         (match_lwt Eliom_reference.get user_info_eref with
            | Some _ ->
                Eliom_reference.Volatile.set login_message_eref (Some "Already logged in");
@@ -354,7 +354,7 @@ let logout_handler () () =
   match_lwt Eliom_reference.get user_info_eref with
     | Some _ ->
         Client_processes_user.erase_process ();
-        lwt () = Eliom_state.discard ~scope:Eliom_common.session () in
+        lwt () = Eliom_state.discard ~scope:Eliom_common.default_session_scope () in
         Eliom_registration.Redirection.send Eliom_service.void_hidden_coservice'
     | None ->
         Eliom_registration.Action.send ()
@@ -615,7 +615,7 @@ let connected_main_handler { user; chat_events } =
     in
     Lwt.return Html5.F.(
       html
-        (Eliom_tools.Html5.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
+        (Eliom_tools.Menu.F.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
         (body [
           h3 [pcdata "Chat with Eliom"];
           (* FIXME reload does not retain all conversations *)
@@ -646,7 +646,7 @@ let connected_main_handler { user; chat_events } =
 let disconnected_main_handler () () =
   Lwt.return Html5.F.(
     html
-      (Eliom_tools.Html5.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
+      (Eliom_tools.Menu.F.head ~title:"Chat with eliom" ~css:[["chat.css"]] ())
       (body [
         h3 [pcdata "Chat with Eliom"];
         div [

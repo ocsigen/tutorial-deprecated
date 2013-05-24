@@ -249,7 +249,7 @@ program,
 >>
 
 After running again {{{make test.byte}}}, and visiting
-[[http://localhost:8080]], the browser will now load the file
+[[http://localhost:8080/graff]], the browser will now load the file
 {{{graffiti.js}}}, and open an alert-box accordingly.
 
 <<concept title="Splitting the code into server and client parts"|
@@ -976,7 +976,7 @@ img##onload <- Dom_html.handler
 
 After compiling the project ({{{make byte}}} and the call to
 {{{oclosure_req}}}), you are ready to try your graffiti-application
-by {{{make test.byt}}}.
+by {{{make test.byte}}}.
 
 Note, that the {{{Makefile}}} from the distillery automatically adds
 the packages defined in {{{SERVER_PACKAGES}}} as an extension in your configuration file {{{local/etc/graffiti/graffiti-test.conf}}}:

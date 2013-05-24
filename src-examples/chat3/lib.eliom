@@ -111,7 +111,8 @@ let messages =
 
       (* Reset by Eliom, on erase_process, or when channel times out *)
       let client_process_id_eref =
-        Eliom_reference.Volatile.eref ~scope:Eliom_common.client_process None
+        Eliom_reference.Volatile.eref
+          ~scope:Eliom_common.default_process_scope None
 
       let signal, modify =
         let signal, set = React.S.create ~eq:(Int_map.equal (fun _ _ -> true)) Int_map.empty in
