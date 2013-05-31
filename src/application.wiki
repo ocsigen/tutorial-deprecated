@@ -876,7 +876,7 @@ using the bundle, it should have been configured with the option
 {{{--enable-cairo}}}. Second, add it to the {{{SERVER_PACKAGES}}} in
 your {{{Makefile.options}}}:
 <<code language="makefile"|
-SERVER_PACKAGES := cairo
+SERVER_PACKAGES := cairo2
 >>
 
 The {{{draw_server}}} function below is the equivalent of the
@@ -890,33 +890,34 @@ let rgb_from_string color = (* color is in format "#rrggbb" *)
   in
   try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
 
-let draw_server, image_string =
-  let surface =
-    Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height
-  in
+let surface = Cairo.Image.create Cairo.Image.ARGB32 ~width ~height in
+
+let draw_server =
   let ctx = Cairo.create surface in
-  ((fun ((color : string), size, (x1, y1), (x2, y2)) ->
+  (fun ((color : string), size, (x1, y1), (x2, y2)) ->
 
     (* Set thickness of brush *)
     Cairo.set_line_width ctx (float size) ;
-    Cairo.set_line_join ctx Cairo.LINE_JOIN_ROUND ;
-    Cairo.set_line_cap ctx Cairo.LINE_CAP_ROUND ;
-    let red, green, blue =  rgb_from_string color in
-    Cairo.set_source_rgb ctx ~red ~green ~blue ;
+    Cairo.set_line_join ctx Cairo.JOIN_ROUND ;
+    Cairo.set_line_cap ctx Cairo.ROUND ;
+    let r, g, b =  rgb_from_string color in
+    Cairo.set_source_rgb ctx ~r ~g ~b ;
 
     Cairo.move_to ctx (float x1) (float y1) ;
     Cairo.line_to ctx (float x2) (float y2) ;
-    Cairo.close_path ctx ;
+    Cairo.Path.close ctx ;
 
     (* Apply the ink *)
     Cairo.stroke ctx ;
-   ),
+   )
+
+let image_string =
    (fun () ->
      let b = Buffer.create 10000 in
      (* Output a PNG in a string *)
-     Cairo_png.surface_write_to_stream surface (Buffer.add_string b);
+     Cairo.PNG.write_to_stream surface (Buffer.add_string b);
      Buffer.contents b
-   ))
+   )
 
 let _ = Lwt_stream.iter draw_server (Eliom_bus.stream bus)
 
@@ -982,7 +983,7 @@ Note, that the {{{Makefile}}} from the distillery automatically adds
 the packages defined in {{{SERVER_PACKAGES}}} as an extension in your configuration file {{{local/etc/graffiti/graffiti-test.conf}}}:
 
 <<code language="xml"|
-  <extension findlib-package="cairo" />
+  <extension findlib-package="cairo2" />
 >>
 
 The first version of the program is now complete. You may want now to
