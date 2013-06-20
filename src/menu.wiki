@@ -6,6 +6,7 @@
 = Examples: Learning by example
 ==[[chat|Chat]]
 = Mini-tutorials: Some little examples
+==[[tutowidgets|Eliom apps basics: writing client server widgets]]
 ==[[macaque|MaCaQue: SQL queries]]
 ==[[custom-conf|Custom configuration]]
 ==[[ocsipersist|Light database]]
