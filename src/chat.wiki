@@ -1,113 +1,345 @@
-= Chat: Design Overview =
+= Mini-tutorial: client-server widgets =
 
-//Chat// is a chatting module and application, currently for conversations
-between two users each. (Extension for multi-user channels is left as an
-exercise to the user.)
+This short tutorial is an example of client-server Eliom application.
+It gives an example of client-server widgets.
 
-First of all,
-* [[site:chat|try it]]! And
-* [[site:darcsweb/?r=tutorial;a=tree;f=/src-examples/chat|browse it]],
-* ##darcs get http://ocsigen.org/darcs/tutorial; cd tutorial/src-examples/chat## it, or
-* [[site:download/chat.tar.gz|download]] the source code.
+The goal is to show that,
+unlike many javascript libraries that build their widgets
+programmatically (by instanciating classes or calling functions),
+Eliom makes possible to generate page widgets on server side,
+before sending them to the client. Thus pages can be indexed by search engines.
 
-== Description ==
+This tutorial also shows that it is possible to use the same code to
+build the widget either on client or server side.
 
-When the user is logged in, he sees a list of available users. He can choose
-one of them to start a conversation with him. The conversation then becomes
-visible to both users as a message prompt and a growing list of messages.  The
-participating users can enter messages and they are made visible to the other
-participants.  If a user becomes unavailable for //Chat//, he is removed from the
-list of available users, and all conversations he was participating are removed
-from the opponent's UI.
+We choose a very simple widget, than could be the base for example
+for implementing a drop-down menu. It consists in several boxes
+with a title and a content. Clicking on the title opens or closes
+the content. And it is possible to group some of the boxes together
+to make them behave like radio buttons: when you open one of them
+the previously opened one are closed.
 
-== Central Data Types ==
+{{site:/darcs/tutorial/files/tutorial/tutowidgets/ex-final.png|screenshot}}
 
-The following data are crucial to the functionality of //Chat//.
+== First step: define an application with a basic service ==
 
-=== Conversation ===
-A conversation (##type Shared.Conversation.t##) is shared between all its
-client participants. It comprises of two values: Firstly, it contains a bus for
-transferring conversation messages (c.f. ##type Shared.Conversation.message##)
-between the participants. Those are displayed as they come on every client.
-Secondly, it contains the set of participating users. This is used when the
-conversation is teared down: An event for removing the UI element for the
-conversation is sent to every participant.
+The following code defines a client-server Web application
+with only one service, registered at URL / (the root of the Web site).
 
-=== Client Process ===
-When a user enters a web page which contains //Chat//, it is rendered in HTML and
-a new client process is created in doing so.  Every client process holds a
-channel, where the server can send messages to //add or to remove conversations//
-(c.f. ##type Shared.event##).
+It also defines a client side application (section {{{ {client{ ... }} }}})
+that appends to the page a widget, generated on client side.
 
-=== User Info ===
-On the server side, the channel for those events is stored for each user along
-with a list of conversations he participates in.  This is done with a
-Eliom-reference of scope ##session_group##, such that it is shared among all
-sessions of a user (and likewise all client processes).
+<<code language="ocaml" |
 
-But, when one user requests to start (or end) a conversation with any another
-user, it is also necessary to access the event channel of any user.
-As it is only stored in an Eliom-reference specific to the user, it is
-impossible to access.  In favour of this, the user info is moreover
-stored in a weak hash table (c.f. module ##Weak_info##) which associates the
-user info to each user in a globally accessible way. This association is weak
-in its value, the user info, such that it is garbage-collected as soon as the
-Eliom-reference storing it is cleared, i.e. when the last session of the
-respective user is closed.
+{shared{
+  open Eliom_content
+  open Html5
+  open Html5.D
+}}
+
+module Ex_app =
+  Eliom_registration.App (struct let application_name = "ex" end)
+
+let _ =
+  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+    (fun () () ->
+      Lwt.return (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+                   (body [h2 [pcdata "Welcome to Ocsigen!"]])))
 
 
-=== Available Users ===
-The client's UI contains a list of users which are currently available for
-chatting. This is achieved as follows.
+{client{
 
-If it is the user's first client process he is added to the set of available
-users, which is available in an react signal ##Chat.users_signal## on a set of
-user (i.e. ##User_set.t React.S.t##).
-As long as a user is available with at least one client he is kept in the value
-of the signal. This signal is send to the client when initializing //Chat//.
-Changes in its value are then directly reflected in the list of available users
-in the client's UI (c.f.  ##Client.change_users##).
+  let mywidget s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"]] [pcdata s2] in
+    div ~a:[a_class ["mywidget"]] [button; content]
 
-To observe when a user is not available through a given client process anymore,
-//Chat// awaits for every client process that it is inactive for a given
-time.  ##Eliom_comet.Channels.wait_timeout## is used for for detecting a client
-process to be abandoned.
+  let _ =
+    lwt _ = Lwt_js_events.onload () in
+    Dom.appendChild
+      (Dom_html.document##body)
+      (To_dom.of_element (mywidget "Click me" "Hello!"));
+    Lwt.return ()
 
-When it is observed that a user isn't avaible through any client process
-anymore, he is removed from the ##Chat.users_signal##, and all conversation he
-is participating are teared down (c.f. ##Chat.remove_client_process##).
+}}
 
-=== Starting a conversation ===
-When the user selects one of the available users for a conversation, one of two
-things may happen (c.f. ##Client.create_or_focus_conversation##):
+>>
 
-Firstly, if there is already a conversation between exactly those two users,
-the message prompt is focused.
-Secondly, if there is no conversation between those users yet, a new one is created
-by calling the server's ##Chat.create_dialog_service## (dialog is a conversatio
-of two) with the selected user as argument.
+To compile it, first create a project by calling
 
-This service establishes the conversation between the users: It creates the
-conversation on the server side (i.e. the set of participants and the bus for
-messages) and sends an event to append the conversation to each participant.
-Each client is streaming such events (c.f. ##Client.dispatch_event##) and
-creates the respective UI-element for the conversation with event handlers for
-sending and receiving messages in the conversation.
+{{{
+  eliom-distillery -name ex
+}}}
 
-=== Sending a message in a conversationg ===
-Sending messages within an conversation is achieved without any server-side
-code; the messages are sent "directly" to all all participants of the
-conversation //through its Eliom-bus//. Two things make this work.
+The name of the project must match the name given to the functor
+{{{Eliom_registration.App}}}.
 
-Firstly, an event listener on the message prompt of the conversation
-(c.f. ##Client.handle_enter_pressed##) awaits that the enter-key is hit in
-the message prompt of a conversation. It then creates a message and sends it
-to the conversation's event bus.
+Adapt the file {{{ex.eliom}}} and compile, by calling {{{make}}}
+and run the server, by calling {{{make test.byte}}}.
+Download the
+[[site:/darcs/tutorial/files/tutorial/tutowidgets/ex.css|CSS file]]
+and place it in directory {{{static/css}}}.
+Then open a browser window and go to URL {{{http://localhost:8080}}}.
 
-Secondly, every participant of a conversation is streaming the messages which
-are sent over the conversation bus.
-A stream iterator on that bus then displays those messages as they arrive
-(c.f. ##Client.dispatch_message##).
+{{site:/darcs/tutorial/files/tutorial/tutowidgets/ex1.png|screenshot}}
 
-Have fun. [[site:chat|Be communicative!]]
+=== More explanations
 
+This section gives very quick explanations on the rest of the program.
+For more detailed explanations, see the tutorial for the graffiti app
+or the manual of each of the projects.
+
+* The {{{##}}} is used to call a JS method from OCaml
+(see js_of_ocaml's documentation).
+* If there are several services in your application, the client-side program
+will be sent only with the first page, and will not stop if you go to
+another page of the application.
+* {{{Lwt}}} is the concurrent library used to program threads on both
+client and server sides. The syntax {{{lwt a = e1 in e2}}} allows to wait
+(without blocking the rest of the program) for a Lwt thread to terminate
+before continuing. {{{e2}}} must be a Lwt thread itself. {{{Lwt.return}}}
+makes possible to create a Lwt thread already terminated.
+* {{{Lwt_js_events}}} defines a very convenient way to program
+events. Here {{{Lwt_js_events.onload}}} is a Lwt thread that waits
+until the page is loaded.
+
+== Second step: bind the button ==
+
+To make to widget work, we must bind the click event.
+Replace function {{{mywidget}}} by the following lines:
+
+<<code language="ocaml" |
+
+  let switch_visibility elt =
+    let elt = To_dom.of_element elt in
+    if Js.to_bool (elt##classList##contains(Js.string "hidden"))
+    then elt##classList##remove(Js.string "hidden")
+    else elt##classList##add(Js.string "hidden")
+
+  let mywidget s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"]] [pcdata s2] in
+    Lwt_js_events.(
+      async (fun () ->
+        clicks (To_dom.of_element button)
+          (fun _ _ -> switch_visibility content; Lwt.return ())));
+    div ~a:[a_class ["mywidget"]] [button; content]
+
+>>
+
+* Once again we use {{{Lwt_js_events}}}. {{{async}}} runs a {{{Lwt}}}
+thread asynchronously (without waiting for its result).
+* {{{Lwt_js_events.clicks elt f}}} calls function {{{f}}} for each
+mouse click on element {{{elt}}}.
+* {{{To_dom.of_element}}}, {{{Js.string}}} and {{{Js.to_bool}}} are conversion
+function between OCaml values and JS values.
+
+
+== Third step: Generating the widget on server side ==
+
+The following version of the program shows how to generate the widget
+on server side, before sending it to the client.
+
+The code is exactly the same, but:
+* We place function {{{mywidget}}} outside client section.
+* The portion of code that must be run on client side
+  (binding the click event) is written as a //client value//,
+  inside {{{ {unit{ ... }} }}}. This code will be executed by
+  the client side program when it receives the page. Note that you
+  must give the type (here {{{unit}}} as there is no type inference
+  for client values for now). The client section may refer server side
+  values, using the {{{%x}}} syntax. These values will be serialized
+  and sent to the client automatically with the page.
+* We include the widget on the server side generated page instead of
+  adding it to the page from client side.
+
+<<code language="ocaml" |
+{shared{
+  open Eliom_content
+  open Html5
+  open Html5.D
+}}
+
+module Ex_app =
+  Eliom_registration.App (struct let application_name = "ex" end)
+
+{client{
+
+  let switch_visibility elt =
+    let elt = To_dom.of_element elt in
+    if Js.to_bool (elt##classList##contains(Js.string "hidden"))
+    then elt##classList##remove(Js.string "hidden")
+    else elt##classList##add(Js.string "hidden")
+}}
+
+  let mywidget s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"]] [pcdata s2] in
+    let _ = {unit{
+      Lwt_js_events.(
+        async (fun () ->
+          clicks (To_dom.of_element %button)
+            (fun _ _ -> switch_visibility %content; Lwt.return ()))) }}
+    in
+    div ~a:[a_class ["mywidget"]] [button; content]
+
+let _ =
+  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+    (fun () () ->
+      Lwt.return (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+                   (body [h2 [pcdata "Welcome to Ocsigen!"];
+                          mywidget "Click me" "Hello!"])))
+
+>>
+
+== Fifth step: widget usable either on client or server sides ==
+
+If you place function {{{mywidget}}} into a //shared// section
+(syntax {{{ {{shared{ ... }} }}}), it will be available both on
+server and client sides.
+
+<<code language="ocaml" |
+
+{shared{
+
+  let mywidget s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"]] [pcdata s2] in
+    let _ = {unit{
+      Lwt_js_events.(
+        async (fun () ->
+          clicks (To_dom.of_element %button)
+            (fun _ _ -> switch_visibility %content; Lwt.return ()))) }}
+    in
+    div ~a:[a_class ["mywidget"]] [button; content]
+
+}}
+
+>>
+
+{{site:/darcs/tutorial/files/tutorial/tutowidgets/ex2.png|screenshot}}
+
+
+== Sixth step: close last window when opening a new one ==
+
+To implement this, we just record in a client side reference
+the function to be used to close the currently opened window.
+
+<<code language="ocaml" |
+{shared{
+  open Eliom_content
+  open Html5
+  open Html5.D
+}}
+
+module Ex_app =
+  Eliom_registration.App (struct let application_name = "ex" end)
+
+
+{client{
+  let close_last = ref (fun () -> ())
+
+  let switch_visibility elt =
+    let elt = To_dom.of_element elt in
+    if Js.to_bool (elt##classList##contains(Js.string "hidden"))
+    then elt##classList##remove(Js.string "hidden")
+    else elt##classList##add(Js.string "hidden")
+}}
+
+{shared{
+
+  let mywidget s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
+    let _ = {unit{
+      Lwt_js_events.(
+        async (fun () ->
+          clicks (To_dom.of_element %button)
+            (fun _ _ ->
+               !close_last();
+               close_last := (fun () -> switch_visibility %content);
+               switch_visibility %content; Lwt.return ()))) }}
+    in
+    div ~a:[a_class ["mywidget"]] [button; content]
+
+}}
+
+let _ =
+  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+    (fun () () ->
+      let _ = {unit{ Dom.appendChild
+         (Dom_html.document##body)
+         (To_dom.of_element (mywidget "Click me" "client side")) }}
+      in
+      Lwt.return (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+                   (body [h2 [pcdata "Welcome to Ocsigen!"];
+                          mywidget "Click me" "server side";
+                          mywidget "Click me" "server side";
+                          mywidget "Click me" "server side"])))
+
+>>
+
+== Last step: several sets of widgets ==
+
+Now we want to be able to have several sets of widgets in the
+same page. To do that we can't use only one reference any more.
+In the following version, the server side program asks the client side
+program to generate two different references by calling function
+{{{new_set}}}. This function returns what a call a //client value//.
+On server side, it is not evaluated, and has an abstract type.
+
+<<code language="ocaml" |
+
+{shared{
+  open Eliom_content
+  open Html5
+  open Html5.D
+}}
+
+module Ex_app =
+  Eliom_registration.App (struct let application_name = "ex" end)
+
+
+let new_set () = {(unit -> unit) ref{ ref (fun () -> ()) }}
+
+{client{
+  let switch_visibility elt =
+    let elt = To_dom.of_element elt in
+    if Js.to_bool (elt##classList##contains(Js.string "hidden"))
+    then elt##classList##remove(Js.string "hidden")
+    else elt##classList##add(Js.string "hidden")
+}}
+
+{shared{
+
+  let mywidget set s1 s2 =
+    let button  = div ~a:[a_class ["button"]] [pcdata s1] in
+    let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
+    let _ = {unit{
+      Lwt_js_events.(
+        async (fun () ->
+          clicks (To_dom.of_element %button)
+            (fun _ _ ->
+               ! %set();
+               %set := (fun () -> switch_visibility %content);
+               switch_visibility %content; Lwt.return ()))) }}
+    in
+    div ~a:[a_class ["mywidget"]] [button; content]
+
+}}
+
+let _ =
+  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+    (fun () () ->
+      let set1 = new_set () in
+      let set2 = new_set () in
+      let _ = {unit{ Dom.appendChild
+         (Dom_html.document##body)
+         (To_dom.of_element (mywidget %set2 "Click me" "client side")) }}
+      in
+      Lwt.return (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+                   (body [h2 [pcdata "Welcome to Ocsigen!"];
+                          mywidget set1 "Click me" "server side";
+                          mywidget set1 "Click me" "server side";
+                          mywidget set2 "Click me" "server side"])))
+>>
