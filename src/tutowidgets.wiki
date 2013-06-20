@@ -3,6 +3,10 @@
 This short tutorial is an example of client-server Eliom application.
 It gives an example of client-server widgets.
 
+It is probably a good starting point if you want to learn quickly how to write a
+client-server Eliom application with a short example and few explanations.
+For more explanation, see the "graffiti" tutorial or read the manuals.
+
 The goal is to show that,
 unlike many javascript libraries that build their widgets
 programmatically (by instanciating classes or calling functions),
@@ -12,7 +16,7 @@ before sending them to the client. Thus pages can be indexed by search engines.
 This tutorial also shows that it is possible to use the same code to
 build the widget either on client or server side.
 
-We choose a very simple widget, than could be the base for example
+We chose a very simple widget, than could be the base for example
 for implementing a drop-down menu. It consists in several boxes
 with a title and a content. Clicking on the title opens or closes
 the content. And it is possible to group some of the boxes together
@@ -127,12 +131,12 @@ Replace function {{{mywidget}}} by the following lines:
 
 >>
 
-* Once again we use {{{Lwt_js_events}}}. {{{async}}} runs a {{{Lwt}}}
+* Once again we use {{{Lwt_js_events}}}. Function {{{async}}} runs a {{{Lwt}}}
 thread asynchronously (without waiting for its result).
 * {{{Lwt_js_events.clicks elt f}}} calls function {{{f}}} for each
 mouse click on element {{{elt}}}.
 * {{{To_dom.of_element}}}, {{{Js.string}}} and {{{Js.to_bool}}} are conversion
-function between OCaml values and JS values.
+functions between OCaml values and JS values.
 
 
 == Third step: Generating the widget on server side ==
@@ -146,8 +150,8 @@ The code is exactly the same, but:
   (binding the click event) is written as a //client value//,
   inside {{{ {unit{ ... }} }}}. This code will be executed by
   the client side program when it receives the page. Note that you
-  must give the type (here {{{unit}}} as there is no type inference
-  for client values for now). The client section may refer server side
+  must give the type (here {{{unit}}}) as there is no type inference
+  for client values for now. The client section may refer server side
   values, using the {{{%x}}} syntax. These values will be serialized
   and sent to the client automatically with the page.
 * We include the widget on the server side generated page instead of
@@ -285,7 +289,7 @@ Now we want to be able to have several sets of widgets in the
 same page. To do that we can't use only one reference any more.
 In the following version, the server side program asks the client side
 program to generate two different references by calling function
-{{{new_set}}}. This function returns what a call a //client value//.
+{{{new_set}}}. This function returns what we call a //client value//.
 On server side, it is not evaluated, and has an abstract type.
 
 <<code language="ocaml" |
@@ -343,3 +347,5 @@ let _ =
                           mywidget set1 "Click me" "server side";
                           mywidget set2 "Click me" "server side"])))
 >>
+
+{{site:/darcs/tutorial/files/tutorial/tutowidgets/ex-final.png|screenshot}}
