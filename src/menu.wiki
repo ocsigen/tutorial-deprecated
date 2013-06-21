@@ -13,4 +13,3 @@
 ==[[pictures|Upload pictures]]
 ==[[music|Playing music]]
 ==[[hash-password|Protecting passwords]]
-== More coming soon ...

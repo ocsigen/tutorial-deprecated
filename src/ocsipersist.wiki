@@ -37,3 +37,12 @@ let () = Eliom_registration.Action.register
  (currently sqlite and dbm) and can be extended.
  For more informations see <<a_api project="ocsigenserver"| type Ocsipersist.table >>.
 >>
+
+
+== Ocsiperist and Eliom
+
+Eliom has a higher level interface above Ocsiperist to store the server side
+state of an application, called //Eliom references//.
+For example persistent Eliom references of scope session group
+can be used to store information about a user (if the session group
+corresponds to the user).

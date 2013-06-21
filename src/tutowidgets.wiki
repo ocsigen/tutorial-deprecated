@@ -349,3 +349,30 @@ let _ =
 >>
 
 {{site:/darcs/tutorial/files/tutorial/tutowidgets/ex-final.png|screenshot}}
+
+
+== And now? ==
+
+===Calling server functions===
+An important feature missing in this tutorial is the ability
+to call server functions from the client side program ("server functions").
+You can have a quick description of this
+[[site:/howto/getsubpage|in mini HOWTOs]] or
+in [[site:/eliom/manual/clientserver-communication#rpc|Eliom's manual]].
+
+===Services===
+For many applications, you will need several services.
+Remember that by default, client-side Eliom program do not
+stop when you follow a link or send a form. This make possible to combine
+Rich client side feature (playing music, animations, stateful applications~ ...)
+with traditional Web interaction (links, forms, bookmarks, back button~ ...).
+Eliom proposes several way to identify services, either by the URL (and
+parameters) or by a session identifier (we call this kind of service
+a //coservice//). Eliom also makes possible to create dynamically new
+(co-)services dynamically, for example coservices depending on previous
+interaction with a user. More information on the service identification
+mechanism in [[site:/eliom/manual/server-services|Eliom's manual]].
+
+===Sessions===
+Eliom also offers a rich session mechanism, with //scopes//
+(see [[site:/eliom/manual/server-state|Eliom's manual]]).
