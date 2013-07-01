@@ -196,7 +196,7 @@ let _ =
 
 >>
 
-== Fifth step: widget usable either on client or server sides ==
+== Fourth step: widget usable either on client or server sides ==
 
 If you place function {{{mywidget}}} into a //shared// section
 (syntax {{{ {{shared{ ... }} }}}), it will be available both on
@@ -224,7 +224,7 @@ server and client sides.
 {{site:/darcs/tutorial/files/tutorial/tutowidgets/ex2.png|screenshot}}
 
 
-== Sixth step: close last window when opening a new one ==
+== Fifth step: close last window when opening a new one ==
 
 To implement this, we just record in a client side reference
 the function to be used to close the currently opened window.
