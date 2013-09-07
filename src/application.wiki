@@ -126,7 +126,7 @@ construction function for each HTML5 tag.
 //Note that it is also possible to use the usual HTML syntax directly
  in OCaml, cf.  <<a_api project="tyxml" | module Pa_tyxml >>.//
 
-Ocsigen uses the <<a_manual project="tyxml" version="dev"|TyXML>>
+Ocsigen uses the <<a_manual project="tyxml" |TyXML>>
 library to build HTML tree.  The TyXML library is very strict and
 compels you to respect HTML5 standard (with some limitations). For
 example if you write:
@@ -161,7 +161,7 @@ variant type.
 
 **Another example:** In HTML5, some tags cannot be empty. For example
 {{{<table>}}}must contain at least one row.  To enforce this, the
-<<a_api project="tyxml" version="dev" text="Html5.table"| val
+<<a_api project="tyxml" text="Html5.table"| val
 Html5.F.table >> function takes two parameters: the first one is the
 first row, the second one is a list containing all the other rows
 (same thing for {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...).  This

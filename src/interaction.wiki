@@ -457,7 +457,7 @@ parameters corresponding to the names of each field.
 <<a_api project="eliom" | module Eliom_content.Html5.F >>)
 defines constructors for all possible form fields.  OCaml checks that
 the name you use matches the field.  For example it is not possible to
-use the names above with <<a_api project="eliom" version="dev" | val
+use the names above with <<a_api project="eliom" | val
 Eliom_content.Html5.D.int_input >> as it is a name for a string.  >>
 
 ===Opening a session===
@@ -689,7 +689,7 @@ Usually, after sending a POST form, it is good practice to do a
 redirection.  This avoids reposting the data if the user reloads the
 page.
 
-Eliom provides the module <<a_api project="eliom" version="dev" |
+Eliom provides the module <<a_api project="eliom" |
 module Eliom_registration.Redirection >> to register services doing
 redirections.  Such services return a service without parameter.
 
@@ -703,12 +703,12 @@ let redir_service = Eliom_registration.Redirection.register_service
 >>
 
 (If you want to give parameters to the service you return, use <<a_api
-project="eliom" version="dev" | val Eliom_service.preapply >> ---
+project="eliom" | val Eliom_service.preapply >> ---
 more information in the <<a_manual project="eliom" chapter="server-services"
 fragment="p3preapplied" | Eliom manual >>.)
 
 If you want to do a redirection towards the current page (as in our
-case), use the special service <<a_api project="eliom" version="dev" |
+case), use the special service <<a_api project="eliom" |
 val Eliom_service.void_coservice' >>, which is some kind of POST
 non-attached coservice without parameter at all.  >>
 
@@ -716,9 +716,9 @@ non-attached coservice without parameter at all.  >>
 
 To create a logout/disconnection form, we create another non-attached
 coservice using POST method, and register another action.  We call the
-function <<a_api project="eliom" version="dev" | val
+function <<a_api project="eliom" | val
 Eliom_state.discard >> with scope <<a_api project="eliom"
-version="dev" | val Eliom_common.default_session_scope >> to remove all session
+| val Eliom_common.default_session_scope >> to remove all session
 data.
 
 <<code language="ocaml"|
@@ -1046,7 +1046,7 @@ Our service {{{user_service}}} responds to any request parameter, even
 if the user does not exist in the database.  We want to check that the
 user is in the database before displaying the page, and send a 404
 error if the user is not.  To do that, we will replace the module
-{{{ My_app }}} by <<a_api project="eliom" version="dev" | module
+{{{ My_app }}} by <<a_api project="eliom" | module
 Eliom_registration.Any >> to register the service {{{user_service}}}:
 
 <<code language="ocaml"|
@@ -1076,7 +1076,7 @@ Eliom_registration.Any.register
 
 <<concept title="Eliom_registration.Any" |
 
-The module <<a_api project="eliom" version="dev" | module
+The module <<a_api project="eliom" | module
 Eliom_registration.Any >> can be used to create services that are
 flexible to choose the kind of output they want to send.
 
