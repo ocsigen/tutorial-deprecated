@@ -78,7 +78,7 @@ parameter, serving the content of the static directory. We use <<a_api project="
 url as a string.
 
 <<code language="ocaml"|
-let feed_service = Eliom_service.service ~path:["feed"]
+let feed_service = Eliom_service.Http.service ~path:["feed"]
   ~get_params:(Eliom_parameter.string "name") ()
 
 let local_filename name number =

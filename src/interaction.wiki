@@ -227,10 +227,10 @@ program:
 open Eliom_content.Html5.D
 
 let main_service =
-  Eliom_service.service ~path:[""] ~get_params:Eliom_parameter.unit ()
+  Eliom_service.Http.service ~path:[""] ~get_params:Eliom_parameter.unit ()
 
 let user_service =
-  Eliom_service.service
+  Eliom_service.Http.service
     ~path:["users"] ~get_params:Eliom_parameter.(suffix (string "name")) ()
 
 (* User names and passwords: *)
@@ -266,8 +266,10 @@ As my two services are mutually recursive (the first one contains
 links towards the second one and vice versa), we split the
 {{{register_service}}} in two steps:
 
-* First we create all the services using <<a_api project="eliom"
-  version="dev" | val Eliom_service.service >>,
+* First we create all the services using
+  <<a_api project="eliom" | val Eliom_service.Http.service >>
+  or <<a_api project="eliom" | val Eliom_service.App.service >>
+  (depending on the type of services you want)
 * Then we register the handlers using the {{{register}}} function from
   the right module.
 
@@ -316,7 +318,7 @@ these parameters:
 
 <<code language="ocaml"|
 let connection_service =
-  Eliom_service.post_service
+  Eliom_service.Http.post_service
     ~fallback:main_service
     ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
@@ -325,10 +327,14 @@ let connection_service =
 <<concept title="Hidden (POST) services" |
 
 Services using the POST HTTP method are created using the function
-<<a_api project="eliom" version="dev" | val
-Eliom_service.post_service >>.  As you can see, there is a major
-difference from the function <<a_api project="eliom" version="dev" |
-val Eliom_service.service >>: {{{post_service}}} does not take a path
+<<a_api project="eliom" | val Eliom_service.Http.post_service >>
+or <<a_api project="eliom" | val Eliom_service.App.post_service >>
+(depending on what type of service you want to create).
+As you can see, there is a major
+difference from the function <<a_api project="eliom" |
+val Eliom_service.Http.service >>
+(and <<a_api project="eliom" | val Eliom_service.App.service >>):
+{{{post_service}}} does not take a path
 as parameter, but a GET service as a //fallback//.
 
 This means that for each POST service, you must first create a GET
@@ -657,7 +663,7 @@ Transform the connection service into a non-attached coservice:
 
 <<code language="ocaml"|
 let connection_service =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
 >>
@@ -717,7 +723,7 @@ data.
 
 <<code language="ocaml"|
 let disconnection_service =
-  Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
+  Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
 
 let disconnect_box () =
   post_form disconnection_service
@@ -759,10 +765,10 @@ the "database":
 
 <<code language="ocaml"|
 let new_user_form_service =
-  Eliom_service.service ~path:["registration"] ~get_params:Eliom_parameter.unit ()
+  Eliom_service.Http.service ~path:["registration"] ~get_params:Eliom_parameter.unit ()
 
 let create_account_service =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:main_service
     ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
@@ -847,7 +853,7 @@ new POST attached coservice called {{{account_confirmation_service}}}:
 
 <<code language="ocaml"|
 let account_confirmation_service =
-  Eliom_service.post_coservice
+  Eliom_service.Http.post_coservice
     ~fallback:new_user_form_service
     ~post_params:Eliom_parameter.(string "name" ** string "password")
     ()
