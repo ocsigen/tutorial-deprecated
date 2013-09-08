@@ -222,7 +222,7 @@ let messages =
     (unit, string,
      [ `Nonattached of [ `Post] Eliom_service.na_s ], [ `WithoutSuffix ],
      unit, [ `One of string ] Eliom_parameter.param_name,
-     [ `Registrable ], string Eliom_parameter.caml)
+     [ `Registrable ], string Eliom_service.caml_service)
     Eliom_service.service
   let server_function_id_int = 1001
 }}
@@ -281,4 +281,3 @@ let messages =
 }}
 
  *)
-

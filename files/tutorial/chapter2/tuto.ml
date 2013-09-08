@@ -2,24 +2,24 @@ open Eliom_content.Html5.D
 open Eliom_parameter
 
 (* Services *)
-let main_service = Eliom_service.service ~path:[""] ~get_params:unit ()
+let main_service = Eliom_service.Http.service ~path:[""] ~get_params:unit ()
 
 let user_service =
-  Eliom_service.service
+  Eliom_service.Http.service
     ~path:["users"] ~get_params:(suffix (string "name")) ()
 
 let connection_service =
-  Eliom_service.post_service
+  Eliom_service.Http.post_service
     ~fallback:main_service
     ~post_params:(string "name" ** string "password")
     ()
 
-let disconnection_service = Eliom_service.post_coservice' ~post_params:unit ()
+let disconnection_service = Eliom_service.Http.post_coservice' ~post_params:unit ()
 
-let new_user_form_service = Eliom_service.service ~path:["create account"] ~get_params:unit ()
+let new_user_form_service = Eliom_service.Http.service ~path:["create account"] ~get_params:unit ()
 
 let account_confirmation_service =
-  Eliom_service.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
+  Eliom_service.Http.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
 
 
 
@@ -92,7 +92,7 @@ let create_account_form () =
 
 
 (* Registration of services *)
-let _ = 
+let _ =
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
@@ -162,5 +162,3 @@ let _ =
                         pcdata " ";
                         a ~service:main_service [pcdata "No"] ()]
                     ])))
-
-

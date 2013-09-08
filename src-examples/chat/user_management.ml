@@ -5,11 +5,11 @@ open Shared
 (* Services *)
 
 let login_service =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
 let logout_service =
-  Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
+  Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
 
 (* References *)
 

@@ -60,7 +60,7 @@ module Chat_app =
     (struct let application_name = "chat_site" end)
 
 let main_service =
-  Eliom_service.service ~path:[] ~get_params:Eliom_parameter.unit ()
+  Eliom_service.App.service ~path:[] ~get_params:Eliom_parameter.unit ()
 
 let connected user content =
   let open Html5.F in
@@ -113,4 +113,3 @@ let () =
     Chat.on_create_first_connection
     Chat.on_drop_last_connection;
   Chat_app.register ~service:main_service main_handler
-
