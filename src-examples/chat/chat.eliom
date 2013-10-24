@@ -10,9 +10,9 @@ let css_files = [["chat.css"]]
 (* Services *)
 
 let create_dialog_service =
-  Eliom_service.post_coservice' ~post_params:(User.parameter "other") ()
+  Eliom_service.Http.post_coservice' ~post_params:(User.parameter "other") ()
 let cancel_dialog_service =
-  Eliom_service.post_coservice' ~post_params:(Eliom_parameter.int "conversation_id") ()
+  Eliom_service.Http.post_coservice' ~post_params:(Eliom_parameter.int "conversation_id") ()
 
 (* User info *)
 

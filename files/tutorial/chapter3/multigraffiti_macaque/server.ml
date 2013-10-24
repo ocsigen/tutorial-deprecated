@@ -74,9 +74,9 @@ let get_bus (name:string) =
       Hashtbl.add graffiti_info name (bus,image_string);
       bus
 
-let main_service = Eliom_service.service ~path:[""]
+let main_service = Eliom_service.App.service ~path:[""]
   ~get_params:(Eliom_parameter.unit) ()
-let multigraffiti_service = Eliom_service.service ~path:[""]
+let multigraffiti_service = Eliom_service.App.service ~path:[""]
   ~get_params:(Eliom_parameter.suffix (Eliom_parameter.string "name")) ()
 
 let choose_drawing_form () =
@@ -90,12 +90,12 @@ let choose_drawing_form () =
           ]])
 
 let connection_service =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params:(let open Eliom_parameter in (string "name" ** string "password"))
     ()
-let disconnection_service = Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
+let disconnection_service = Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
 let create_account_service =
-  Eliom_service.post_coservice ~fallback:main_service ~post_params:(let open Eliom_parameter in (string "name" ** string "password")) ()
+  Eliom_service.Http.post_coservice ~fallback:main_service ~post_params:(let open Eliom_parameter in (string "name" ** string "password")) ()
 
 let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 
@@ -234,4 +234,3 @@ let () = Connected.register ~service:main_service
     make_page
       [h1 [pcdata ("Welcome to Multigraffiti " ^ username)];
        choose_drawing_form ()])
-

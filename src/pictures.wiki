@@ -4,7 +4,7 @@
 We will now add a button to the application to save the current
 image. The images will be saved to the filesystem using the module
 <<a_api project="lwt"| module Lwt_io>>. We will then make an Atom feed
-with the saved images using <<a_api project="eliom" version="dev"| module Atom_feed >>.
+with the saved images using <<a_api project="eliom" | module Atom_feed >>.
 
 We save the images in the directory containing the static contents
 under the directory {{{images_saved/username}}}. The {{{username}}}
@@ -78,7 +78,7 @@ parameter, serving the content of the static directory. We use <<a_api project="
 url as a string.
 
 <<code language="ocaml"|
-let feed_service = Eliom_service.service ~path:["feed"]
+let feed_service = Eliom_service.Http.service ~path:["feed"]
   ~get_params:(Eliom_parameter.string "name") ()
 
 let local_filename name number =

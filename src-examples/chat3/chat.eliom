@@ -325,11 +325,11 @@ let verify_user ~username ~password =
   else Lwt.return None
 
 let login_service =
-  Eliom_service.post_coservice'
+  Eliom_service.Http.post_coservice'
     ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
 let logout_service =
-  Eliom_service.post_coservice' ~post_params:Eliom_parameter.unit ()
+  Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
 
 let login_message_eref = Eliom_reference.Volatile.eref ~scope:Eliom_common.request_scope None
 
@@ -573,7 +573,7 @@ let connected_users_list_id = Html5.Id.new_elt_id ~global:true ()
 (* {{{                          Main service                                  *)
 
 let main_service =
-  Eliom_service.service ~path:[] ~get_params:Eliom_parameter.unit ()
+  Eliom_service.App.service ~path:[] ~get_params:Eliom_parameter.unit ()
 
 let connected_main_handler { user; chat_events } =
   fun () () ->
