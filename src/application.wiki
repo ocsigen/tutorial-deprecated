@@ -21,7 +21,7 @@ very simplicistic project called "graffiti" in the directory
 "graffiti" (adapt it to your needs!):
 
 <<code language="shell"|
-$ eliom-distillery -name graffiti -template basic -destination graffiti
+$ eliom-distillery -name graffiti -template basic -target-directory graffiti
 >>
 
 ===My first page===
