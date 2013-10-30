@@ -29,7 +29,8 @@ step by step a small client/server web application.
 
 <<wip|
 Manuals are permanently under evolution.
-Please report any error, mistake, and send us your comments and suggestions!
+Please report any error, mistake, for example by doing pull requests
+on Github, and send us your comments and suggestions!
 >>
 
 ==Ocsigen software projects==
