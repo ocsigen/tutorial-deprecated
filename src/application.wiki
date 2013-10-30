@@ -266,6 +266,10 @@ to specify for which side the code should run.
 * {{{ {shared{ ... }} }}} for code that will be used both for the server and the client.
 * Code outside of those quotations is assument to be only for server side.
 
+**Client sections are executed once, when the client side process is launched.**
+The client process is not restarted after each page change (and obviously
+not after remote function calls).
+
 In the Makefile created by the distillery we automatically split the
 code by a syntax extension, compile the server part as usual, and
 compile the client part using {{{js_of_ocaml}}} to create a JavaScript
@@ -287,6 +291,12 @@ Note, that such a client values is abstract on the server, but becomes
 concrete, once it is sent to the client with the next request.
 
 (The {{{typ}}} can be ommitted, when it can be inferred from the usage of the client value in the server code.)
+
+**Client values are executed on client side after the service returns.**
+Use client values for example when a service or remote function wants
+to ask the client to run something
+(binding some event handler on some element it returns for example).
+
 >>
 
 <<concept title="Js_of_ocaml"|
