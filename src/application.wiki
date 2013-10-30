@@ -768,12 +768,20 @@ In this section, we add a color picker and slider to choose the size
 of the brush. For that we used add two widgets provided by the
 <<a_manual project="oclosure"|OClosure widget library>>.
 
-For using OClosure, you have to make sure that it is installed. If you
-are using the bundle, it should have been configured with the option
-{{{--enable-oclosure}}}.  Cf. the
-[[wiki(36):bundle#oclosure|corresponding bundle
-documentation]]. Otherwise, you need to install it from
+<<wip|
+This part of the tutorial needs to be upgraded.
+The OClosure project currently has no maintainer and we don't really
+want to encourage people to use it.
+
+Other JS widgets libraries fit better the Eliom model
+(making possible to create the widgets on server side).
+We should switch to something else, for example JQuery.
+
+OClosure is not packaged in opam either.
+If you want to try this section, you need to install it from
 [[wiki(33):install|source]].
+>>
+
 
 In the {{{Makefile.options}}}, created by Eliom's distillery, just add {{{oclosure}}} to the (currently empty) {{{CLIENT_PACKAGES}}}:
 <<code language="makefile"|
