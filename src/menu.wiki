@@ -10,6 +10,6 @@
 ==[[macaque|MaCaQue: SQL queries]]
 ==[[custom-conf|Custom configuration]]
 ==[[ocsipersist|Light database]]
-==[[pictures|Upload pictures]]
+==[[pictures|Download pictures]]
 ==[[music|Playing music]]
 ==[[hash-password|Protecting passwords]]
