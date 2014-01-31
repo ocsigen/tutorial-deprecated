@@ -241,4 +241,4 @@ It makes possible to write dynamic user interfaces for Web pages in OCaml
 using Js_of_ocaml.
 
 
-[[wiki:application|next]]
+[[href:application|next]]

@@ -486,4 +486,4 @@ to {{{disconnect_box}}}
        canvas;])
 >>
 
-[[interaction|prev]]
+[[href:interaction|prev]]
