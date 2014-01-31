@@ -1,6 +1,6 @@
 =Implementing Web Interaction Using Eliom=
 
-//The code of this tutorial has been tested with Eliom 3.// \\
+//The code of this tutorial has been tested with Eliom 4.// \\
 
 <<|outline target="documentation">>
 
@@ -1144,5 +1144,5 @@ let _ = My_app.register ~service:main_service
            (body [h1 [pcdata ("Hello " ^ username) ]]))))
 >>
 
-[[wiki:application|prev]]
-[[wiki:misc|next]]
+[[application|prev]]
+[[misc|next]]

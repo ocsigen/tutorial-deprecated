@@ -2,7 +2,7 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested with Eliom 3.// \\
+//The code of this tutorial has been tested with Eliom 4.// \\
 
 ==Multi-user collaborative drawing application==
 
@@ -486,4 +486,4 @@ to {{{disconnect_box}}}
        canvas;])
 >>
 
-[[wiki:interaction|prev]]
+[[interaction|prev]]

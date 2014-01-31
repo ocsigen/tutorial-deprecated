@@ -131,6 +131,10 @@ still can save bookmarks on pages!  This opens up a wide field of new
 possibilities, and should facilitate the emergence of new kinds of Web
 applications.
 
+<<div class="tutocase"|
+;If you want a more complete manual
+:Read the manual of each project, and/or the API documentation.
+>>
 
 
 ==Ocsigen software projects==

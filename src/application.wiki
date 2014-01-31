@@ -1,6 +1,6 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested with Eliom3.// \\
+//The code of this tutorial has been tested against Eliom 4.// \\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]].  It is a client/server web application
@@ -482,7 +482,7 @@ let main_service =
   My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       (* Cf. the box "Client side side-effects on the server" *)
-      ignore {unit{ init_client () }};
+      let _ = {unit{ init_client () }} in
       Lwt.return page)
 
 >>
@@ -491,8 +491,8 @@ let main_service =
 
   title="JavaScript datatypes in OCaml"|
 
-  Note that we use the function <<a_api project="js_of_ocaml" | val
-  Js.string>> from the Js_of_ocaml's library to convert an OCaml
+  Here we use the function <<a_api project="js_of_ocaml" | val
+  Js.string>> from Js_of_ocaml's library to convert an OCaml
   string into a JS string.
 
 >>
@@ -503,16 +503,19 @@ let main_service =
   processing request in a client-server application: If a client value
   is created while processing a request, it will be evaluated on the
   client once he receives the response and the document is put in place;
-  with this, the corresponding side effects are executed, of course.
+  with this, the corresponding side effects are executed at that moment.
 
   In the example above the line
   <<code language="ocaml"|
-    ignore {unit{ init_client () }};
+    let _ = {unit{ init_client () }} in
   >>
 
   creates such a client value which consists only of side effects, so
   the value can be {{{ignore}}}d, but Eliom will evaluate the value
-  anyway, justs because it has been created!
+  anyway, justs because it has been created.
+
+  Not ignoring the value will make possible to manipulate client-side
+  values from the server (see later).
 >>
 
 ===Single user drawing application===
@@ -877,6 +880,9 @@ Then you can test your application ({{{make test.byte}}}).
   application. The full documentation is available [[wiki(33):|on the
   project's site]].
 
+<<wip|We are currently working on a binding for JQuery and a native widget
+      library for Eliom.>>
+
 >>
 
 ===@@id="initial-image"@@ Sending the initial image===
@@ -1017,14 +1023,14 @@ $ sudo make install
 
 ====Exercises====
 
-* Add an OClosure button to make possible to download the current
+* Add a button to make possible to download the current
   image and save it to the hard disk (reuse the service
   {{{imageservice}}}).
   <<|BB
     Wrapping my head around the huge oclosure-API offhanded is very hard. A
     hint on how to register a click-listener with the button would help.
   >>
-* Add an OClosure button with a color picker to select a color from
+* Add a button with a color picker to select a color from
   the drawing. Pressing the button changes the mouse cursor, and disables
   current mouse events until the next mouse click event on the document.
   Then the color palette changes to the color of the pixel clicked.
@@ -1032,5 +1038,5 @@ $ sudo make install
 
 >>
 
-[[wiki:intro|prev]]
-[[wiki:interaction|next]]
+[[intro|prev]]
+[[interaction|next]]
