@@ -475,7 +475,8 @@ to the browser).
 
 Define your Eliom reference with a default value:
 <<code language="ocaml"|
-let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
+let username =
+  Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
 >>
 
 Here is the new {{{connection_box}}} function:
@@ -683,7 +684,7 @@ Now you can add the connection box on user pages.
                           ~service:main_service [pcdata "Home"] ()]])));
 >>
 
-<<concept title="Altenative: register a redirection" |
+<<concept title="Alternative: register a redirection" |
 
 Usually, after sending a POST form, it is good practice to do a
 redirection.  This avoids reposting the data if the user reloads the

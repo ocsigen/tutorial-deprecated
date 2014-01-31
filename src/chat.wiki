@@ -1,5 +1,7 @@
 = Chat: Design Overview =
 
+<<wip|Warning this tutorial is not maintained and may be not 100% up to date.>>
+
 //Chat// is a chatting module and application, currently for conversations
 between two users each. (Extension for multi-user channels is left as an
 exercise to the user.)
@@ -110,4 +112,3 @@ A stream iterator on that bus then displays those messages as they arrive
 (c.f. ##Client.dispatch_message##).
 
 Have fun. [[site:chat|Be communicative!]]
-

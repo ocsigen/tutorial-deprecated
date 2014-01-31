@@ -76,7 +76,7 @@ It shows on an example the client-server syntax,
 and is a good starting point for understanding Eliom's client-server features.
 
 <<div class="tutocase"|
-;If you want to write a more traditional Web site
+;If you want to write a more traditional Web site, with pages, forms, and sessions:
 :Read tutorial [[href:interaction|Service based Web programming]]
 >>
 
@@ -114,6 +114,17 @@ the first section, which explains the basics). Conversely, if you are
 not interested in standard Web interactions, with sessions links, and
 forms, you can skip the second chapter.
 >>
+
+<<div class="tutocase"|
+;If you want to have quickly a full application with user management (registration, activation emails, authentication)
+: Have a look at [[wiki(81):|Eliom base app]].
+>>
+
+Eliom base app is a library and a template for Eliom distillery that
+contains a working Eliom application with user and right
+management.
+
+<<wip|Eliom base app is still very young and not fully documented.>>
 
 <<div class="tutocase"|
 You will also find some other tutorials in the menu on the left.
