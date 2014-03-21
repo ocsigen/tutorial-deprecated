@@ -50,7 +50,7 @@ let launch_server_canvas () =
 let graffiti_info = Hashtbl.create 0
 
 let imageservice =
-  Eliom_registration.Text.register_service
+  Eliom_registration.String.register_service
     ~path:["image"]
     ~headers:Http_headers.dyn_headers
     ~get_params:(let open Eliom_parameter in string "name" ** int "q")
