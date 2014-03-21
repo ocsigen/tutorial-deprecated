@@ -242,7 +242,7 @@ let user_links () =
                         ~service:user_service [pcdata name] name])
                !users)
 
-let _ =
+let () =
   Eliom_registration.Html5.register
     ~service:main_service
     (fun () () ->
@@ -1136,7 +1136,7 @@ let authenticated_handler f =
       handle_anonymous (* Called when [username] is [None] *)
       f (* Called [username] contains something *)
 
-let _ = My_app.register ~service:main_service
+let () = My_app.register ~service:main_service
   (authenticated_handler
     (fun username _get _post ->
        Lwt.return
