@@ -1,21 +1,23 @@
-<<header| =Writing a client/server Eliom application >>
+<<header| =Writing a basic Web site in OCaml >>
 
 //The code of this tutorial has been tested against Eliom 4.// \\
+
+<<wip|This tutorial is work in progress. Please send us any mistake or comment./>>
 
 In this tutorial, we will show how to use the Ocsigen framework
 (mainly Eliom) to write a lightweight Web site by generating pages
 using OCaml functions. The goal is to show that using Eliom is
 possible even if you don't need all the features (for example if you
 don't want HTML typing or client side features). Besides, this will
-make possible to extend you Web site in a full Web application
+make possible to extend your Web site in a full Web application
 if you want, later. This tutorial is also a good overview of the basics
-of ELiom.
+of Eliom.
 
 
-==@@id="service"@@ A service genetaring a page==
+==@@id="service"@@ A service generating a page==
 
-The following code shown how to create a service that will answer
-for requests at URL http://.../aaa/bbb, by calling the following
+The following code shows how to create a service that will answer
+for requests at URL {{{http://.../aaa/bbb}}}, by calling the following
 Ocaml function {{{f}}}:
 
 <<code language="ocaml" |
@@ -39,6 +41,8 @@ let main_service =
     f
 
 >>
+
+{{{Eliom_paramer.any}}} means that the service takes any GET parameter.
 
 We recommend to use the program {{{eliom-distillery}}}
 to generate a template for your application (a Makefile and a default
@@ -68,5 +72,26 @@ $ ocsigenserver -c mysite.conf
 >>
 
 where mysite.conf is adapted from
- {{{ocsigenserver -c local/etc/mysite/mysite-test.conf}}}
+ {{{local/etc/mysite/mysite-test.conf}}}
 by replacing mysite.cma by your cmo.
+
+==@@id="post"@@ POST service==
+
+Services using the POST HTTP method are created using the function
+<<a_api project="eliom" | val Eliom_service.Http.register_post_service >>.
+To create a service with POST parameters, first you must create
+a service without POST parameters and then the service with POST
+parameters, with the fist service as fallback. The fallback will be used
+if the user comes back later without POST parameters, for example
+because he put a bookmark on this URL.
+
+<<code language="ocaml"|
+
+let g getp postp = Lwt.return "..."
+
+let post_service =
+  Eliom_registration.Html_text.register_post_service
+    ~fallback:main_service
+    ~post_params:Eliom_parameter.any
+    g
+>>
