@@ -81,7 +81,7 @@ Services using the POST HTTP method are created using the function
 <<a_api project="eliom" | val Eliom_service.Http.register_post_service >>.
 To create a service with POST parameters, first you must create
 a service without POST parameters and then the service with POST
-parameters, with the fist service as fallback. The fallback will be used
+parameters, with the first service as fallback. The fallback will be used
 if the user comes back later without POST parameters, for example
 because he put a bookmark on this URL.
 
@@ -95,3 +95,31 @@ let post_service =
     ~post_params:Eliom_parameter.any
     g
 >>
+
+==@@id="misc"@@ Going further==
+
+That's probably all you need for a basic Web site in OCaml.
+
+Have a look at Eliom's API documentation to see other kinds of services,
+for example <<a_api project="eliom"| module Eliom_registration.Redirection>>
+to create HTTP redirections.
+
+Instead of generating HTML in OCam strings, we highly recommend to use
+//typed HTML//. It is very easy to use (once you have learned the basics)
+and helps a lot to write efficiently modular and valid HTML.
+
+Eliom also has a way to type GET or POST parameters.
+By giving a description of the parameters your service expects,
+Eliom will check their presence automatically, and convert them
+for you to OCaml types.
+
+Eliom also has other ways to identify services (rather than just the PATH
+in the URL). For example Eliom can identify a service just by a parameter
+(whatever the path is). This is called //non-attached coservices// and
+this makes possible for example to have the same feature on every page
+(for example a connection service).
+
+Eliom also make possible to write client side code in OCaml and to program
+the communication between client and server.
+
+See other tutorials for more details about all this.
