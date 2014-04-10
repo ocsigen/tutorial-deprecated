@@ -104,11 +104,11 @@ Have a look at Eliom's API documentation to see other kinds of services,
 for example <<a_api project="eliom"| module Eliom_registration.Redirection>>
 to create HTTP redirections.
 
-Instead of generating HTML in OCam strings, we highly recommend to use
+Instead of generating HTML in OCaml strings, we highly recommend to use
 //typed HTML//. It is very easy to use (once you have learned the basics)
-and helps a lot to write efficiently modular and valid HTML.
+and helps a lot to efficiently write modular and valid HTML.
 
-Eliom also has a way to type GET or POST parameters.
+Eliom also has a way to typecheck forms and GET or POST parameters.
 By giving a description of the parameters your service expects,
 Eliom will check their presence automatically, and convert them
 for you to OCaml types.
