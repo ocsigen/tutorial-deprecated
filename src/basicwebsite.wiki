@@ -1,0 +1,72 @@
+<<header| =Writing a client/server Eliom application >>
+
+//The code of this tutorial has been tested against Eliom 4.// \\
+
+In this tutorial, we will show how to use the Ocsigen framework
+(mainly Eliom) to write a lightweight Web site by generating pages
+using OCaml functions. The goal is to show that using Eliom is
+possible even if you don't need all the features (for example if you
+don't want HTML typing or client side features). Besides, this will
+make possible to extend you Web site in a full Web application
+if you want, later. This tutorial is also a good overview of the basics
+of ELiom.
+
+
+==@@id="service"@@ A service genetaring a page==
+
+The following code shown how to create a service that will answer
+for requests at URL http://.../aaa/bbb, by calling the following
+Ocaml function {{{f}}}:
+
+<<code language="ocaml" |
+
+ f : (string * string) list -> unit -> string Lwt.t
+
+>>
+
+{{{f}}} generates HTML as a string, taking as argument
+the list of URL parameters (GET parameters).
+
+<<code language="ocaml" |
+
+let f _ () =
+  Lwt.return "<html><head><title>A</title></head><body>B</body></html>"
+
+let main_service =
+  Eliom_registration.Html_text.register_service
+    ~path:["aaa"; "bbb"]
+    ~get_params:Eliom_parameter.any
+    f
+
+>>
+
+We recommend to use the program {{{eliom-distillery}}}
+to generate a template for your application (a Makefile and a default
+configuration file for Ocsigen Server).
+
+
+<<code language="shell"|
+$ eliom-distillery -name mysite -template basic -target-directory mysite
+>>
+
+Put these lines in file {{{mysite.eliom}}}, compile and run the server by
+doing:
+
+<<code language="shell"|
+$ make test.byte
+>>
+
+Your page is now available at URL [[http://localhost:8080/aaa/bbb|{{{http://localhost:8080/aaa/bbb}}}]].
+
+If you dont want to use the Makefile provided by eliom-distillery,
+just replace {{{mysite.eliom}}} by a file {{{mysite.ml}}},
+compile and run with
+
+<<code language="shell"|
+$ ocamlfind ocamlc -package eliom.server -thread -c mysite.ml
+$ ocsigenserver -c mysite.conf
+>>
+
+where mysite.conf is adapted from
+ {{{ocsigenserver -c local/etc/mysite/mysite-test.conf}}}
+by replacing mysite.cma by your cmo.
