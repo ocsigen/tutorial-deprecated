@@ -1145,5 +1145,5 @@ let () = My_app.register ~service:main_service
            (body [h1 [pcdata ("Hello " ^ username) ]]))))
 >>
 
-[[href:application|prev]]
-[[href:misc|next]]
+[[wiki:manual/application|prev]]
+[[wiki:manual/misc|next]]

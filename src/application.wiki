@@ -1038,5 +1038,5 @@ $ sudo make install
 
 >>
 
-[[href:intro|prev]]
-[[href:interaction|next]]
+[[wiki:manual/intro|prev]]
+[[wiki:manual/interaction|next]]
