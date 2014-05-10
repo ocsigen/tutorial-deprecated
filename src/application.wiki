@@ -8,7 +8,7 @@ displaying an area where users can draw using the mouse, and see what
 other users are drawing at the same time and in real-time.
 
 <<webonly| The final eliom code is available
-[[site:/darcs/tutorial/files/tutorial/chapter1/distillery-oclosure/|for download]]. >>
+[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter1/distillery-oclosure/|for download]]. >>
 
 <<|outline target="documentation">>
 

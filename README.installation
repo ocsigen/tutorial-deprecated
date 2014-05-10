@@ -15,8 +15,8 @@ $ tree -L 2 $(TUTORIAL_DIR)
   │   │   └── tutorial.tar.gz
   │   └── src
   ├── dev
-  │   ├── files -> /var/www/data/darcs/tutorial/files
-  │   └── src -> /var/www/data/darcs/tutorial/src
+  │   ├── files -> /var/www/data/git/tutorial/files
+  │   └── src -> /var/www/data/git/tutorial/src
   └── stable -> 2.0
 
 The Makefile helps to maintain a directory of versions of the tutorial like
@@ -25,4 +25,3 @@ $ make show-help
 $ TUTORIAL_VERSION=x.y make install set-stable
 
 Do not forget to add a new version to Site_doc.tutorial_version.
-

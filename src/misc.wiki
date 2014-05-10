@@ -11,9 +11,8 @@ turn it to a multi user one. Each user will have his own drawing,
 where everyone can draw, and the owner will have the ability to save
 the drawing he wants and create an Atom feed containing all saved drawings.
 
-Download the <<a_file src="tutorial.tar.gz"|full code>> of the examples
-or browse it
-[[site:darcs/tutorial/files/tutorial/chapter3/multigraffiti|online]].
+See the
+[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter3/multigraffiti|full code of examples]].
 
 ===Split application into multiple files and using several canvas===
 <<concepts | Complex eliom project\\Unique elements>>

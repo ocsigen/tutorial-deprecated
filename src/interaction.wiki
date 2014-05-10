@@ -21,7 +21,7 @@ will add a login/connection form. We will also add a registration
 form, in order to learn how to create //dynamically// new services,
 and why it is very useful.
 
-The [[site:darcs/tutorial/files/tutorial/chapter2/|full code]]
+The [[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter2|full code]]
 of the program can be downloaded.
 
 ==Services==
