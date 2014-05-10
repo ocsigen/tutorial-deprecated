@@ -1,6 +1,4 @@
 
-//The code of this tutorial has been tested against Eliom 4.// \\
-
 =Introduction=
 
 This tutorial is an overview of the main features of the Ocsigen
