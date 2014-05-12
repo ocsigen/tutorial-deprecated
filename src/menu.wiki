@@ -14,3 +14,4 @@
 ==[[pictures|Download pictures]]
 ==[[music|Playing music]]
 ==[[hash-password|Protecting passwords]]
+==[[rest|RESTful JSON API]]
