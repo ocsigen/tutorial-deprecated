@@ -1,7 +1,8 @@
 =Reactive Media Player=
-<<concepts |Reactive nodes and attributes>>
 
-You should read the Playing Music tutorial before this one.
+You should read the [[site:/tuto/manual/music|Playing Music]] tutorial before this one.
+
+
 
 Since version 4, Eliom embed React library in order to use reactive
 html element like nodes and attributes. The React precise
@@ -15,15 +16,17 @@ current value of a signal. For exemple :
 
 
 <<code language="ocaml"|
-{client{
+{server{
+
+  open Eliom_content
 
   let s, set_s = React.S.create 0 (* signal creation *)
 
 	let exemple_div =
-	  R.node (React.S.map (
+	  C.node {{R.node (React.S.map (
 	    fun s_value ->
 			  Html5.D.(div [pcdata (string_of_int s_value)]
-			  )) s)
+			  )) s)}}
 
 	let incr_button =
     Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
@@ -34,23 +37,22 @@ current value of a signal. For exemple :
 The signal {{s}} carries an int value initialized to 0 set_s is the update
 function,$ generating an occurence of the signal.
 
-The {{exemple_div}} value is a div containing a string and all of this depends
+The {{{exemple_div}}} value is a div containing a string and all of this depends
 of the value of s.
 
 The magic part is that we never have to write explicitely the update
-of the div anywere in the code. The behavior of it is discribe in
-its own code and not in an event handler in the code of the button.
+of the div anywere in the code and the behavior of it is discribe in
+it's own code and not in an event handler in the code of the button.
 
-<<concept title="Client code"|
-Those nodes are generated from the client part, so you must call
-{{Manip.appendChild}} to add them to the html page.
+<<concept title="Reactive server node"|
+	{{{C.node}}} takes reactive client node and bring it to the server side
 >>
 
 <<concept title="Step semantics"|
 **Warning** : If you didn't read the React sematics, be aware of this :
-A step occurence of a signal {{s}} happens only when the update function is called
-on the signal or when an update function is called on a other signal {{s'}} which
-{{s}} depends on. But moreover, this update call must at least **modify**
+A step occurence of a signal {{{s}}} happens only when the update function is called
+on the signal or when an update function is called on a other signal {{{s'}}} which
+{{{s}}} depends on. But moreover, this update call must at least **modify**
 the signal current value, otherwise it's not a step.
 
 This can be seen when there are side effects (like print) in the code
@@ -58,8 +60,184 @@ of functions mapped to the signal. If the update function doesn't modify
 the signal value, the printing doesn't happen.
 
 The test equality function of a signal can be set in the {{eq}} optional parameters
-of React.S functions producing a signal (like {{create}}).
+of React.S functions producing a signal (like {{{create}}}).
 >>
 
 
-<<wip| the main part of this tutorial is in progress >>
+
+==@@id="frp_medial_player"@@ Functionnal Reactive Media Player==
+
+This part explain how to create a simple media player like in
+[[site:/tuto/manual/music|Playing Music]] tutorial with customs
+controls. We are going to write those in an FRP (Functionnal Reactive
+Programming) way.
+
+In order to show a short tutorial, we only create three controls :
+Play, Pause and Seek/Progress bar.  So, let's write the corresponding
+type :
+
+<<code language="ocaml"|
+{shared{
+  open Eliom_content
+}}
+{client{
+
+  type media_action = Play | Pause | Seek of float
+  let media_s, set_media_s = React.S.create Pause
+
+}}
+>>
+Each html element emit a signal value corresponding to it's action.
+It's enough to create our Play and Pause inputs.
+
+<<code language="ocaml"|
+{server{
+  let pause_button () =
+    D.(string_input ~input_type:`Submit () ~value:"Pause"
+         ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
+
+  let play_button () =
+    D.(string_input ~input_type:`Submit () ~value:"Play"
+         ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
+}}
+>>
+
+
+<<concept title="Abstract the Js events"|
+The other nice part of FRP is that we can abstract javascript
+events and use signals only.
+The Js event handler is only a function raising a signal.
+>>
+
+
+
+To use our buttons, we create know a media (audio or video) html element in the server
+side.
+
+<<code language="ocaml"|
+{server{
+let media_uri = (Html5.D.make_uri
+              ~service:(Eliom_service.static_dir ())
+              ["exemple.mp3"])
+			(* We assume that you have add a file 'exemple.mp3' in the
+			static directory of your project *)
+
+	
+let media_tag () =
+  let media = Html5.D.(audio ~src:(media_uri)[pcdata "alt"]) in
+  let _ = {unit{
+    Lwt_js_events.async (fun () ->
+      let media = To_dom.of_audio %media in
+      let _ = React.S.map (function
+        | Play -> media##play ()
+        | Pause -> media##pause ()
+        | Seek f -> media##currentTime <- (f /. 100. *. media##duration))
+							 (* The seeking value is in percent of the duration *)
+        media_s in
+      Lwt.return ())
+  }} in
+  media
+
+}}
+>>
+
+The code in {{{ {unit{...\}} }}} is client client part. It's an asynchronous
+Lwt thread which just execute the code inside : mapping a
+function {{{media_action -> unit}}} on the signal {{{media_s}}}.
+
+<<concept title="Playing video"|
+The code for playing video is exactly the same except that you must
+replace {{{audio}}} tag by {{{video}}} tag. But be careful : some
+browsers are not compatible with some formats.
+>>
+
+<<concept title="Create local elements outside the Html value" |
+If you don't want to create a global element as in
+[[site:/tuto/manual/music|Playing Music]], and you don't even want to
+create it locally in the html value, you can also create a function
+which build the element as we did and call where you build the html
+value.
+>>
+
+
+<<code language="ocaml"|
+{server{
+module React_Player_app =
+  Eliom_registration.App (
+    struct
+      let application_name = "react_player"
+    end)
+
+let media_service =
+  Eliom_service.App.service ~path:[] ~get_params:Eliom_parameter.unit ()
+
+let () =
+  React_Player_app.register
+    ~service:media_service
+    (fun name () ->
+      Lwt.return D.(
+        Eliom_tools.D.html ~title:"Media" ~css:[]
+        (body [
+            h2 [pcdata "Media"];
+            media_tag ();
+            div [
+              play_button (); pause_button ()]])))
+}}
+
+>>
+
+
+Now you should have a html with an audio tag and two buttons play and
+pause.  The progress bar is slightly harder to understand, but thanks
+to FRP, very easy to write.  It's basically an {{{input}}} with
+{{{range}}} type. In our program, the progress bar must emit the
+signal {{{media_s}}} with the value {{{Seek f}}} at input handling.
+Then, it must evolve during the progression of the media (we need an
+other signal).  To conclude, we must check that the display (the
+value) of the progress bar is not modified when the user is seeking.
+
+
+<<code language="ocaml"|
+
+{client{
+  let progress_s, set_progress_s = React.S.create (0., 0.)
+  let unblock_s, set_unblock_s = React.S.create true
+
+}}	
+{server{
+
+let progress_bar () =
+  let progress_value = {float React.signal{ React.S.map (fun (time, duration) ->
+    if duration = 0. then 0. else time /. duration *. 100.)
+    progress_s }} in
+			(* the signal inherites of progress_s to compute the value *)
+  let oninput = {{ fun ev ->
+    let target : Dom_html.inputElement Js.t = get_target ev in
+    let input_value = Js.parseFloat (target##value) in
+    set_bc_media_s (BSeek input_value) }} in
+  let attrs = D.([a_input_min 0.; a_input_max 100.; a_oninput oninput;
+                  a_onmousedown {{fun _ -> set_block_s false}};
+										(* unblock to false when the user is seeking*)
+                  a_onmouseup {{fun _ -> set_block_s true}};
+								 		(* modify the value only when unblock_s is true *)
+                  C.attr {{R.a_value (React.S.map (sprintf "%f")
+                               (React.S.on block_s 0. %progress_value))}};])
+  in D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
+
+}}
+>>
+
+
+
+<<concept title="Reactive attributes and React.S.on" |
+
+The function {{{R.a_value}}} is a reactive attribute
+value. {{{React.S.on c d s}}} is equal to s the last time c value was
+true, unless it's equal to d (in case c has never been true). Which
+means : we update the attribute value of our input only if unblock is
+true.
+
+>>
+
+
+<<wip| in progress ... >>
