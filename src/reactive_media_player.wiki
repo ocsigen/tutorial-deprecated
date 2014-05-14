@@ -1,0 +1,65 @@
+=Reactive Media Player=
+<<concepts |Reactive nodes and attributes>>
+
+You should read the Playing Music tutorial before this one.
+
+Since version 4, Eliom embed React library in order to use reactive
+html element like nodes and attributes. The React precise
+documentation can be found
+[[http://erratique.ch/logiciel/react|here]].
+
+==@@id="basics"@@ Basics==
+
+A reactive element, or more generally a reactive value, depends of the
+current value of a signal. For exemple :
+
+
+<<code language="ocaml"|
+{client{
+
+  let s, set_s = React.S.create 0 (* signal creation *)
+
+	let exemple_div =
+	  R.node (React.S.map (
+	    fun s_value ->
+			  Html5.D.(div [pcdata (string_of_int s_value)]
+			  )) s)
+
+	let incr_button =
+    Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
+               ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
+}}
+>>
+
+The signal {{s}} carries an int value initialized to 0 set_s is the update
+function,$ generating an occurence of the signal.
+
+The {{exemple_div}} value is a div containing a string and all of this depends
+of the value of s.
+
+The magic part is that we never have to write explicitely the update
+of the div anywere in the code. The behavior of it is discribe in
+its own code and not in an event handler in the code of the button.
+
+<<concept title="Client code"|
+Those nodes are generated from the client part, so you must call
+{{Manip.appendChild}} to add them to the html page.
+>>
+
+<<concept title="Step semantics"|
+**Warning** : If you didn't read the React sematics, be aware of this :
+A step occurence of a signal {{s}} happens only when the update function is called
+on the signal or when an update function is called on a other signal {{s'}} which
+{{s}} depends on. But moreover, this update call must at least **modify**
+the signal current value, otherwise it's not a step.
+
+This can be seen when there are side effects (like print) in the code
+of functions mapped to the signal. If the update function doesn't modify
+the signal value, the printing doesn't happen.
+
+The test equality function of a signal can be set in the {{eq}} optional parameters
+of React.S functions producing a signal (like {{create}}).
+>>
+
+
+<<wip| the main part of this tutorial is in progress >>
