@@ -203,8 +203,15 @@ value) of the progress bar is not modified when the user is seeking.
   let progress_s, set_progress_s = React.S.create (0., 0.)
   let unblock_s, set_unblock_s = React.S.create true
 
+	
+	(* get the targeted node of the given event *)
+  let get_target ev =
+    Js.Unsafe.coerce (Js.Opt.get (ev##target) (fun _ -> assert false))
+
 }}	
 {server{
+
+
 
 let progress_bar () =
   let progress_value = {float React.signal{ React.S.map (fun (time, duration) ->
@@ -239,5 +246,29 @@ true.
 
 >>
 
+To end this tutorial, you can just add {{{progress_bar ()}}} call to the div containing play and pause. We also need a mechanism which emit the {{{progress_s}}} signal. 
 
-<<wip| in progress ... >>
+
+<<code language="ocaml"|
+
+{server{
+
+  let timeupdate = {{fun ev ->
+    let media : Dom_html.audioElement Js.t = get_target ev in
+        set_progress_s (media##currentTime, media##duration);
+  }} in
+	
+}}
+
+
+>>
+
+Set the corresponding attribute in the media element in : 
+
+<<code language="ocaml"|
+  let media = D.(audio
+                   ~a:[a_ontimeupdate timeupdate]
+                   ~src:(media_uri)[pcdata "alt"]) in
+>>
+
+
