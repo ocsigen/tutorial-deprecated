@@ -228,10 +228,10 @@ let progress_bar () =
   let attrs = D.([a_input_min 0.; a_input_max 100.; a_oninput oninput;
                   a_onmousedown {{fun _ -> set_block_s false}};
 										(* unblock to false when the user is seeking*)
-                  a_onmouseup {{fun _ -> set_block_s true}};
+                  a_onmouseup {{fun _ -> set_unblock_s true}};
 								 		(* modify the value only when unblock_s is true *)
                   C.attr {{R.a_value (React.S.map (sprintf "%f")
-                               (React.S.on block_s 0. %progress_value))}};])
+                               (React.S.on unblock_s 0. %progress_value))}};])
   in D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
 
 }}
@@ -281,4 +281,4 @@ Set the corresponding attribute in the media element in :
 ====Exercises====
 
 * Add a control to set the volume
-* Add an {{{Eliom_bus}}} controle several clients
+* Add an {{{Eliom_bus}}} to control several clients
