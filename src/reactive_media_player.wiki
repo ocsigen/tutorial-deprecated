@@ -9,6 +9,9 @@ html element like nodes and attributes. The React precise
 documentation can be found
 [[http://erratique.ch/logiciel/react|here]].
 
+<<webonly| The final eliom code is available
+[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/|for download]]. >>
+
 ==@@id="basics"@@ Basics==
 
 A reactive element, or more generally a reactive value, depends of the
@@ -272,3 +275,8 @@ Set the corresponding attribute in the media element in :
 >>
 
 
+
+====Exercises====
+
+* Add a control to set the volume
+* Add an {{{Eliom_bus}}} controle several clients
