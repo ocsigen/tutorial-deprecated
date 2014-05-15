@@ -1,0 +1,64 @@
+=How to set and id, classes or other attributes to HTML elements?=
+
+Elements generated with Ocsigen are valid and contain required attributes because they must be given as parameters to functions.
+
+But you know what? You can add some optional attributes to your HTML5 elements to make them shine!
+
+The optional parameter "**a**" is more or less available for every HTML5 elements functions. This argument is taking a list of attributes compatible with the element.
+
+<<code language="ocaml" |
+  div ~a:[a_class ["red";"shadow"];
+        a_id "the_div";
+        a_onclick {{ Dom_html.window##alert(Js.string "hello") }}]
+    [pcdata "I'm a div with two classes to describe me (red and shadow), ";
+     pcdata "an id to make me unique and an action when you click me."]
+>>
+
+=== Id
+The id attribute specifies a unique id for an HTML element (the value must be unique within the HTML document).
+
+The id attribute is most used to point to a style in a style sheet, and by JavaScript (via the HTML DOM) to manipulate the element with the specific id. With js_of_ocaml, it is not a good practice to manipulate elements with their identifier manually setted.
+
+Its parameter is a simple string.
+<<code language="ocaml" |~a:[a_id "identifier"]>>
+
+=== Classes
+The class attribute specifies one or more classnames for an element.
+
+The class attribute is mostly used to point to a class in a style sheet. However, it can also be used by a JavaScript (via the HTML DOM) to make changes to HTML elements with a specified class.
+
+Its parameter is a list of strings.
+<<code language="ocaml" |~a:[a_class ["blue_button"; "small"]]>>
+
+=== Style
+
+The style attribute specifies an inline style for an element. The style attribute will override any style set globally, e.g. styles specified in the header of the page.
+
+Using this attribute to stylish elements is not a good practice. You should rather use [[wiki(72):howto/css|an external CSS file]].
+
+Its parameter is a string.
+<<code language="ocaml" |~a:[a_style "color: pink; padding: 10px;"]>>
+
+=== Title
+
+The title attribute specifies extra information about an element. The information is most often shown as a tooltip text when the mouse moves over the element.
+
+Its parameter is a string.
+<<code language="ocaml" |~a:[a_title "Lorem ipsum dolor sit amet."]>>
+
+=== Events
+
+Some attributes allow you to do something when the user do an action. They are many available actions since HTML5.
+
+Its argument is an Eliom event handler:
+<<code language="ocaml" |~a:[a_onclick {{ Dom_html.window##alert(Js.string "hello") }}]>>
+
+Using these attributes is not a good practice. You should rather use [[wiki(72):js_of_ocaml/api/Event_arrows|event arrows]]
+The complete list of event attributes is in [[[[wiki(72):tyxml/api/Html5_sigs.T#2_Events|tyxml documentation]].
+
+=== Links
+
+* [[wiki(72):tyxml/api/Html5_types#TYPEbase_attrib|List of attributes available for each elements]]
+* [[wiki(72):tyxml/api/Html5_sigs.T#2_Events|Events attributes]]
+* [[http://www.w3schools.com/html5/html5_reference.asp|Official w3 HTML5 elements reference]]
+* [[http://www.w3schools.com/html5/html5_ref_eventattributes.asp|Events attributes]]

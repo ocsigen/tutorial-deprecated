@@ -1,0 +1,21 @@
+=How to install Ocsigen?=
+
+=== The simplest and safest way: [[http://opam.ocamlpro.com/|opam]]
+
+Just install opam and do : {{{opam install eliom}}}.
+* [[wiki(72):install#source|Install with opam]]
+
+=== From your distribution package
+
+Ocsigen is packaged on several linux distributions:
+* [[wiki(72):install#binary|Download from packages]]
+
+=== The old, deprecated way : the **bundle**
+
+The Ocsigen bundle is currently deprecated but still usable if you really want too.
+
+* [[wiki(72):bundle|Download from the Bundle]]
+
+=== Each projects apart
+
+* [[wiki(72):install#individual|Download each projects apart]]

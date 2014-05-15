@@ -1,0 +1,55 @@
+=How to add a Javacript script?=
+
+If you have to put some client-side execution on your website, it is hardly recommended to use **js_of_ocaml** and not including external javascript scripts.
+
+However, if you have to include an external script, for example if you downloaded it on another website, or if you have already made it directly in Javascript, it is possible to include it and use it.
+
+=== Include the script on the html header
+
+Javascript scripts are included in the header using the **js_script** function.
+
+<<code language="ocaml"|
+js_script
+     ~uri:(make_uri (Eliom_service.static_dir ())
+              ["hello.js"])
+     ()
+>>
+This function has 2 parameters: the file path and unit.
+
+The file path is generated using the **make_uri** function. This function creates the relative URL string using the static directory configured in the configuration file and the given list.
+
+Insert this piece of code on the list given in parameter to the **head** function.
+
+Or you can use: 
+[[wiki(2):eliom/api/server/Eliom_tools.HTML5_TOOLS#VALhead|Eliom_tools module]]
+
+[[wiki(2):howto/page|◄ How does a page's source code look?]]
+
+=== Call an external function
+
+It is possible to call a function in this file.
+
+However, as the power of Ocsigen is its stability, it is checking at the compilation that functions you are calling exists. If you call a function in the same way as with js_of_ocaml, it will not compile:
+
+<<code|
+Error: Unbound value hello_function
+>>
+
+To call an unknown function, you have to use [[http://ocsigen.org/js_of_ocaml/api/Js.Unsafe|the Unsafe module of js_of_ocaml]]:
+
+<<code language="ocaml"|
+{{ Js.Unsafe.eval_string "hello_function()" }}
+>>
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/js/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+
+=== Links
+
+* [[wiki(72):eliom/manual/misc|About images, css and javascript]]
+* [[wiki(72):eliom/api/server/Eliom_content.Html5.D#VALmake_uri|About make_uri]]
+* [[wiki(72):ocsigenserver/manual/staticmod|About the configuration file for static files]]
+* [[wiki(72):js_of_ocaml/manual/library|Calling Javascript functions]]
+* [[wiki(72):js_of_ocaml/manual/|Js_of_OCaml documentation]]

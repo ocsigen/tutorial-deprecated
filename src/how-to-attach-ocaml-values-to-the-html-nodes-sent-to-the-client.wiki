@@ -1,0 +1,3 @@
+== How to attach OCaml values to the HTML nodes sent to the client?
+
+Use the module Eliom_content.Html5.Custom_data.

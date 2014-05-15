@@ -1,0 +1,68 @@
+=How to add a list?=
+
+==== Simple list and ordered list
+
+===== Simple list
+
+<<code language='ocaml'|
+  ul
+    [li [pcdata "first item"];
+     li [pcdata "second item"];
+     li [pcdata "third item"];
+     li [pcdata "fourth item"]]
+>>
+
+
+===== Ordered list
+
+<<code language='ocaml'|
+  ol
+    [li [pcdata "first item"];
+     li [pcdata "second item"]]
+>>
+
+The only difference between these two kind of list is the type of the chip (bullet point for ul and numbers for ol).
+
+**Required parameter**: list containing **li** elements ([[wiki(72):tyxml/api/Html5_types#TYPEli_attrib|Details of li content]]).
+
+**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+
+==== Definition list
+
+<<code language='ocaml'|
+  dl
+    [((dt [pcdata "Banana"], []),
+      (dd [pcdata "An elongated curved fruit"], []));
+     ((dt [pcdata "Orange"], []),
+      (dd [pcdata "A globose, reddish-yellow, edible fruit"],
+       [dd [pcdata "A color between yellow and red"]]));
+     ((dt [pcdata "Kiwi"], []),
+      (dd [pcdata "Egg-sized green fruit from China"], []))]
+>>
+
+This kind of list contains definitions.
+
+**Required parameter**:
+A list of pair of:
+* A pair containing:
+** The first element of type dt
+** A list of elements of type dt
+* Another pair containing:
+** The first element of type dd
+** A list of elements of type dd
+
+Details:
+* [[wiki(72):tyxml/api/Html5_types#TYPEphrasing|dd content]]
+* [[wiki(72):tyxml/api/Html5_types#TYPEflow5|dt content]]
+
+**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/elements/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+
+=== Links
+
+* [[wiki(72):tyxml/api/Html5.M|HTML5 Elements]]
+* [[wiki(72):tyxml/api/Html5_sigs.T|Elements attributes]]

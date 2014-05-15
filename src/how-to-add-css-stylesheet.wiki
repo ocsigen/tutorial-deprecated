@@ -1,0 +1,42 @@
+=How to add a CSS stylesheet?=
+
+CSS stylesheet are included in the header using the **css_link** function.
+
+<<code language="ocaml"|
+css_link
+     ~uri:(make_uri (Eliom_service.static_dir ())
+              ["css";"style.css"])
+     ()
+>>
+This function has 2 parameters: the file path and unit.
+
+The file path is generated using the **make_uri** function. This function creates the relative URL string using the static directory configured in the configuration file and the given list.
+
+=== Where?
+
+Insert this piece of code on the list given in parameter to the **head** function:
+
+<<code language="ocaml"|
+  (html
+     (head (title (pcdata "Page Title"))
+        [css_link ~uri:(make_uri (Eliom_service.static_dir ())
+	        	  ["css";"style.css"]) ()])
+     (body [p [pcdata "Hello World!"]]))))
+>>
+
+Or you can use: 
+[[wiki(2):eliom/api/server/Eliom_tools.HTML5_TOOLS#VALhead|Eliom_tools module]]
+
+[[wiki(2):howto/page|◄ How does a page's source code look?]]
+
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/css/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+
+=== Links
+
+* [[wiki(72):eliom/manual/misc|About images, css and javascript]]
+* [[wiki(72):eliom/api/server/Eliom_content.Html5.D#VALmake_uri|About make_uri]]
+* [[wiki(72):ocsigenserver/manual/staticmod|About the configuration file for static files]]

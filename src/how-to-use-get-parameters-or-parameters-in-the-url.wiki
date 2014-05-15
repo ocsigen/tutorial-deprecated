@@ -1,0 +1,82 @@
+=How to use "get" parameters or parameters in the URL?
+
+All pages are services ([[wiki(72):howto/page|How does a page's source code look?]]). These services has two parameters: **path** and **get_params**.
+
+* The first parameter, **path**, is used to set choose the path URL.
+* The second parameter, **get_params**, is the one that interests you!
+
+=== path
+
+This argument is a **list of string**, corresponding to the URL where your page service can be found.
+
+For example, if you want your page to be accessed via this URL:
+<<code language='ocaml'|http://website.com/a/b/c>>
+You must provide this path:
+<<code language='ocaml'|    ~path:["a";"b";"c"]>>
+
+This parameter can also be an **empty list**. It means that the service page will be accessed via this URL:
+<<code|http://website.com/>>
+
+=== get_params
+
+Services can have several parameters of several types.
+
+Don't forget to open the module [[wiki(72):eliom/api/server/Eliom_parameter|Eliom_parameter]] at the beginning of your file!
+
+==== Syntax for several parameters
+
+* **No parameter**
+<<code language='ocaml'|~get_params:unit>>
+
+* **One parameter**
+<<code language='ocaml'|~get_params:(int "id")>>
+
+* **More parameters**
+<<code language='ocaml'|~get_params:(string "name" ** int "age" ** bool "graduate")>>
+
+==== Types of parameters
+
+* **Common types**: [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L121|string]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L122|int]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L123|int32]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L124|float]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L125|bool]]
+* **Some other types**: [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L126|optional values]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L158|any parameter]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L187|list]], [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom#L211|your own type]].
+
+* See the whole list of available parameters in [[wiki(72):eliom/api/server/Eliom_parameter|Eliom documentation]]
+
+==== Get these parameters
+
+On service registration, parameters can be retrieved as a parameter of the function:
+<<code language='ocaml'|
+Example.register ~service:the_service
+    (fun parameters () -> ...)
+>>
+
+* **No parameter**
+<<code language='ocaml'|    (fun () () -> ...)>>
+
+* **One parameter**
+<<code language='ocaml'|    (fun a () -> ...)>>
+
+* **Several parameters**
+
+The operator is left associative:
+<<code language='ocaml'|    (fun (a, (b, (c, d)))) () -> ...)>>
+
+=== Variable paths
+
+Parameters provided in the path are constant. It's possible to have a variable URL!
+
+Imagine you want to offer a personal page to your users. You will need a variable URL that will look like this, where //xxx// can be replace by the username:
+<<code|http://website.com/users/xxx>>
+
+To do that, add a parameter of type **suffix** in **get_params**:
+<<code|~get_params:(suffix (string "username"))>>
+
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/parameters/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example (parameters)]]
+
+=== Links
+
+* [[wiki(72):eliom/api/server/Eliom_parameter|Eliom_parameter]]
+* [[wiki(72):eliom/api/server/Eliom_service|Eliom_service]]

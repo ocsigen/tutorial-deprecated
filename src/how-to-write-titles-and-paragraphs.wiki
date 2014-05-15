@@ -1,0 +1,30 @@
+=How to write titles and paragrahs?=
+
+#### Titles
+
+<<code language='ocaml'|
+h3 [pcdata "Hello world"]
+>>
+
+There are 6 types of titles: h1, h2, h3, h4, h5 and h6. h1 is the largest and h6 is the smallest.
+
+#### Pagragraph
+
+<<code language='ocaml'|
+p [pcdata "Some text, blah blah blah"]
+>>
+
+**Required parameter**: list containing other elements ([[wiki(72):tyxml/api/Html5_types#TYPEflow5|Details of available elements]]).
+
+**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/elements/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+
+=== Links
+
+* [[wiki(72):tyxml/api/Html5.M|HTML5 Elements]]
+* [[wiki(72):tyxml/api/Html5_sigs.T|Elements attributes]]
+* [[wiki(72):tyxml/api/Html5_sigs.T#VALh1|Titles elements]]

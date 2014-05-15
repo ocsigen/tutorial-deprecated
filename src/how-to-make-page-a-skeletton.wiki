@@ -1,0 +1,32 @@
+=How to make a page skeletton?=
+
+=== The same header for all your pages
+
+When your site will grow, you will have several different services for pages which will often contain the same header informations.
+
+A great solutions to avoid code copy-pasting of these recurrent informations are to make a page skeletton function:
+
+<<code language="ocaml"|
+let skeletton body_content =
+  Lwt.return
+    (html
+       (head (title (pcdata "Page Title")) [])
+       (body body_content)))
+>>
+
+So when you define your pages, you just call this skeletton with the content of the page as an argument:
+
+<<code language="ocaml"|
+  Example.register ~service:main
+    (fun () () -> skeletton [p [pcdata "Hello World!"]])
+>>
+
+
+This method can also be adapted to add elements on all your pages, like a header, a footer and a menu.
+The following example is more complete.
+
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/skeletton/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]

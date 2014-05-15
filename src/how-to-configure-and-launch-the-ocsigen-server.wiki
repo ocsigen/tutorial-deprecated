@@ -1,0 +1,26 @@
+=How to configure and launch the Ocsigen Server?=
+
+=== Default configuration file
+
+* Copy the default configuration file provided with the installation of Ocsigen (ocsigenserver.conf.sample) and edit it.
+* You can also use the one provided by [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/.make/example.conf|the Ocsigen-Quick-Howto examples]].
+* Change the port by the network port number you want your website to work on. The port **80** is the port used by http by default but you need to be the administrator of your server to use it.
+* Change paths.
+
+* Change other parameters that suits your needs using the [[wiki(2):ocsigenserver/manual/config|configuration file documentation]]
+
+=== Your own configuration file
+
+Have a look at the [[wiki(2):ocsigenserver/manual/config|configuration file full documentation]].
+
+=== Launch the server
+
+<<code |
+ocsigenserver -c file.conf
+>>
+
+* Read the manual for more information about this command, or read [[wiki(72):ocsigenserver/manual/|the online documentation]]
+
+=== Links
+
+* [[wiki(72):ocsigenserver/manual/|Ocsigen Server documentation]]

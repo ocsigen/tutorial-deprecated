@@ -1,0 +1,19 @@
+=How to add a div?=
+
+<<code language='ocaml'|
+div [pcdata "Hello!"]
+>>
+
+**Required parameter**: list containing other elements ([[wiki(72):tyxml/api/Html5_types#TYPEflow5|Details of available elements]]).
+
+**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+
+=== Download full code
+
+* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/elements/example.eliom|Read the full code]]
+* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+
+=== Links
+
+* [[wiki(72):tyxml/api/Html5.M|HTML5 Elements]]
+* [[wiki(72):tyxml/api/Html5_sigs.T|Elements attributes]]

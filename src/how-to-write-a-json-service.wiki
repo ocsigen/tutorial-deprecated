@@ -1,0 +1,24 @@
+=How to write a JSON service?=
+
+<<code language="ocaml"|
+
+let my_json_service =
+  Eliom_service.Http.service
+    ~path:["my_json_service"]
+    ~get_params:Eliom_parameter.unit
+    ()
+                                                                                        
+let _ =
+  Eliom_registration.String.register
+    ~service:my_json_service
+    (fun () () ->
+      Lwt.return ("{text:'something'}", "application/json"))
+
+>>
+
+**Comment:** \\
+There exists some tools to help you to write JSON documents, like YoJson. \\
+If you want to get result from a Database, it could already be in JSON format. \\
+Anyway, you probably do not need to pretty-print JSON yourself. \\
+
+>>

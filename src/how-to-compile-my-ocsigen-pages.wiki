@@ -1,0 +1,25 @@
+=How to compile my Ocsigen pages?=
+
+//To compile and launch Quick Howto Examples, follow [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/README.md|this guide]]://
+
+//To compile your own project, follow the instructions below.//
+
+=== Quick and dirty
+
+* Use extension {{{.eliom}}} instead of {{{.ml}}} for your client/server Eliom source files.
+* Download [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/.make/Makefile|this magic Makefile]].
+* Replace "example" by the name of your application
+* Replace "../static" by the directory where static files (css, js, images, ..) will be
+* Replace the two "$FILES$" by files compiled on server side or client side
+
+=== Compilation details
+
+* **eliomdep** helps you handle dependencies of eliom files
+* **eliomc** compile server-side eliom files (and ml files too)
+* **js_of_eliom** compile client-side eliom files
+
+Read manuals for mor information about these compilers.
+
+=== Links
+
+* [[wiki(72):eliom/manual/client-compiling#h5o-2|Full documentation about Ocsigen compilation]]

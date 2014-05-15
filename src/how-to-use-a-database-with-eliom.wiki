@@ -1,0 +1,5 @@
+=How to use a database with Eliom?=
+
+You can use any library you want for database interaction. PGOCaml is a good choice and/or Macaque. Both can be used in cooperative way with Lwt.
+
+[[wiki(2):howto|◄ Back to the Quick Howto's]]
