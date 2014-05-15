@@ -4,9 +4,9 @@ You should read the [[site:/tuto/manual/music|Playing Music]] tutorial before th
 
 
 
-Since version 4, Eliom embed React library in order to use reactive
+Since version 4, Eliom embeds React library in order to use reactive
 html element like nodes and attributes. The React precise
-documentation can be found
+documentation can be found 
 [[http://erratique.ch/logiciel/react|here]].
 
 <<webonly| The final eliom code is available
@@ -14,8 +14,8 @@ documentation can be found
 
 ==@@id="basics"@@ Basics==
 
-A reactive element, or more generally a reactive value, depends of the
-current value of a signal. For exemple :
+A reactive element, or more generally a reactive value, depends on the
+current value of a signal. For instance :
 
 
 <<code language="ocaml"|
@@ -37,14 +37,14 @@ current value of a signal. For exemple :
 }}
 >>
 
-The signal {{s}} carries an int value initialized to 0 set_s is the update
+The signal {{{s}}} carries an int value initialized at 0 set_s is the update
 function,$ generating an occurence of the signal.
 
 The {{{exemple_div}}} value is a div containing a string and all of this depends
 of the value of s.
 
 The magic part is that we never have to write explicitely the update
-of the div anywere in the code and the behavior of it is discribe in
+of the div anywere in the code and its behavior is describe in
 it's own code and not in an event handler in the code of the button.
 
 <<concept title="Reactive server node"|
@@ -52,7 +52,7 @@ it's own code and not in an event handler in the code of the button.
 >>
 
 <<concept title="Step semantics"|
-**Warning** : If you didn't read the React sematics, be aware of this :
+**Warning** If you didn't read the React sematics, be aware of this:
 A step occurence of a signal {{{s}}} happens only when the update function is called
 on the signal or when an update function is called on a other signal {{{s'}}} which
 {{{s}}} depends on. But moreover, this update call must at least **modify**
@@ -70,14 +70,14 @@ of React.S functions producing a signal (like {{{create}}}).
 
 ==@@id="frp_medial_player"@@ Functionnal Reactive Media Player==
 
-This part explain how to create a simple media player like in
+This part explains how to create a simple media player like in
 [[site:/tuto/manual/music|Playing Music]] tutorial with customs
 controls. We are going to write those in an FRP (Functionnal Reactive
 Programming) way.
 
-In order to show a short tutorial, we only create three controls :
+In order to show a short tutorial, we only create three controls:
 Play, Pause and Seek/Progress bar.  So, let's write the corresponding
-type :
+type:
 
 <<code language="ocaml"|
 {shared{
@@ -90,7 +90,7 @@ type :
 
 }}
 >>
-Each html element emit a signal value corresponding to it's action.
+Each html element emits a signal value corresponding to it's action.
 It's enough to create our Play and Pause inputs.
 
 <<code language="ocaml"|
@@ -114,7 +114,7 @@ The Js event handler is only a function raising a signal.
 
 
 
-To use our buttons, we create know a media (audio or video) html element in the server
+To use our buttons, we now create a media (audio or video) html element on the server
 side.
 
 <<code language="ocaml"|
@@ -122,7 +122,7 @@ side.
 let media_uri = (Html5.D.make_uri
               ~service:(Eliom_service.static_dir ())
               ["exemple.mp3"])
-			(* We assume that you have add a file 'exemple.mp3' in the
+			(* We assume that you have added a file 'exemple.mp3' in the
 			static directory of your project *)
 
 	
@@ -144,21 +144,21 @@ let media_tag () =
 }}
 >>
 
-The code in {{{ {unit{...\}} }}} is client client part. It's an asynchronous
-Lwt thread which just execute the code inside : mapping a
-function {{{media_action -> unit}}} on the signal {{{media_s}}}.
+The code in {{{ {unit{...\}} }}} is on client part. It's an asynchronous
+Lwt thread which just executes the code inside: mapping a
+function {{{media_action -> unit}}} to the signal {{{media_s}}}.
 
 <<concept title="Playing video"|
-The code for playing video is exactly the same except that you must
-replace {{{audio}}} tag by {{{video}}} tag. But be careful : some
-browsers are not compatible with some formats.
+The code to play videos is exactly the same except that you must
+replace {{{audio}}} tag by {{{video}}} tag. But be careful: some
+browsers are not compatible with many formats.
 >>
 
 <<concept title="Create local elements outside the Html value" |
 If you don't want to create a global element as in
 [[site:/tuto/manual/music|Playing Music]], and you don't even want to
 create it locally in the html value, you can also create a function
-which build the element as we did and call where you build the html
+which builds the element as we did and call where you build the html
 value.
 >>
 
@@ -190,7 +190,7 @@ let () =
 >>
 
 
-Now you should have a html with an audio tag and two buttons play and
+Now you should have an html node with an audio tag and two buttons play and
 pause.  The progress bar is slightly harder to understand, but thanks
 to FRP, very easy to write.  It's basically an {{{input}}} with
 {{{range}}} type. In our program, the progress bar must emit the
@@ -222,7 +222,7 @@ let progress_bar () =
     progress_s }} in
 			(* the signal inherites of progress_s to compute the value *)
   let oninput = {{ fun ev ->
-    let target : Dom_html.inputElement Js.t = get_target ev in
+    let target: Dom_html.inputElement Js.t = get_target ev in
     let input_value = Js.parseFloat (target##value) in
     set_bc_media_s (BSeek input_value) }} in
   let attrs = D.([a_input_min 0.; a_input_max 100.; a_oninput oninput;
@@ -244,12 +244,14 @@ let progress_bar () =
 The function {{{R.a_value}}} is a reactive attribute
 value. {{{React.S.on c d s}}} is equal to s the last time c value was
 true, unless it's equal to d (in case c has never been true). Which
-means : we update the attribute value of our input only if unblock is
+means: we update the attribute value of our input only if unblock is
 true.
 
 >>
 
-To end this tutorial, you can just add {{{progress_bar ()}}} call to the div containing play and pause. We also need a mechanism which emit the {{{progress_s}}} signal. 
+To end this tutorial, you can just add {{{progress_bar ()}}} call to
+the div containing play and pause. We also need a mechanism which emits
+the {{{progress_s}}} signal.
 
 
 <<code language="ocaml"|
@@ -257,7 +259,7 @@ To end this tutorial, you can just add {{{progress_bar ()}}} call to the div con
 {server{
 
   let timeupdate = {{fun ev ->
-    let media : Dom_html.audioElement Js.t = get_target ev in
+    let media: Dom_html.audioElement Js.t = get_target ev in
         set_progress_s (media##currentTime, media##duration);
   }} in
 	
@@ -266,7 +268,7 @@ To end this tutorial, you can just add {{{progress_bar ()}}} call to the div con
 
 >>
 
-Set the corresponding attribute in the media element in : 
+Set the corresponding attribute in the media element in :
 
 <<code language="ocaml"|
   let media = D.(audio
