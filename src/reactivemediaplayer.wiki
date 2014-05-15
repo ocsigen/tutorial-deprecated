@@ -28,12 +28,12 @@ current value of a signal. For instance :
 	let exemple_div =
 	  C.node {{R.node (React.S.map (
 	    fun s_value ->
-			  Html5.D.(div [pcdata (string_of_int s_value)]
-			  )) s)}}
+	      Html5.D.(div [pcdata (string_of_int s_value)]
+	      )) s)}}
 
 	let incr_button =
     Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
-               ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
+      ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
 }}
 >>
 
@@ -97,11 +97,12 @@ It's enough to create our Play and Pause inputs.
 {server{
   let pause_button () =
     D.(string_input ~input_type:`Submit () ~value:"Pause"
-         ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
+      ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
 
   let play_button () =
-    D.(string_input ~input_type:`Submit () ~value:"Play"
-         ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
+		D.(string_input ~input_type:`Submit () ~value:"Play"
+		  ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
+
 }}
 >>
 
@@ -120,9 +121,8 @@ side.
 <<code language="ocaml"|
 {server{
 let media_uri = (Html5.D.make_uri
-              ~service:(Eliom_service.static_dir ())
-              ["exemple.mp3"])
-			(* We assume that you have added a file 'exemple.mp3' in the
+  ~service:(Eliom_service.static_dir ()) ["exemple.mp3"])
+		(* We assume that you add a file 'exemple.mp3' in the
 			static directory of your project *)
 
 	
@@ -130,14 +130,14 @@ let media_tag () =
   let media = Html5.D.(audio ~src:(media_uri)[pcdata "alt"]) in
   let _ = {unit{
     Lwt_js_events.async (fun () ->
-      let media = To_dom.of_audio %media in
-      let _ = React.S.map (function
-        | Play -> media##play ()
-        | Pause -> media##pause ()
-        | Seek f -> media##currentTime <- (f /. 100. *. media##duration))
-							 (* The seeking value is in percent of the duration *)
-        media_s in
-      Lwt.return ())
+    let media = To_dom.of_audio %media in
+    let _ = React.S.map (function
+      | Play -> media##play ()
+      | Pause -> media##pause ()
+      | Seek f -> media##currentTime <- (f /. 100. *. media##duration))
+         (* The seeking value is in percent of the duration *)
+      media_s in
+    Lwt.return ())
   }} in
   media
 
@@ -167,9 +167,9 @@ value.
 {server{
 module React_Player_app =
   Eliom_registration.App (
-    struct
-      let application_name = "react_player"
-    end)
+  struct
+    let application_name = "react_player"
+  end)
 
 let media_service =
   Eliom_service.App.service ~path:[] ~get_params:Eliom_parameter.unit ()
@@ -180,7 +180,7 @@ let () =
     (fun name () ->
       Lwt.return D.(
         Eliom_tools.D.html ~title:"Media" ~css:[]
-        (body [
+          (body [
             h2 [pcdata "Media"];
             media_tag ();
             div [
@@ -227,9 +227,9 @@ let progress_bar () =
     set_bc_media_s (BSeek input_value) }} in
   let attrs = D.([a_input_min 0.; a_input_max 100.; a_oninput oninput;
                   a_onmousedown {{fun _ -> set_block_s false}};
-										(* unblock to false when the user is seeking*)
+                  (* unblock to false when the user is seeking*)
                   a_onmouseup {{fun _ -> set_unblock_s true}};
-								 		(* modify the value only when unblock_s is true *)
+                  (* modify the value only when unblock_s is true *)
                   C.attr {{R.a_value (React.S.map (sprintf "%f")
                                (React.S.on unblock_s 0. %progress_value))}};])
   in D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
@@ -272,8 +272,8 @@ Set the corresponding attribute in the media element in :
 
 <<code language="ocaml"|
   let media = D.(audio
-                   ~a:[a_ontimeupdate timeupdate]
-                   ~src:(media_uri)[pcdata "alt"]) in
+    ~a:[a_ontimeupdate timeupdate]
+    ~src:(media_uri)[pcdata "alt"]) in
 >>
 
 
