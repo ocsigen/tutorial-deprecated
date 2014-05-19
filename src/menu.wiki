@@ -13,5 +13,5 @@
 ==[[ocsipersist|Light database]]
 ==[[pictures|Download pictures]]
 ==[[music|Playing music]]
-==[[reactive_media_player|Reactive media player]]
+==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]

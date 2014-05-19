@@ -5,9 +5,7 @@ You should read the [[site:/tuto/manual/music|Playing Music]] tutorial before th
 
 
 Since version 4, Eliom embeds React library in order to use reactive
-html element like nodes and attributes. The React precise
-documentation can be found 
-[[http://erratique.ch/logiciel/react|here]].
+html element like nodes and attributes. The documentation for the the React itself can be found [[http://erratique.ch/logiciel/react|here]].
 
 <<webonly| The final eliom code is available
 [[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter3/reactive_media_player/reactive_media_player.eliom|for download]]. >>
