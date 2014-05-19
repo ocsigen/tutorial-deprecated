@@ -19,3 +19,14 @@ DIV.goog-hsv-palette-sm {
   top: 100px;
   left: 780px;
 }
+
+div.ojw_colorpicker {
+  position: absolute;
+  top: 8px;
+  left: 740px;
+}
+
+input {
+  position: absolute;
+  width: 400px;
+}
