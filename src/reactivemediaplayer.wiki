@@ -19,19 +19,19 @@ current value of a signal. For instance :
 <<code language="ocaml"|
 {server{
 
-  open Eliom_content
+open Eliom_content
 
-  let s, set_s = React.S.create 0 (* signal creation *)
+let s, set_s = React.S.create 0 (* signal creation *)
 
-  let example_div =
-    C.node {{R.node (React.S.map (
-      fun s_value ->
-        Html5.D.(div [pcdata (string_of_int s_value)]
-      )) s)}}
+let example_div =
+  C.node {{R.node (React.S.map (
+    fun s_value ->
+      Html5.D.(div [pcdata (string_of_int s_value)]
+    )) s)}}
 
-  let incr_button =
-    Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
-      ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
+let incr_button =
+  Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
+    ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
 }}
 >>
 
@@ -60,18 +60,23 @@ This can be seen when there are side effects (like print) in the code
 of functions mapped to the signal. If the update function doesn't modify
 the signal value, the printing doesn't happen.
 
-The test equality function of a signal can be set in the {{eq}} optional parameters
+The test equality function of a signal can be set in the {{{eq}}} optional parameters
 of React.S functions producing a signal (like {{{create}}}).
 >>
 
 
 
-==@@id="frp_medial_player"@@ Functionnal Reactive Media Player==
+==@@id="frp_medial_player"@@ Functional Reactive Media Player==
+
+
 
 This part explains how to create a simple media player like in
 [[site:/tuto/manual/music|Playing Music]] tutorial but with custom
-controls. We are going to write those in an FRP (Functionnal Reactive
-Programming) way.
+controls. We are going to write those in
+[[http://en.wikipedia.org/wiki/Functional_reactive_programming|FRP (Functionnal Reactive
+Programming)]] way.
+
+
 
 In order to show a short tutorial, we only create three controls:
 Play, Pause and Seek/Progress bar.  So, let's write the corresponding
@@ -79,12 +84,12 @@ type:
 
 <<code language="ocaml"|
 {shared{
-  open Eliom_content
+open Eliom_content
 }}
 {client{
 
-  type media_action = Play | Pause | Seek of float
-  let media_s, set_media_s = React.S.create Pause
+type media_action = Play | Pause | Seek of float
+let media_s, set_media_s = React.S.create Pause
 
 }}
 >>
@@ -94,13 +99,13 @@ It's enough to create our Play and Pause inputs.
 <<code language="ocaml"|
 {server{
 
-  let pause_button () =
-    D.(string_input ~input_type:`Submit () ~value:"Pause"
-      ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
+let pause_button () =
+  D.(string_input ~input_type:`Submit () ~value:"Pause"
+    ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
 
-  let play_button () =
-		D.(string_input ~input_type:`Submit () ~value:"Play"
-		  ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
+let play_button () =
+  D.(string_input ~input_type:`Submit () ~value:"Play"
+    ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
 
 }}
 >>
@@ -202,13 +207,13 @@ value) of the progress bar is not modified when the user is seeking.
 <<code language="ocaml"|
 
 {client{
-  let progress_s, set_progress_s = React.S.create (0., 0.)
-  let unblock_s, set_unblock_s = React.S.create true
+let progress_s, set_progress_s = React.S.create (0., 0.)
+let unblock_s, set_unblock_s = React.S.create true
 
 	
-	(* get the targeted node of the given event *)
-  let get_target ev =
-    Js.Unsafe.coerce (Js.Opt.get (ev##target) (fun _ -> assert false))
+  (* get the targeted node of the given event *)
+let get_target ev =
+  Js.Unsafe.coerce (Js.Opt.get (ev##target) (fun _ -> assert false))
 
 }}	
 {server{
@@ -256,11 +261,11 @@ the {{{progress_s}}} signal.
 
 {server{
 
-  let timeupdate = {{fun ev ->
-    let media: Dom_html.audioElement Js.t = get_target ev in
-        set_progress_s (media##currentTime, media##duration);
-  }} in
-	
+let timeupdate = {{fun ev ->
+  let media: Dom_html.audioElement Js.t = get_target ev in
+    set_progress_s (media##currentTime, media##duration);
+}} in
+
 }}
 
 
