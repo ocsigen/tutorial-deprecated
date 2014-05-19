@@ -162,8 +162,7 @@ browsers are not compatible with many formats.
 If you don't want to create a global element as in
 [[site:/tuto/manual/music|Playing Music]], and you don't even want to
 create it locally in the html value, you can also create a function
-which builds the element as we did and call where you build the html
-value.
+which builds the element. Here it's {{{media_tag}}}
 >>
 
 
@@ -221,10 +220,11 @@ let get_target ev =
 
 
 let progress_bar () =
-  let progress_value = {float React.signal{ React.S.map (fun (time, duration) ->
-    if duration = 0. then 0. else time /. duration *. 100.)
-    progress_s }} in
-			(* the signal inherites of progress_s to compute the value *)
+  let progress_value = {float React.signal{
+    React.S.map (fun (time, duration) ->
+      if duration = 0. then 0. else time /. duration *. 100.)
+      progress_s }} in
+     (* the signal inherites of progress_s to compute the value *)
   let oninput = {{ fun ev ->
     let target: Dom_html.inputElement Js.t = get_target ev in
     let input_value = Js.parseFloat (target##value) in
@@ -235,7 +235,7 @@ let progress_bar () =
                   a_onmouseup {{fun _ -> set_unblock_s true}};
                   (* modify the value only when unblock_s is true *)
                   C.attr {{R.a_value (React.S.map (sprintf "%f")
-                               (React.S.on unblock_s 0. %progress_value))}};])
+                    (React.S.on unblock_s 0. %progress_value))}};])
   in D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
 
 }}
