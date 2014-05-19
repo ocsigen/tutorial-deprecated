@@ -23,37 +23,37 @@ current value of a signal. For instance :
 
   let s, set_s = React.S.create 0 (* signal creation *)
 
-	let exemple_div =
-	  C.node {{R.node (React.S.map (
-	    fun s_value ->
-	      Html5.D.(div [pcdata (string_of_int s_value)]
-	      )) s)}}
+  let example_div =
+    C.node {{R.node (React.S.map (
+      fun s_value ->
+        Html5.D.(div [pcdata (string_of_int s_value)]
+      )) s)}}
 
-	let incr_button =
+  let incr_button =
     Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
       ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
 }}
 >>
 
-The signal {{{s}}} carries an int value initialized at 0 set_s is the update
-function,$ generating an occurence of the signal.
+The signal {{{s}}} carries an int value initialized at 0 and {{{set_s}}} is
+ the update function generating an occurence of the signal.
 
-The {{{exemple_div}}} value is a div containing a string and all of this depends
+The {{{example_div}}} value is a div containing a string and all of this depends
 of the value of s.
 
-The magic part is that we never have to write explicitely the update
-of the div anywere in the code and its behavior is describe in
-it's own code and not in an event handler in the code of the button.
+The magic part : we never have to write explicitly the update of
+the div. Its behavior is described in it's own code and not in the
+code of the button.
 
 <<concept title="Reactive server node"|
-	{{{C.node}}} takes reactive client node and bring it to the server side
+	{{{C.node}}} takes a reactive client node and brings it to the server side
 >>
 
 <<concept title="Step semantics"|
-**Warning** If you didn't read the React sematics, be aware of this:
-A step occurence of a signal {{{s}}} happens only when the update function is called
-on the signal or when an update function is called on a other signal {{{s'}}} which
-{{{s}}} depends on. But moreover, this update call must at least **modify**
+**Warning** If you didn't read the React semantics, be aware of this:
+a step occurence of a signal {{{s}}} happens when the update function is called
+on the signal or on a other signal {{{s'}}} which {{{s}}} depends on. 
+But moreover, this update call must at least **modify**
 the signal current value, otherwise it's not a step.
 
 This can be seen when there are side effects (like print) in the code
@@ -69,7 +69,7 @@ of React.S functions producing a signal (like {{{create}}}).
 ==@@id="frp_medial_player"@@ Functionnal Reactive Media Player==
 
 This part explains how to create a simple media player like in
-[[site:/tuto/manual/music|Playing Music]] tutorial with customs
+[[site:/tuto/manual/music|Playing Music]] tutorial but with custom
 controls. We are going to write those in an FRP (Functionnal Reactive
 Programming) way.
 
@@ -93,6 +93,7 @@ It's enough to create our Play and Pause inputs.
 
 <<code language="ocaml"|
 {server{
+
   let pause_button () =
     D.(string_input ~input_type:`Submit () ~value:"Pause"
       ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
@@ -107,7 +108,7 @@ It's enough to create our Play and Pause inputs.
 
 <<concept title="Abstract the Js events"|
 The other nice part of FRP is that we can abstract javascript
-events and use signals only.
+events and use only the signals.
 The Js event handler is only a function raising a signal.
 >>
 
@@ -142,13 +143,13 @@ let media_tag () =
 }}
 >>
 
-The code in {{{ {unit{...\}} }}} is on client part. It's an asynchronous
-Lwt thread which just executes the code inside: mapping a
+The code in {{{ {unit{...}} }}} is on the client part. It's an asynchronous
+Lwt thread that executes the code inside: mapping a
 function {{{media_action -> unit}}} to the signal {{{media_s}}}.
 
 <<concept title="Playing video"|
-The code to play videos is exactly the same except that you must
-replace {{{audio}}} tag by {{{video}}} tag. But be careful: some
+The code to play a video is exactly the same except that you must
+replace {{{audio}}} tag by {{{video}}} tag. But be careful, some
 browsers are not compatible with many formats.
 >>
 
@@ -240,14 +241,13 @@ let progress_bar () =
 <<concept title="Reactive attributes and React.S.on" |
 
 The function {{{R.a_value}}} is a reactive attribute
-value. {{{React.S.on c d s}}} is equal to s the last time c value was
-true, unless it's equal to d (in case c has never been true). Which
-means: we update the attribute value of our input only if unblock is
-true.
+value. {{{React.S.on c d s}}} is equal to {{{s}}} the last time {{{c}}} value was
+true, unless it's equal to {{{d}}} (in case {{{c}}} has never been true). Which
+means we update the attribute value of our input only if unblock is true.
 
 >>
 
-To end this tutorial, you can just add {{{progress_bar ()}}} call to
+To end this tutorial, you can add a {{{progress_bar ()}}} call inside
 the div containing play and pause. We also need a mechanism which emits
 the {{{progress_s}}} signal.
 
