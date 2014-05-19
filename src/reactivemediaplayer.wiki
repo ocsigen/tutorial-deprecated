@@ -124,9 +124,9 @@ side.
 
 <<code language="ocaml"|
 {server{
-let media_uri = (Html5.D.make_uri
-  ~service:(Eliom_service.static_dir ()) ["exemple.mp3"])
-		(* We assume that you add a file 'exemple.mp3' in the
+let media_uri = Html5.D.make_uri
+  ~service:(Eliom_service.static_dir ()) ["example.mp3"]
+		(* Assuming that you add a file 'example.mp3' in the
 			static directory of your project *)
 
 	
