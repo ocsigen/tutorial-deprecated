@@ -8,7 +8,7 @@ displaying an area where users can draw using the mouse, and see what
 other users are drawing at the same time and in real-time.
 
 <<webonly| The final eliom code is available
-[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter1/distillery-oclosure/|for download]]. >>
+[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter1/distillery-no-oclosure/|for download]]. >>
 
 <<|outline target="documentation">>
 
@@ -452,7 +452,8 @@ module My_app =
 }}
 
 {client{
-  let draw ctx (color, size, (x1, y1), (x2, y2)) =
+  let draw ctx ((r, g, b), size, (x1, y1), (x2, y2)) =
+    let color = CSS.Color.string_of_t (CSS.Color.rgb r g b) in
     ctx##strokeStyle <- (Js.string color);
     ctx##lineWidth <- float size;
     ctx##beginPath();
@@ -475,7 +476,7 @@ let page =
     let canvas = Eliom_content.Html5.To_dom.of_canvas %canvas_elt in
     let ctx = canvas##getContext (Dom_html._2d_) in
     ctx##lineCap <- Js.string "round";
-    draw ctx ("#ffaa33", 12, (10, 10), (200, 100))
+    draw ctx ((0, 0, 0), 12, (10, 10), (200, 100))
 }}
 
 let main_service =
@@ -556,7 +557,7 @@ let init_client () =
   let compute_line ev =
     let oldx = !x and oldy = !y in
     set_coord ev;
-    ("#ff9933", 5, (oldx, oldy), (!x, !y))
+    ((0, 0, 0), 5, (oldx, oldy), (!x, !y))
   in
 
   let line ev = draw ctx (compute_line ev); Lwt.return () in
@@ -684,11 +685,11 @@ In order to see what other users are drawing, we now want to do the following:
 * Dispatch the coordinates to all connected users.
 
 We first declare a type, shared by the server and the client,
-describing the color and coordinates of drawn lines.
+describing the color (as RGB values) and coordinates of drawn lines.
 
 <<code language="ocaml"|
 {shared{
-  type messages = (string * int * (int * int) * (int * int))
+  type messages = ((int * int * int) * int * (int * int) * (int * int))
     deriving (Json)
 }}
 >>
@@ -765,63 +766,55 @@ lines are drawn on both windows.
 
 ===Color and size of the brush===
 
-<<concepts| Widgets with OClosure >>
+<<concepts| Widgets with Ojwidgets >>
 
 In this section, we add a color picker and slider to choose the size
-of the brush. For that we used add two widgets provided by the
-<<a_manual project="oclosure"|OClosure widget library>>.
+of the brush. For the colorpicker we used a widget available in Ojwidhets
+<<a_manual project="ojwidgets"|Ojwidgets widget library>>.
 
-<<wip|
-This part of the tutorial needs to be upgraded.
-The OClosure project currently has no maintainer and we don't really
-want to encourage people to use it.
-
-Other JS widgets libraries fit better the Eliom model
-(making possible to create the widgets on server side).
-We should switch to something else, for example JQuery.
-
-OClosure is not packaged in opam either.
-If you want to try this section, you need to install it from
-[[wiki(33):install|source]].
->>
-
-
-In the {{{Makefile.options}}}, created by Eliom's distillery, just add {{{oclosure}}} to the (currently empty) {{{CLIENT_PACKAGES}}}:
+In the {{{Makefile.options}}}, created by Eliom's distillery, just add {{{ojwidgets}}} to the (currently empty) {{{CLIENT_PACKAGES}}}:
 <<code language="makefile"|
-CLIENT_PACKAGES := oclosure
+CLIENT_PACKAGES := ojwidgets
 >>
 
-To create the widgets, we add the following code in the
+To create the widget, we add the following code in the
 {{{init_client}}} immediatly after canvas configuration:
 
 <<code language="ocaml"|
-(* Size of the brush *)
-let slider = jsnew Goog.Ui.slider(Js.null) in
-slider##setMinimum(1.);
-slider##setMaximum(80.);
-slider##setValue(10.);
-slider##setMoveToPointEnabled(Js._true);
-slider##render(Js.some Dom_html.document##body);
-(* The color palette: *)
-let pSmall =
-  jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
-                           Js.some (Js.string "goog-hsv-palette-sm"))
-in
-pSmall##render(Js.some Dom_html.document##body);
+(* Color of the brush *)
+let colorpicker = Ojw_color_picker.create ~width:150 () in
+Ojw_color_picker.append_at (Dom_html.document##body) colorpicker;
+Ojw_color_picker.init_handler colorpicker;
 >>
 
-And to change the size and the color of the brush, we replace the last
+Then we'll add a simple Html5 slider to change the size of the brush.
+Near the canvas_elt definition, add simply this code
+
+<<code language="ocaml"|
+
+let slider = int_input ~a:[a_id "slider"] ~input_type:`Range ()
+>>
+
+Next, add it to the page's body like this
+<<code language="ocaml"|
+let page =
+  (html
+    (head (title (pcdata "Graffiti")) [])
+    (body [h1 [pcdata "Graffiti"];
+           canvas_elt;div [slider]] ))
+>>
+
+To change the size and the color of the brush, we replace the last
 line of the function {{{compute_line}}} in {{{init_client}}} by:
 
 <<code language="ocaml"|
-let color = Js.to_string (pSmall##getColor()) in
-let size = int_of_float (Js.to_float (slider##getValue())) in
+let color = Ojw_color_picker.get_rgb colorpicker in
+let size_slider = Eliom_content.Html5.To_dom.of_input %slider in
+let size = int_of_string (Js.to_string size_slider##value) in
 (color, size, (oldx, oldy), (!x, !y))
 >>
 
-
-As last step, we need to add some stylesheets and one JavaScript file
-in the headers of our page. To ease the creation of the
+As last step, we need to add a stylesheet and in the headers of our page. To ease the creation of the
 {{{head}}}-element in HTML we use the function <<a_api project="eliom"
 subproject="server"|val Eliom_tools.F.head>>:
 
@@ -830,13 +823,8 @@ let page =
   html
     (Eliom_tools.F.head ~title:"Graffiti"
        ~css:[
-         ["css";"common.css"];
-         ["css";"hsvpalette.css"];
-         ["css";"slider.css"];
-         ["css";"graffiti.css"];
-         ["graffiti_oclosure.js"];
-      ]
-      ~js:[ ["graffiti_oclosure.js"] ] ())
+         ["css";"graffiti.css"];]
+      ~js:[] ())
     (body [h1 [pcdata "Graffiti"]; canvas_elt])
 >>
 
@@ -844,41 +832,22 @@ You need to install the corresponding stylesheets and images into your
 project.  The stylesheet files should go in the directory
 {{{static/css}}}
 
-* the <<a_file src="tutorial/static/css/common.css"|{{{common.css}}}>>
-  and <<a_file src="tutorial/static/css/hsvpalette.css"|{{{hsvpalette.css}}}>>
-  are taken from the Google Closure library;
-* the <<a_file src="tutorial/static/css/slider.css"|{{{slider.css}}}>>
-  and <<a_file src="tutorial/static/css/graffiti.css"|{{{graffiti.css}}}>> are
-  home-made css; and
-
-the following image should go into ##static/images##:
-* the <<a_file src="tutorial/static/images/hsv-sprite-sm.png"|{{{hsv-sprite-sm.png}}}>>
-
-Finally, the {{{graffiti_oclosure.js}}} script must be generated. To
-do this, first, generate the original {{{graffiti.js}}} script by
-<<code language="shell"|
-$ make byte
->>
-
-Then use {{{oclosure_req}}} to generate the Oclosure-specific
-{{{local/var/www/graffiti/eliom/graffiti_oclosure.js}}} script from
-the original
-
-<<code language="shell"|
-$ oclosure_req local/var/www/graffiti/eliom/graffiti.js
->>
+* the <<a_file src="tutorial/static/css/graffiti.css"|{{{graffiti.css}}}>> is a
+  home-made css file
 
 Then you can test your application ({{{make test.byte}}}).
 
 <<concept
 
-  title="OClosure" |
+  title="Ojwidgets" |
 
-  OClosure is a Js_of_ocaml binding for the Google Closure widget
-  library (used for example in GMail, Google Calendar or Google Maps).
+  Ojwidgets is a Js_of_ocaml library providing useful client widgets for your
+  applications.
   You can use it for building complex user interfaces for your Eliom
   application. The full documentation is available [[wiki(33):|on the
   project's site]].
+  Note that you can also use Eliom-widgets for server-client widgets, or use native JavaScript libraries
+  via Js_of_ocaml enabled bindings.
 
 <<wip|We are currently working on a binding for JQuery and a native widget
       library for Eliom.>>
@@ -907,24 +876,23 @@ The {{{draw_server}}} function below is the equivalent of the
 function outputs the PNG image in a string.
 
 <<code language="ocaml"|
-let rgb_from_string color = (* color is in format "#rrggbb" *)
-  let get_color i =
-    (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255.
-  in
-  try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
-
-let surface = Cairo.Image.create Cairo.Image.ARGB32 ~width ~height
 
 let draw_server =
+
+  let surface = Cairo.Image.create Cairo.Image.ARGB32 ~width ~height in
+
+  let rgb_floats_from_ints (r, g, b) =
+    float r /. 255., float g /. 255., float b /. 255. in
+
   let ctx = Cairo.create surface in
-  (fun ((color : string), size, (x1, y1), (x2, y2)) ->
+  (fun (rgb, size, (x1, y1), (x2, y2)) ->
 
     (* Set thickness of brush *)
     Cairo.set_line_width ctx (float size) ;
     Cairo.set_line_join ctx Cairo.JOIN_ROUND ;
     Cairo.set_line_cap ctx Cairo.ROUND ;
-    let r, g, b =  rgb_from_string color in
-    Cairo.set_source_rgb ctx ~r ~g ~b ;
+    let red, green, blue =  rgb_floats_from_ints rgb in
+    Cairo.set_source_rgb ctx ~red ~green ~blue ;
 
     Cairo.move_to ctx (float x1) (float y1) ;
     Cairo.line_to ctx (float x2) (float y2) ;
