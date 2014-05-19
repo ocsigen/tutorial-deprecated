@@ -217,7 +217,10 @@ let get_target ev =
 }}	
 {server{
 
-
+let oninput = {{ fun ev ->
+  let target: Dom_html.inputElement Js.t = get_target ev in
+  let input_value = Js.parseFloat (target##value) in
+  set_bc_media_s (BSeek input_value) }}
 
 let progress_bar () =
   let progress_value = {float React.signal{
@@ -225,18 +228,18 @@ let progress_bar () =
       if duration = 0. then 0. else time /. duration *. 100.)
       progress_s }} in
      (* the signal inherites of progress_s to compute the value *)
-  let oninput = {{ fun ev ->
-    let target: Dom_html.inputElement Js.t = get_target ev in
-    let input_value = Js.parseFloat (target##value) in
-    set_bc_media_s (BSeek input_value) }} in
-  let attrs = D.([a_input_min 0.; a_input_max 100.; a_oninput oninput;
-                  a_onmousedown {{fun _ -> set_block_s false}};
-                  (* unblock to false when the user is seeking*)
-                  a_onmouseup {{fun _ -> set_unblock_s true}};
-                  (* modify the value only when unblock_s is true *)
-                  C.attr {{R.a_value (React.S.map (sprintf "%f")
-                    (React.S.on unblock_s 0. %progress_value))}};])
-  in D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
+  let attrs = D.([
+    a_input_min 0.; 
+    a_input_max 100.; 
+    a_oninput oninput;
+    a_onmousedown {{fun _ -> set_block_s false}}; 
+        (* unblock to false when the user is seeking*)
+    a_onmouseup {{fun _ -> set_unblock_s true}};
+        (* modify the value only when unblock_s is true *)
+    C.attr {{R.a_value (React.S.map (sprintf "%f")
+      (React.S.on unblock_s 0. %progress_value))}};])
+  in 
+  D.(float_input ~input_type:`Range () ~value:0. ~a:attrs)
 
 }}
 >>
@@ -264,7 +267,7 @@ the {{{progress_s}}} signal.
 let timeupdate = {{fun ev ->
   let media: Dom_html.audioElement Js.t = get_target ev in
     set_progress_s (media##currentTime, media##duration);
-}} in
+}}
 
 }}
 
