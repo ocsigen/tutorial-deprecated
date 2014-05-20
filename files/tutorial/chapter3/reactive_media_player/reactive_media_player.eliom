@@ -2,7 +2,7 @@
   open Eliom_content
   open Html5
 
-  type action = Play | Pause | Seek of float deriving (Json)
+  type action = Play | Pause | Seek of float
 
 }}
 
