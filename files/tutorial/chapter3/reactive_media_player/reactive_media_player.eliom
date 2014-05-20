@@ -13,10 +13,6 @@
   let progress_s, set_progress_s = React.S.create (0., 0.)
   let unblock_s, set_unblock_s = React.S.create true
 
-
-  let ontimeupdate_emit media _ _ =
-    Lwt.return ()
-
 }}
 
 let progress_bar () =
@@ -39,9 +35,9 @@ let progress_bar () =
     )}}
   in d_input
 
-let media_uri = (Html5.D.make_uri
+let media_uri = Html5.D.make_uri
               ~service:(Eliom_service.static_dir ())
-              ["hb.mp3"])
+              ["hb.mp3"]
 
 
 let media_tag () =
