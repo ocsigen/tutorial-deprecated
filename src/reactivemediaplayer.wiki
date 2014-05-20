@@ -5,7 +5,7 @@ You should read the [[site:/tuto/manual/music|Playing Music]] tutorial before th
 
 
 Since version 4, Eliom embeds React library in order to use reactive
-html element like nodes and attributes. The documentation for the the React itself can be found [[http://erratique.ch/logiciel/react|here]].
+html element like nodes and attributes. The documentation for the the React library itself can be found [[http://erratique.ch/logiciel/react|here]].
 
 <<webonly| The final eliom code is available
 [[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter3/reactive_media_player/reactive_media_player.eliom|for download]]. >>
@@ -98,14 +98,14 @@ It's enough to create our Play and Pause inputs.
 
 <<code language="ocaml"|
 {server{
-
+		
 let pause_button () =
-  D.(string_input ~input_type:`Submit () ~value:"Pause"
-    ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
+  D.(button ~button_type:`Button
+    ~a:[a_onclick {{ fun _ -> set_media_s Pause }}] [pcdata "Pause"])
 
 let play_button () =
-  D.(string_input ~input_type:`Submit () ~value:"Play"
-    ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
+  D.(button ~button_type:`Button
+    ~a:[a_onclick {{ fun _ -> set_media_s Play }}] [pcdata "Play"])
 
 }}
 >>
@@ -205,19 +205,14 @@ value) of the progress bar is not modified when the user is seeking.
 <<code language="ocaml"|
 
 {client{
+
 let progress_s, set_progress_s = React.S.create (0., 0.)
 let unblock_s, set_unblock_s = React.S.create true
-
-let oninput_emit input _ _ =
-  set_media_s (Seek (Js.parseFloat (input##value)));
-  Lwt.return ()
 
 }}	
 
 
 {server{
-
-
   
 let progress_bar () =
   let progress_value = {float React.signal{ React.S.map (fun (time, duration) ->
@@ -227,14 +222,15 @@ let progress_bar () =
     a_input_max 100.;
     a_onmousedown {{fun _ -> set_unblock_s false}};
     a_onmouseup {{fun _ -> set_unblock_s true}};
-    C.attr {{R.a_value (React.S.map (Format.sprintf "%0.f")
+    C.attr {{R.a_value (React.S.map (Printf.sprintf "%0.f")
                           (React.S.on unblock_s 0. %progress_value))}};])
   in
   let d_input = D.(float_input ~input_type:`Range () ~value:0. ~a:attrs) in
   let _ = {unit{
     Lwt.async (fun () ->
       let d_input = To_dom.of_input %d_input in
-      Lwt_js_events.inputs d_input (oninput_emit d_input)
+      Lwt_js_events.inputs d_input (fun _ _ ->
+        set_media_s (Seek (Js.parseFloat (d_input##value))))
     )}}
   in d_input
 
@@ -270,12 +266,27 @@ let ontimeupdate_emit media _ _ =
 
 >>
 
-Set the corresponding attribute in the media element in :
+Set the eventhandler on {{{timeupdate}}} :
 
 <<code language="ocaml"|
-  let media = D.(audio
-    ~a:[a_ontimeupdate timeupdate]
-    ~src:(media_uri)[pcdata "alt"]) in
+
+let media_tag () =
+  let media = D.(audio ~src:(media_uri)[pcdata "alt"]) in
+  let _ = {unit{
+    Lwt.async (fun () ->
+      let media = To_dom.of_audio %media in
+      Lwt_react.S.keep (React.S.map (function
+        | Play -> media##play ()
+        | Pause -> media##pause ()
+        | Seek f -> media##currentTime <- (f /. 100. *. media##duration))
+        media_s);
+				(* Emit progress_s when timeupdate is raised *)
+      Lwt_js_events.timeupdates media
+        (fun _ _ -> set_progress_s (media##currentTime, media##duration))
+      )}}
+  in media
+		
+		
 >>
 
 

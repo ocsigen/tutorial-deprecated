@@ -2,13 +2,7 @@
   open Eliom_content
   open Html5
 
-
   type action = Play | Pause | Seek of float deriving (Json)
-
-  let string_of_action = function
-    | Play -> "play"
-    | Pause -> "pause"
-    | Seek f -> Format.sprintf "seek %f" f
 
 }}
 
@@ -20,13 +14,7 @@
   let unblock_s, set_unblock_s = React.S.create true
 
 
-  let oninput_emit input _ _ =
-    set_media_s (Seek (Js.parseFloat (input##value)));
-    Lwt.return ()
-
-
   let ontimeupdate_emit media _ _ =
-    set_progress_s (media##currentTime, media##duration);
     Lwt.return ()
 
 }}
@@ -39,25 +27,21 @@ let progress_bar () =
     a_input_max 100.;
     a_onmousedown {{fun _ -> set_unblock_s false}};
     a_onmouseup {{fun _ -> set_unblock_s true}};
-    C.attr {{R.a_value (React.S.map (Format.sprintf "%0.f")
+    C.attr {{R.a_value (React.S.map (Printf.sprintf "%0.f")
                           (React.S.on unblock_s 0. %progress_value))}};])
   in
   let d_input = D.(float_input ~input_type:`Range () ~value:0. ~a:attrs) in
   let _ = {unit{
     Lwt.async (fun () ->
       let d_input = To_dom.of_input %d_input in
-      Lwt_js_events.inputs d_input (oninput_emit d_input)
+      Lwt_js_events.inputs d_input (fun _ _ ->
+        set_media_s (Seek (Js.parseFloat (input##value))))
     )}}
   in d_input
 
 let media_uri = (Html5.D.make_uri
               ~service:(Eliom_service.static_dir ())
               ["hb.mp3"])
-
-let exemple_div () =
-  C.node {{R.node (React.S.map (
-    fun s_value -> D.div [D.pcdata (string_of_action s_value)]
-  ) media_s)}}
 
 
 let media_tag () =
@@ -70,19 +54,19 @@ let media_tag () =
         | Pause -> media##pause ()
         | Seek f -> media##currentTime <- (f /. 100. *. media##duration))
         media_s);
-      Lwt_js_events.timeupdates media (ontimeupdate_emit media);
+      Lwt_js_events.timeupdates media
+        (fun _ _ -> set_progress_s (media##currentTime, media##duration))
       )}}
   in media
 
 
 let pause_button () =
-  D.(string_input ~input_type:`Submit () ~value:"Pause"
-       ~a:[a_onclick {{ fun _ -> set_media_s Pause }}])
+  D.(button ~button_type:`Button
+       ~a:[a_onclick {{ fun _ -> set_media_s Pause }}] [pcdata "Pause"])
 
 let play_button () =
-  D.(string_input ~input_type:`Submit () ~value:"Play"
-       ~a:[a_onclick {{ fun _ -> set_media_s Play }}])
-
+  D.(button ~button_type:`Button
+       ~a:[a_onclick {{ fun _ -> set_media_s Play }}] [pcdata "Play"])
 
 
 module React_Player_app =
