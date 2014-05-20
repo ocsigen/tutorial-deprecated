@@ -15,3 +15,4 @@
 ==[[music|Playing music]]
 ==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]
+==[[rest|RESTful JSON API]]
