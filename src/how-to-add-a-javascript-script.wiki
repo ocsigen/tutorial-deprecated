@@ -28,17 +28,3 @@ Or you can use:
 Have a look at
 <<a_manual project="js_of_ocaml" chapter="bindings"|this page of Js_of_ocaml's manual>>
 to understand how to call JS function from your OCaml program.
-
-
-=== Download full code
-
-* [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/js/example.eliom|Read the full code]]
-* [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
-
-=== Links
-
-* [[wiki(72):eliom/manual/misc|About images, css and javascript]]
-* [[wiki(72):eliom/api/server/Eliom_content.Html5.D#VALmake_uri|About make_uri]]
-* [[wiki(72):ocsigenserver/manual/staticmod|About the configuration file for static files]]
-* [[wiki(72):js_of_ocaml/manual/library|Calling Javascript functions]]
-* [[wiki(72):js_of_ocaml/manual/|Js_of_OCaml documentation]]
