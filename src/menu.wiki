@@ -44,7 +44,7 @@
 ===[[how-to-create-link-to-a-current-page-without-knowing-its-url|How to create link to a current page (without knowing its URL)]]
 ===[[how-to-create-form-wizard-sequence-of-pages-depending-on-data-entered-on-previous-ones|How to create form wizard (sequence of pages depending on data entered on previous ones)]]
 ===[[how-to-write-a-json-service|How to write a JSON service]]
-===[[how-to-send-a-file-upload|How to send a file (upload)]]
+===[[how-to-send-file-upload|How to send a file (upload)]]
 == Sessions
 ===[[how-to-register-session-data|How to register session data]]
 == Js_of_ocaml
