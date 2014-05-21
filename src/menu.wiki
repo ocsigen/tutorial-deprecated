@@ -24,7 +24,7 @@
 ===[[how-to-configure-and-launch-the-ocsigen-server|How to configure and launch the Ocsigen Server]]
 ===[[how-does-a-page-s-source-code-look|How does a page's source code look]]
 == How to put some elements in my page ?
-===[[how-to-make-page-a-skeleton|How to make a page skeleton]]
+===[[how-to-make-page-a-skeleton|How to make a page skeletton]]
 ===[[how-to-use-get-parameters-or-parameters-in-the-url|How to use GET parameters (parameters in the URL)]]
 ===[[how-to-add-css-stylesheet|How to add CSS stylesheet]]
 ===[[how-to-add-a-javascript-script|How to add a Javascript script]]
