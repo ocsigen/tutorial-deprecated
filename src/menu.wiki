@@ -16,9 +16,7 @@
 ==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]
 ==[[rest|RESTful JSON API]]
-
-<<div class="howto"|
-= HOW-TO
+=@@class="howto"@@ HOW-TO
 == My first step with Ocsigen
 ===[[how-to-install-ocsigen|How to install Ocsigen]]
 ===[[how-to-make-hello-world-in-ocsigen|How to make "hello world" in Ocsigen]]
