@@ -1,4 +1,4 @@
-=How to use "get" parameters or parameters in the URL?
+=How to use GET parameters (parameters in the URL)?
 
 All pages are services ([[wiki(72):howto/page|How does a page's source code look?]]). These services has two parameters: **path** and **get_params**.
 

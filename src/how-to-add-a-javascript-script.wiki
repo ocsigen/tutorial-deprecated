@@ -1,8 +1,6 @@
 =How to add a Javacript script?=
 
-If you have to put some client-side execution on your website, it is hardly recommended to use **js_of_ocaml** and not including external javascript scripts.
-
-However, if you have to include an external script, for example if you downloaded it on another website, or if you have already made it directly in Javascript, it is possible to include it and use it.
+If you have client-side programs on your website, you can use Eliom's client-server features, that will compile client side parts to JS using **Ocsigen Js_of_ocaml**. But in some cases you may also want to include external JS scripts.
 
 === Include the script on the html header
 
@@ -20,26 +18,17 @@ The file path is generated using the **make_uri** function. This function create
 
 Insert this piece of code on the list given in parameter to the **head** function.
 
-Or you can use: 
+Or you can use:
 [[wiki(2):eliom/api/server/Eliom_tools.HTML5_TOOLS#VALhead|Eliom_tools module]]
 
 [[wiki(2):howto/page|◄ How does a page's source code look?]]
 
 === Call an external function
 
-It is possible to call a function in this file.
+Have a look at
+<<a_manual project="js_of_ocaml" chapter="bindings"|this page of Js_of_ocaml's manual>>
+to understand how to call JS function from your OCaml program.
 
-However, as the power of Ocsigen is its stability, it is checking at the compilation that functions you are calling exists. If you call a function in the same way as with js_of_ocaml, it will not compile:
-
-<<code|
-Error: Unbound value hello_function
->>
-
-To call an unknown function, you have to use [[http://ocsigen.org/js_of_ocaml/api/Js.Unsafe|the Unsafe module of js_of_ocaml]]:
-
-<<code language="ocaml"|
-{{ Js.Unsafe.eval_string "hello_function()" }}
->>
 
 === Download full code
 
