@@ -39,7 +39,7 @@ containing shared types and declarations
 
 It contains what was in {{{ {shared{ ... }} }}}
 <<code language="ocaml"|
-type messages = (string * int * (int * int) * (int * int)) deriving (Json)
+type messages = ((int * int * int) * int * (int * int) * (int * int)) deriving (Json)
 
 let width = 700
 let height = 400>>
@@ -87,7 +87,7 @@ Notice that the client does not keep data from pages it left.
 
 <<code language="ocaml"|
 
-let launch_client_canvas bus image_elt canvas_elt =
+let launch_client_canvas bus image_elt canvas_elt slider  =
   let canvas = Html5.To_dom.of_canvas canvas_elt in
   let ctx = canvas##getContext (Dom_html._2d_) in
   ctx##lineCap <- Js.string "round";
@@ -99,20 +99,11 @@ let launch_client_canvas bus image_elt canvas_elt =
   else img##onload <- Dom_html.handler
     (fun ev -> copy_image (); Js._false);
 
-  (* Size of the brush *)
-  let slider = jsnew Goog.Ui.slider(Js.null) in
-  slider##setMinimum(1.);
-  slider##setMaximum(80.);
-  slider##setValue(10.);
-  slider##setMoveToPointEnabled(Js._true);
-  slider##render(Js.some Dom_html.document##body);
 
   (* The color palette: *)
-  let pSmall =
-    jsnew Goog.Ui.hsvPalette(Js.null, Js.null,
-                             Js.some (Js.string "goog-hsv-palette-sm"))
-  in
-  pSmall##render(Js.some Dom_html.document##body);
+  let colorpicker = Ojw_color_picker.create ~width:150 () in
+  Ojw_color_picker.append_at (Dom_html.document##body) colorpicker;
+  Ojw_color_picker.init_handler colorpicker;
 
   let x = ref 0 and y = ref 0 in
   let set_coord ev =
@@ -121,9 +112,10 @@ let launch_client_canvas bus image_elt canvas_elt =
   let compute_line ev =
     let oldx = !x and oldy = !y in
     set_coord ev;
-    let color = Js.to_string (pSmall##getColor()) in
-    let size = int_of_float (Js.to_float (slider##getValue())) in
-    (color, size, (oldx, oldy), (!x, !y))
+    let rgb = Ojw_color_picker.get_rgb colorpicker in
+    let size_slider = Html5.To_dom.of_input slider in
+    let size = int_of_string (Js.to_string size_slider##value) in
+    (rgb, size, (oldx, oldy), (!x, !y))
   in
   let line ev =
     let v = compute_line ev in
@@ -157,11 +149,6 @@ module My_app =
       let application_name = "graffiti"
     end)
 
-let rgb_from_string color = (* color is in format "#rrggbb" *)
-  let get_color i =
-    (float_of_string ("0x"^(String.sub color (1+2*i) 2))) /. 255.
-  in
-  try get_color 0, get_color 1, get_color 2 with | _ -> 0.,0.,0.
 >>
 
 The main difference is that the bus is now local.
@@ -170,26 +157,27 @@ let launch_server_canvas () =
   let bus = Eliom_bus.create Json.t<messages> in
 
   let draw_server, image_string =
-    let surface = Cairo.image_surface_create
-      Cairo.FORMAT_ARGB32 ~width ~height in
+    let rgb_ints_to_floats (r, g, b) =
+      float r /. 255., float g /. 255., float b /. 255. in
+    let surface = Cairo.Image.create Cairo.Image.ARGB32 ~width ~height in
     let ctx = Cairo.create surface in
-    ((fun ((color : string), size, (x1, y1), (x2, y2)) ->
+    ((fun (rgb, size, (x1, y1), (x2, y2)) ->
 
       (* Set thickness of brush *)
+      let r, g, b = rgb_ints_to_floats rgb in
       Cairo.set_line_width ctx (float size) ;
-      Cairo.set_line_join ctx Cairo.LINE_JOIN_ROUND ;
-      Cairo.set_line_cap ctx Cairo.LINE_CAP_ROUND ;
-      let red, green, blue =  rgb_from_string color in
-      Cairo.set_source_rgb ctx ~red ~green ~blue ;
+      Cairo.set_line_join ctx Cairo.JOIN_ROUND ;
+      Cairo.set_line_cap ctx Cairo.ROUND ;
+      Cairo.set_source_rgb ctx ~r ~g ~b ;
 
       Cairo.move_to ctx (float x1) (float y1) ;
       Cairo.line_to ctx (float x2) (float y2) ;
-      Cairo.close_path ctx ;
+      Cairo.Path.close ctx ;
 
       (* Apply the ink *)
       Cairo.stroke ctx ;
      ),
-     (fun () ->
+    (fun () ->
        let b = Buffer.create 10000 in
        (* Output a PNG in a string *)
        Cairo_png.surface_write_to_stream surface (Buffer.add_string b);
@@ -328,7 +316,7 @@ And then we define a function initializing the client application by
 side effects in a client value.
 
 <<code language="ocaml"|
-let start_drawing name image canvas =
+let start_drawing name image canvas slider =
   let bus = get_bus name in
   ignore {unit{
     let canceller = launch_client_canvas %bus %image %canvas in
@@ -354,14 +342,17 @@ let () = My_app.register ~service:multigraffiti_service
       img ~alt:name
         ~src:(make_uri
 		~service:imageservice (name,!counter)) () in
+    let slider = Html5.D.int_input ~a:[Html5.D.a_id "slider"]
+        ~input_type:`Range () in
     let canvas =
       canvas ~a:[ a_width width; a_height height ]
         [pcdata "your browser doesn't support canvas"; br (); image] in
-    start_drawing name image canvas;
+    start_drawing name image canvas slider;
     make_page
       [h1 [pcdata name];
        choose_drawing_form ();
-       canvas;])
+       canvas;
+       Html5.D.div [slider]])
 >>
 
 At this point, you can run your application on the server provided that you installed the css and images directories in the main directory of your application, build it using this <<a_file src="tutorial/chapter3/multigraffiti/Makefile"|{{{Makefile}}}>> along with this <<a_file src="tutorial/chapter3/multigraffiti/Makefile.common"|{{{Makefile.common}}}>> and configured it using <<a_file src="tutorial/chapter3/multigraffiti/graffiti.conf.in"|{{{graffiti.conf.in}}}>> as groundwork of configuration file.
