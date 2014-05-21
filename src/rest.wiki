@@ -110,7 +110,8 @@ First, let's define common service parameters:
 * The GET parameter, which is an optional identifier given as a URL suffix. We
 set it as optional so we can distinguish GET requests for all resources or a
 single one, and return a detailed error if the identifier is missing in POST,
-PUT and DELETE requests.
+PUT and DELETE requests. An alternative would be to use two services at the same
+path (one with id and the other without).
 
 <<code language="ocaml"|
 let path = []
@@ -227,12 +228,12 @@ let read_handler id_opt () =
   | None ->
     Ocsipersist.fold_step
       (fun id loc acc -> Lwt.return ((id, loc) :: acc)) db []
-    >>= fun locations ->
+    ~>>= fun locations ->
     let json = Yojson.to_string<locations> locations in
     send_json ~code:200 json
   | Some id ->
     catch (fun () ->
-        Ocsipersist.find db id >>= fun location ->
+        Ocsipersist.find db id ~>>= fun location ->
         let json = Yojson.to_string<location> location in
         send_json ~code:200 json)
     (function
@@ -258,15 +259,15 @@ let edit_handler_aux ?(create = false) id_opt (content_type, raw_content_opt) =
     | _, None ->
       send_error ~code:400 "Body content is missing"
     | Some id, Some raw_content ->
-      read_raw_content raw_content >>= fun location_str ->
+      read_raw_content raw_content ~>>= fun location_str ->
       catch (fun () ->
           (if create then
             Lwt.return_unit
           else
-            Ocsipersist.find db id >>= fun _ -> Lwt.return_unit)
-          >>= fun () ->
+            Ocsipersist.find db id ~>>= fun _ -> Lwt.return_unit)
+          ~>>= fun () ->
           let location = Yojson.from_string<location> location_str in
-          Ocsipersist.add db id location >>= fun () ->
+          Ocsipersist.add db id location ~>>= fun () ->
           send_success ())
       (function
         | Not_found ->
@@ -289,7 +290,7 @@ let delete_handler id_opt _ =
   | None ->
     send_error ~code:400 "An id must be provided to delete a location"
   | Some id ->
-    Ocsipersist.remove db id >>= fun () ->
+    Ocsipersist.remove db id ~>>= fun () ->
     send_success ()
 >>
 
@@ -402,12 +403,12 @@ let read_handler id_opt () =
   | None ->
     Ocsipersist.fold_step
       (fun id loc acc -> Lwt.return ((id, loc) :: acc)) db []
-    >>= fun locations ->
+    ~>>= fun locations ->
     let json = Yojson.to_string<locations> locations in
     send_json ~code:200 json
   | Some id ->
     catch (fun () ->
-        Ocsipersist.find db id >>= fun location ->
+        Ocsipersist.find db id ~>>= fun location ->
         let json = Yojson.to_string<location> location in
         send_json ~code:200 json)
     (function
@@ -425,15 +426,15 @@ let edit_handler_aux ?(create = false) id_opt (content_type, raw_content_opt) =
     | _, None ->
       send_error ~code:400 "Body content is missing"
     | Some id, Some raw_content ->
-      read_raw_content raw_content >>= fun location_str ->
+      read_raw_content raw_content ~>>= fun location_str ->
       catch (fun () ->
           (if create then
             Lwt.return_unit
           else
-            Ocsipersist.find db id >>= fun _ -> Lwt.return_unit)
-          >>= fun () ->
+            Ocsipersist.find db id ~>>= fun _ -> Lwt.return_unit)
+          ~>>= fun () ->
           let location = Yojson.from_string<location> location_str in
-          Ocsipersist.add db id location >>= fun () ->
+          Ocsipersist.add db id location ~>>= fun () ->
           send_success ())
       (function
         | Not_found ->
@@ -452,7 +453,7 @@ let delete_handler id_opt _ =
   | None ->
     send_error ~code:400 "An id must be provided to delete a location"
   | Some id ->
-    Ocsipersist.remove db id >>= fun () ->
+    Ocsipersist.remove db id ~>>= fun () ->
     send_success ()
 
 (* Register services *)

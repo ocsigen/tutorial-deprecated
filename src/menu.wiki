@@ -16,6 +16,8 @@
 ==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]
 ==[[rest|RESTful JSON API]]
+
+<<div class="howto"|
 = HOW-TO
 == My first step with Ocsigen
 ===[[how-to-install-ocsigen|How to install Ocsigen]]
@@ -67,3 +69,4 @@
 == Eliom Server side
 ===[[how-do-i-create-a-cryptographically-safe-identifier|How do I create a Cryptographically safe identifier]]
 ===[[how-can-i-extend-the-configuration-file-parsing-with-application-specific-entry|How can I extend the configuration file parsing with applicaiton-specific entry]]
+>>
