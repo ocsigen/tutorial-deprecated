@@ -1,16 +1,31 @@
 =How to compile my Ocsigen pages?=
 
-//To compile and launch Quick Howto Examples, follow [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/README.md|this guide]]://
+=== Eliom distillery
 
-//To compile your own project, follow the instructions below.//
+Eliom-distillery will help you to build your client-server application
+using Eliom.
+It comes with several templates ("basic", "mobile", and more to come  ...).
 
-=== Quick and dirty
+{{{
+$ eliom-distillery -name <name> -template basic [-target-directory <dir>]
+}}}
 
-* Use extension {{{.eliom}}} instead of {{{.ml}}} for your client/server Eliom source files.
-* Download [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/.make/Makefile|this magic Makefile]].
-* Replace "example" by the name of your application
-* Replace "../static" by the directory where static files (css, js, images, ..) will be
-* Replace the two "$FILES$" by files compiled on server side or client side
+Eliom distillery will also create a default configuration file for Ocsigen
+Server.
+
+More information on Eliom distillery in
+<<a_manual project="eliom" subproject="server" chapter="workflow-distillery"|Eliom's manual>>.
+
+More information on how client-server Eliom project are compiled on
+<<a_manual project="eliom" subproject="server" chapter="workflow-compilation"|this page>>.
+
+If you don't need client-server features, the compilation process is very
+simple and without surprise. Compile with {{{ocamlc}}} or {{{ocamlopt}}}
+using {{{ocamlfind}}}, with package {{{eliom.server}}}.
+You will have to create your configuration file manually.
+But you can still use Eliom distillery, which will make easier the inclusion
+of client side features, later.
+
 
 === Compilation details
 

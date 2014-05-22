@@ -37,19 +37,20 @@ let _ =
 ===
 
 Now I guess you want to actually //understand// this code. You can:
-* Have a look at 
-[[wiki(2):howto/page/|How does a page's source code look?]]
+* Have a look at
+[[how-does-a-page-s-source-code-look|How does a page's source code look?]]
 * Or directly continue by compiling this code:
-[[wiki(2):howto/compile/|How to compile my Ocsigen pages?]]
+[[how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages?]]
 
 
+<<|
 === Download full code (recommended)
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/page/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
- 
+>>
+
 === Links
- 
-* [[wiki(72):tutorial/application|Tutorial to write a client/server application]]
-* [[wiki(72):tutorial/interaction|Tutorial to write a server side web site]]
-* [[wiki(2):howto/page/|How does a page's source code look?]]
+
+* [[application|Tutorial to write a client/server application]]
+* [[interaction|Tutorial to write a server side web site]]
