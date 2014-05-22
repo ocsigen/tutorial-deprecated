@@ -12,7 +12,7 @@ where everyone can draw, and the owner will have the ability to save
 the drawing he wants and create an Atom feed containing all saved drawings.
 
 See the
-[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter3/multigraffiti|full code of examples]].
+[[https://github.com/ocsigen/graffiti/tree/master/extended/|full code of examples]].
 
 ===Split application into multiple files and using several canvas===
 <<concepts | Complex eliom project\\Unique elements>>
@@ -342,7 +342,8 @@ let () = My_app.register ~service:multigraffiti_service
       img ~alt:name
         ~src:(make_uri
 		~service:imageservice (name,!counter)) () in
-    let slider = Html5.D.int_input ~a:[Html5.D.a_id "slider"]
+    let slider = Html5.D.int_input
+        ~a:[Html5.D.a_id "slider"; Html5.D.a_input_min 1.; Html5.D.a_input_max 80.]
         ~input_type:`Range () in
     let canvas =
       canvas ~a:[ a_width width; a_height height ]
