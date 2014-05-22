@@ -8,7 +8,7 @@ displaying an area where users can draw using the mouse, and see what
 other users are drawing at the same time and in real-time.
 
 <<webonly| The final eliom code is available
-[[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter1/distillery-no-oclosure/|for download]]. >>
+[[https://github.com/ocsigen/graffiti/tree/master/simple|for download]]. >>
 
 <<|outline target="documentation">>
 
@@ -792,7 +792,10 @@ Near the canvas_elt definition, add simply this code
 
 <<code language="ocaml"|
 
-let slider = int_input ~a:[a_id "slider"] ~input_type:`Range ()
+
+let slider = Html5.D.int_input
+   ~a:[Html5.D.a_id "slider"; Html5.D.a_input_min 1.; Html5.D.a_input_max 80.]
+   ~input_type:`Range ()
 >>
 
 Next, add it to the page's body like this
