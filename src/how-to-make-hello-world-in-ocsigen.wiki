@@ -41,9 +41,8 @@ let _ =
 * Or directly continue by compiling this code:
 [[wiki:manual/how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages?]]
 
-
 <<|
-=== Download full code (recommended)
+=== Download full code
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/page/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]

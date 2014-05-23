@@ -1,6 +1,6 @@
 =How to add a Javacript script?=
 
-If you have client-side programs on your website, you can use Eliom's client-server features, that will compile client side parts to JS using **Ocsigen Js_of_ocaml**. But in some cases you may also want to include external JS scripts.
+If you have client-side programs on your website, you can use Eliom's client-server features, that will compile client side parts to JS using **Ocsigen Js_of_ocaml**, and include automatically the script in the page. But in some cases you may also want to include yourselves external JS scripts.
 
 === Include the script on the html header
 
@@ -19,9 +19,7 @@ The file path is generated using the **make_uri** function. This function create
 Insert this piece of code on the list given in parameter to the **head** function.
 
 Or you can use:
-[[wiki(2):eliom/api/server/Eliom_tools.HTML5_TOOLS#VALhead|Eliom_tools module]]
-
-[[wiki(2):howto/page|◄ How does a page's source code look?]]
+<<a_api project="eliom" subproject="server"|val Eliom_tools.F.head>>
 
 === Call an external function
 

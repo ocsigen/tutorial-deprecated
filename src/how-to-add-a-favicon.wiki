@@ -1,17 +1,16 @@
 =How to add a Favicon?=
 
-A favicon is a file of type "ico" which contain a picture of size 16x16px. It is the picture that you can ususally see next to the title of the page on a browser. Some very useful generators can be found online.
+A favicon is a file of type "ico" which contain a picture of size 16x16px. It is the picture that you can ususally see next to the title of the page on a browser.
 
 {{http://public.db0.fr/dev/ocsigen/favicon.png|favicon for Ocsigen.org}}
 
-By default, all browsers display the file at the website root:
+By default, all browsers look for a file {{{favicon.ico}}}
+at the root of the website:
 <<code| http://website.com/favicon.ico>>
 
-With Ocsigen, you just need to put it at the root of the static directory set in the configuration file.
-
-There is actually no other way to display a favicon using Ocsigen.
+Just put the file at the root of the static directory set in the configuration file.
 
 === Links
 
-* [[wiki(72):ocsigenserver/manual/staticmod|About the configuration file for static files]]
+* <<a_manual project="ocsigenserver" chapter="staticmod"|Configuring Ocsigen Server for serving static files>>
 * [[http://www.favicon.cc/|An example of a favicon generator]]
