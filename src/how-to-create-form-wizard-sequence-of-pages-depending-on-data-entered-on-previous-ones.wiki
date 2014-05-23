@@ -1,7 +1,7 @@
 =How to create a form wizard (sequence of pages depending on data entered on previous ones)?=
 
 The solution to implement wizard-like forms (that is a sequence of pages
-depending on data entered on previous ones) is the create dynamically new
+depending on data entered on previous ones) is to create dynamically new
 services especially for one user. If you use session data (eliom references)
 it won't work if you have several tabs on the same site (or if you use the
 back button).
@@ -22,7 +22,8 @@ open Eliom_content.Html5.F
 (* We create two main services on the same URL,             *)
 (* one with a GET integer parameter:                        *)
 
-let calc = Eliom_service.Http.service ~path:["calc"] ~get_params:(Eliom_parameter.unit) ()
+let calc = Eliom_service.Http.service
+    ~path:["calc"] ~get_params:(Eliom_parameter.unit) ()
 let calc_i = Eliom_service.Http.service ~path:["calc"]
 ~get_params:(Eliom_parameter.int "i") ()
 
@@ -59,7 +60,8 @@ let calc_i_handler i () =
   in
   let is = string_of_int i in
   let calc_result =
-    Eliom_registration.Html5.register_coservice ~scope:Eliom_common.default_session_scope
+    Eliom_registration.Html5.register_coservice
+      ~scope:Eliom_common.default_session_scope
       ~fallback:calc
       ~get_params:(Eliom_parameter.int "j")
       ~timeout:120.

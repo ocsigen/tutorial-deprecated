@@ -44,6 +44,7 @@
 ===[[how-to-create-link-to-a-current-page-without-knowing-its-url|How to create link to a current page (without knowing its URL)]]
 ===[[how-to-create-form-wizard-sequence-of-pages-depending-on-data-entered-on-previous-ones|How to create form wizard (sequence of pages depending on data entered on previous ones)]]
 ===[[how-to-write-a-json-service|How to write a JSON service]]
+===[[how-to-send-file-download|How to send a file (download)]]
 ===[[how-to-send-file-upload|How to send a file (upload)]]
 == Sessions
 ===[[how-to-register-session-data|How to register session data]]
@@ -56,7 +57,6 @@
 == Eliom client-server applications
 ===[[how-to-call-a-server-side-function-from-client-side|How to call a server side function from a client side]]
 ===[[how-to-make-the-client-side-program-get-an-html-element-from-the-server-and-insert-it-in-the-page|How to make the client side program get an HTML element from the server and insert it in the page]]
-===[[how-to-create-a-service-sending-json-values|How to create a service sending JSON values]]
 ===[[how-to-attach-ocaml-values-to-the-html-nodes-sent-to-the-client|How to attach OCaml values to the HTML nodes sent to the client]]
 ===[[how-to-iterate-on-all-sessions-for-one-user-or-all-tabs|How to iterate on all sessions for one user, or all tabs]]
 ===[[how-to-implement-a-notification-system|How to implement a notification system]]
