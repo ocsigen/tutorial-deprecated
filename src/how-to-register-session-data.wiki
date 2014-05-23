@@ -47,9 +47,20 @@ The value of this reference is different for each user:
 
 >>
 
+It is possible to create //persistent// Eliom references (see module
+<<a_api project="eliom" subproject="server"|module Eliom_reference>>).
+
 ==Other scopes==
 If you want to store server side data for one browser (one session),
 use scope {{{Eliom_common.default_session_scope}}}.
 
 If you want to store server side data for one tab of your browser (one client process),
 use scope {{{Eliom_common.default_process_scope}}}.
+
+If you want to store server side data during one request,
+use scope {{{Eliom_common.request_scope}}}.
+
+==Links
+
+* <<a_manual project="eliom" chapter="server-state"|More information on session data>>
+* module <<a_api project="eliom" subproject="server"|module Eliom_reference>>

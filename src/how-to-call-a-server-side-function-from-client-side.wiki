@@ -24,9 +24,10 @@ let f x = ...
 Server functions are just syntactic sugar for
 non-attached coservices returning OCaml values.
 
-If the function takes a more complex type, thus type must have been declared
+If the function takes a more complex type, this type must have been declared
 with the JSON module of deriving. This makes possible for the server
-to check the data that are sent (and avoid crashing while unmarshaling).
+to check the data that are sent (and avoid crashing while unmarshaling
+corrupted data).
 
 example:
 
