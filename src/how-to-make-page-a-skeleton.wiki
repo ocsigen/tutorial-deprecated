@@ -23,10 +23,11 @@ So when you define your pages, you just call this skeleton with the content of t
 
 
 This method can also be adapted to add elements on all your pages, like a header, a footer and a menu.
-The following example is more complete.
+<<|The following example is more complete.
 
 
 === Download full code
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/skeleton/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+>>
