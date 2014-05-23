@@ -36,7 +36,7 @@
 ===[[how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements]]
 ===[[how-to-add-a-select-or-other-form-element|How to add select (or other form element)]]
 ===[[how-to-insert-raw-form-elements-not-belonging-to-a-form-towards-a-service|How to insert "raw" form elements (not belonging to a form towards a service)]]
-===[[how-to-make-responsive-css|Howt to make responsive CSS]]
+===[[how-to-make-responsive-css|How to make responsive CSS]]
 == Services
 ===[[how-to-do-links-to-other-pages|How to do links to other pages]]
 ===[[how-to-write-forms|How to write forms]]
