@@ -1,6 +1,6 @@
 =How can I extend the configuration file parsing with application-specific entry?=
 
-You should look at [[wiki(15):dev/api/server/Eliom_config]].
+Have a look at module <<a_api project="eliom" subproject="server"|module Eliom_config>>.
 Every eliom module
 can extend the configuration file parser. For instance, here is how you can
 add an element "<ldap>"
