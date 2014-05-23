@@ -22,7 +22,7 @@
 ===[[how-to-make-hello-world-in-ocsigen|How to make "hello world" in Ocsigen]]
 ===[[how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages]]
 ===[[how-to-configure-and-launch-the-ocsigen-server|How to configure and launch the Ocsigen Server]]
-===[[how-does-a-page-s-source-code-look|How does a page's source code look]]
+===[[how-does-a-page-s-source-code-look|How does a client-server app source code look like?]]
 == How to put some elements in my page ?
 ===[[how-to-make-page-a-skeleton|How to make a page skeleton]]
 ===[[how-to-use-get-parameters-or-parameters-in-the-url|How to use GET parameters (parameters in the URL)]]
