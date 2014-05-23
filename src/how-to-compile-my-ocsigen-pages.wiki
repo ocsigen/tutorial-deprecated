@@ -37,4 +37,4 @@ Read manuals for mor information about these compilers.
 
 === Links
 
-* [[wiki(72):eliom/manual/client-compiling#h5o-2|Full documentation about Ocsigen compilation]]
+* <<a_manual project="eliom" chapter="workflow-compiling" fragment="h5o-2"|Full documentation about Ocsigen compilation>>

@@ -36,11 +36,10 @@ let _ =
 
 ===
 
-Now I guess you want to actually //understand// this code. You can:
-* Have a look at
-[[how-does-a-page-s-source-code-look|How does a page's source code look?]]
+* To //understand// this code, have a look at
+[[wiki:manual/how-does-a-page-s-source-code-look|How does a page's source code look?]]
 * Or directly continue by compiling this code:
-[[how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages?]]
+[[wiki:manual/how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages?]]
 
 
 <<|
@@ -52,5 +51,5 @@ Now I guess you want to actually //understand// this code. You can:
 
 === Links
 
-* [[application|Tutorial to write a client/server application]]
-* [[interaction|Tutorial to write a server side web site]]
+* [[wiki:manual/application|Tutorial to write a client/server application]]
+* [[wiki:manual/interaction|Tutorial to write a server side web site]]

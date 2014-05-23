@@ -2,25 +2,22 @@
 
 === Default configuration file
 
-* Copy the default configuration file provided with the installation of Ocsigen (ocsigenserver.conf.sample) and edit it.
-* You can also use the one provided by [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/.make/example.conf|the Ocsigen-Quick-Howto examples]].
+* Eliom distillery is generating a configuration file
+* If you want to create it yourself, you can have a look at the default configuration file provided with the installation of Ocsigen (usually {{{/etc/ocsigenserver/ocsigenserver.conf.sample}}}).
 * Change the port by the network port number you want your website to work on. The port **80** is the port used by http by default but you need to be the administrator of your server to use it.
-* Change paths.
-
-* Change other parameters that suits your needs using the [[wiki(2):ocsigenserver/manual/config|configuration file documentation]]
+* Adapt paths.
+* Change other parameters that suit your needs using the <<a_manual project="ocsigenserver" chapter="config"|configuration file documentation>>.
 
 === Your own configuration file
 
-Have a look at the [[wiki(2):ocsigenserver/manual/config|configuration file full documentation]].
+Have a look at the <<a_manual project="ocsigenserver" chapter="config"|configuration file full documentation>>.
 
 === Launch the server
 
 <<code |
-ocsigenserver -c file.conf
+ocsigenserver -c your_config_file.conf
 >>
-
-* Read the manual for more information about this command, or read [[wiki(72):ocsigenserver/manual/|the online documentation]]
 
 === Links
 
-* [[wiki(72):ocsigenserver/manual/|Ocsigen Server documentation]]
+* More information about this command or the configuration file in <<a_manual project="ocsigenserver"|Ocsigen Server's manual>>.
