@@ -67,12 +67,13 @@ Validity of HTML is checked at compile time, which means that a program
 that may generate a page that does not respect the recommendations of the
 W3C will be rejected at compile time.
 
-<<|
 === Download full code
+
+//Warning: This third party code may be outdated. Please notify the author is something is broken, or do a pull request on github.//
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/page/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
->>
+
 
 === Links
 
