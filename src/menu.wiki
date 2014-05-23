@@ -30,7 +30,7 @@
 ===[[how-to-add-a-javascript-script|How to add a Javascript script]]
 ===[[how-to-add-a-favicon|How to add a Favicon]]
 ===[[how-to-add-a-div|How to add a div]]
-===[[how-to-add-a-list|How to add a list]]
+===[[how-to-add-a-list|How to add lists in pages?]]
 ===[[how-to-add-an-image|How to add an image]]
 ===[[how-to-write-titles-and-paragraphs|How to write titles and paragraphs]]
 ===[[how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements]]

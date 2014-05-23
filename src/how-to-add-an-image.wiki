@@ -27,17 +27,19 @@ The function **img** has 3 parameters:
 
 For an internal image, the file path is generated using the **make_uri** function. This function creates the relative URL string using the static directory configured in the configuration file and the given list.
 
-For an external image, you must convert the string url into uri using the **uri_of_string** function. You can also create an [[wiki(72):eliom/manual/services#h5o-14|external service]].
+For an external image, you must convert the string url into uri using the **uri_of_string** function. You can also create an <<a_manual project="eliom" chapter="server-services" fragment="unregistrable_services"|external service>>.
 
 === Download full code
+
+//Warning: This third party code may be outdated. Please notice the author is something is broken, or do a pull request on github.//
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/elements/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
 
 === Links
 
-* [[wiki(72):tyxml/api/Html5.M|HTML5 Elements]]
-* [[wiki(72):tyxml/api/Html5_sigs.T#VALimg|The **img** element]]
-* [[wiki(72):tyxml/api/Xml#TYPEuri|Uri type]]
+* module <<a_api project="tyxml"|module Html5.M>> (HTML5 Elements)
+* The <<a_api project="tyxml"|val Html5_sigs.T.img>> element
+* Type <<a_api project="tyxml"|type Xml.uri>>
 * [[http://en.wikipedia.org/wiki/Alt_attribute|Alt attribute]]
-* [[wiki(72):tyxml/api/Html5_sigs.T|Elements attributes]]
+* signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)

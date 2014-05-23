@@ -1,4 +1,4 @@
-=How to add a list?=
+=How to add lists in a page?=
 
 ==== Simple list and ordered list
 
@@ -21,11 +21,9 @@
      li [pcdata "second item"]]
 >>
 
-The only difference between these two kind of list is the type of the chip (bullet point for ul and numbers for ol).
-
 **Required parameter**: list containing **li** elements ([[wiki(72):tyxml/api/Html5_types#TYPEli_attrib|Details of li content]]).
 
-**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+**Optional parameter** for attributes "a" ([[wiki:manual/how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements?]]).
 
 ==== Definition list
 
@@ -55,14 +53,16 @@ Details:
 * [[wiki(72):tyxml/api/Html5_types#TYPEphrasing|dd content]]
 * [[wiki(72):tyxml/api/Html5_types#TYPEflow5|dt content]]
 
-**Optional parameter** for attributes "a" ([[wiki(2):idclass|How to set and id, classes or other attributes to HTML elements?]]).
+**Optional parameter** for attributes "a" ([[wiki:manual/how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements?]]).
 
 === Download full code
+
+//Warning: This third party code may be outdated. Please notice the author is something is broken, or do a pull request on github.//
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/elements/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
 
 === Links
 
-* [[wiki(72):tyxml/api/Html5.M|HTML5 Elements]]
-* [[wiki(72):tyxml/api/Html5_sigs.T|Elements attributes]]
+* module <<a_api project="tyxml"|module Html5.M>> (HTML5 Elements)
+* signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)
