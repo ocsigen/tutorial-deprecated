@@ -52,7 +52,7 @@ code of the button.
 <<concept title="Step semantics"|
 **Warning** If you didn't read the React semantics, be aware of this:
 a step occurence of a signal {{{s}}} happens when the update function is called
-on the signal or on a other signal {{{s'}}} which {{{s}}} depends on. 
+on the signal or on a other signal {{{s'}}} which {{{s}}} depends on.
 But moreover, this update call must at least **modify**
 the signal current value, otherwise it's not a step.
 
@@ -100,7 +100,7 @@ It's enough to create our Play and Pause inputs.
 
 <<code language="ocaml"|
 {server{
-		
+
 let pause_button () =
   D.(button
       ~button_type:`Button
@@ -137,7 +137,6 @@ let media_uri =
     (* Assuming that you add a file 'example.mp3' in the
        static directory of your project *)
 
-	
 let media_tag () =
   let media = D.(audio ~src:media_uri [pcdata "alt"]) in
   let _ = {unit{
@@ -220,11 +219,11 @@ value) of the progress bar is not modified when the user is seeking.
 let progress_s, set_progress_s = React.S.create (0., 0.)
 let unblock_s, set_unblock_s = React.S.create true
 
-}}	
+}}
 
 
 {server{
-  
+
 let progress_bar () =
   let progress_value =
     {float React.signal{
@@ -259,7 +258,7 @@ let progress_bar () =
 <<concept title="Reactive attributes and React.S.on" |
 
 The function {{{R.a_value}}} is a reactive attribute
-value. {{{React.S.on c d s}}} is equal to {{{s}}} when {{{c}}} is true, 
+value. {{{React.S.on c d s}}} is equal to {{{s}}} when {{{c}}} is true,
 unless it's equal to {{{d}}} (in case {{{c}}} has never been true). Which
 means we update the attribute value of our input only if unblock is true.
 
@@ -286,8 +285,7 @@ let media_tag () =
         Lwt.return ()
       ))}}
   in media
-		
-		
+
 >>
 
 
