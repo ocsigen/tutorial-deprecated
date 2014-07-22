@@ -254,7 +254,7 @@ All your Web sites must be written in Lwt-compatible way!
 //Js_of_ocaml// is a compiler of OCaml bytecode to JavaScript. It facilitates to run Ocaml programs in a Web browser. Its key features are the following:
 * The whole language, and most of the standard library are supported.
 * The compiler is easy to install: it depends only on Findlib and Lwt.
-* The generated code whic is independant of Eliom and the Ocsigen Server. You can use it with any Web server.
+* The generated code which is independant of Eliom and the Ocsigen Server. You can use it with any Web server.
 * You can use a standard installation of OCaml to compile your programs. In particular, you do not have to recompile a library to use it with Js_of_ocaml. You just have to link your program with a specific library to interface with the browser API.
 
 ===Macaque===
