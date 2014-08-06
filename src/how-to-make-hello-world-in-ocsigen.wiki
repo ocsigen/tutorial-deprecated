@@ -41,12 +41,14 @@ let _ =
 * Or directly continue by compiling this code:
 [[wiki:manual/how-to-compile-my-ocsigen-pages|How to compile my Ocsigen pages?]]
 
+<<|
 === Download full code
 
 //Warning: This third party code may be outdated. Please notify the author is something is broken, or do a pull request on github.//
 
 * [[https://github.com/db0company/Ocsigen-Quick-Howto/blob/master/page/example.eliom|Read the full code]]
 * [[https://github.com/db0company/Ocsigen-Quick-Howto|Download and try this example]]
+>>
 
 === Links
 
