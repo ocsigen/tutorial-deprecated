@@ -78,7 +78,7 @@ by replacing mysite.cma by your cmo.
 ==@@id="post"@@ POST service==
 
 Services using the POST HTTP method are created using the function
-<<a_api project="eliom" | val Eliom_service.Http.register_post_service >>.
+<<a_api project="eliom" | val Eliom_service.Http.post_service >>.
 To create a service with POST parameters, first you must create
 a service without POST parameters and then the service with POST
 parameters, with the first service as fallback. The fallback will be used
@@ -101,7 +101,7 @@ let post_service =
 That's probably all you need for a basic Web site in OCaml.
 
 Have a look at Eliom's API documentation to see other kinds of services,
-for example <<a_api project="eliom"| module Eliom_registration.Redirection>>
+for example <<a_api project="eliom" subproject="server"| module Eliom_registration.Redirection>>
 to create HTTP redirections.
 
 Instead of generating HTML in OCaml strings, we highly recommend to use
