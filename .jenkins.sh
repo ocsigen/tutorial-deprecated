@@ -5,5 +5,5 @@ do_build_doc () {
 }
 
 do_remove () {
-
+    echo "nothing to remove"
 }
