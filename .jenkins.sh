@@ -1,4 +1,5 @@
 opam pin add --no-action tuto .
+opam install --verbose tuto
 
 do_build_doc () {
   cp -Rf files/* ${MANUAL_FILES_DIR}/
