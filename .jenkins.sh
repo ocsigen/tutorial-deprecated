@@ -1,3 +1,4 @@
+opam pin add --no-action tuto .
 
 do_build_doc () {
   cp -Rf files/* ${MANUAL_FILES_DIR}/
