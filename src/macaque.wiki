@@ -111,11 +111,11 @@ let () = Eliom_registration.Action.register
 	| false -> Lwt.return ()))
 >>
 
-We need to reference {{{macaque}}} in the {{{Makefile}}} :
+We need to reference {{{macaque}}} in the {{{Makefile}}} (or in {{{Makefile.option}}} if you used {{{eliom-distillery}}}) :
 {{{
 SERVER_PACKAGE := macaque.syntax
 }}}
-and in {{{ocsigenserver.conf}}} :
+and in {{{ocsigenserver.conf}}} (only if you don't use {{{eliom-distillery}}}) :
 {{{
 <extension findlib-package="macaque"/>
 }}}
