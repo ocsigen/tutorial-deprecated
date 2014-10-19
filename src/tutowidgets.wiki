@@ -357,7 +357,7 @@ let _ =
 An important feature missing in this tutorial is the ability
 to call server functions from the client side program ("server functions").
 You can have a quick description of this
-[[site:/howto/getsubpage|in mini HOWTOs]] or
+[[site:manual/how-to-call-a-server-side-function-from-client-side|in mini HOWTOs]] or
 in [[site:/eliom/manual/clientserver-communication#rpc|Eliom's manual]].
 
 ===Services===
