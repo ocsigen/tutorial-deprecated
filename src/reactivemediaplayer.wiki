@@ -17,21 +17,24 @@ current value of a signal. For instance :
 
 
 <<code language="ocaml"|
-{server{
-
+{shared{
 open Eliom_content
+open Html5
+}}
 
+{client{
 let s, set_s = React.S.create 0 (* signal creation *)
+}}
 
-let example_div =
-  C.node {{R.node (React.S.map (
-    fun s_value ->
-      Html5.D.(div [pcdata (string_of_int s_value)]
-    )) s)}}
+{shared{
+let example_div () =
+  C.node {{R.pcdata (React.S.map string_of_int s)}}
 
 let incr_button =
-  Html5.D.(string_input ~input_type:`Submit () ~value:"Increment"
-    ~a:[a_onclick (fun _ -> set_s (succ (React.S.value s)))])
+  D.(button
+      ~button_type:`Button
+      ~a:[a_onclick {{fun _ -> set_s (succ (React.S.value s))}} ]
+      [pcdata "Increment"])
 }}
 >>
 
