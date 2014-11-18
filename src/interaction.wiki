@@ -523,8 +523,8 @@ let connection_box () =
       lwt message =
         if check_pwd name password
         then begin
-          Eliom_reference.set username (Some name) ~>>=
-            (fun _ -> Lwt.return ("Hello "^name))
+          lwt () = Eliom_reference.set username (Some name) in
+          Lwt.return ("Hello "^name)
         end else
 	  Lwt.return "Wrong name or password" in
       Lwt.return
@@ -1046,8 +1046,9 @@ Sending 404\\
 Our service {{{user_service}}} responds to any request parameter, even
 if the user does not exist in the database.  We want to check that the
 user is in the database before displaying the page, and send a 404
-error if the user is not.  To do that, we will replace the module
-{{{ My_app }}} by <<a_api project="eliom" | module
+error if the user is not.  To do that, we will replace module
+{{{ Eliom_registration.Html5 }}}
+by <<a_api project="eliom" | module
 Eliom_registration.Any >> to register the service {{{user_service}}}:
 
 <<code language="ocaml"|
@@ -1112,7 +1113,6 @@ called when that information is available.
 let authenticated_handler f =
   let handle_anonymous _get _post =
     let connection_box =
-      let open Html5.F in
       post_form ~service:connection_service
         (fun (name1, name2) ->
 	  [fieldset
@@ -1126,21 +1126,21 @@ let authenticated_handler f =
               ]]) ()
     in
     Lwt.return
-      Html5.F.(html
-                 (head (title (pcdata "")) [])
-                 (body [h1 [pcdata "Please connect"];
-	                connection_box;]))
+      (html
+        (head (title (pcdata "")) [])
+        (body [h1 [pcdata "Please connect"];
+	       connection_box;]))
     in
     Eliom_tools.wrap_handler
       (fun () -> Eliom_reference.get username)
       handle_anonymous (* Called when [username] is [None] *)
       f (* Called [username] contains something *)
 
-let () = My_app.register ~service:main_service
+let () = Eliom_registration.Html5.register ~service:main_service
   (authenticated_handler
     (fun username _get _post ->
        Lwt.return
-         Html5.F.(html
+         (html
            (head (title (pcdata "")) [])
            (body [h1 [pcdata ("Hello " ^ username) ]]))))
 >>
