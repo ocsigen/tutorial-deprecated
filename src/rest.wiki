@@ -107,7 +107,7 @@ In order to successfully build this tutorial's source code, your
 {{{Makefile.options}}} must contain the following settings:
 <<code language="makefile"|
 # OCamlfind packages for the server
-SERVER_PACKAGES := deriving-yojson.syntax deriving-yojson yojson
+SERVER_PACKAGES := deriving-yojson.syntax deriving-yojson
 # OCamlfind packages for the client
 CLIENT_PACKAGES := deriving-yojson.syntax
 >>
