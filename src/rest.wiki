@@ -101,6 +101,24 @@ let db : location Ocsipersist.table =
   Ocsipersist.open_table "locations"
 >>
 
+<<concept title="Syntax extensions"|
+
+In order to successfully build this tutorial's source code, your
+{{{Makefile.options}}} must contain the following settings:
+<<code language="makefile"|
+# OCamlfind packages for the server
+SERVER_PACKAGES := deriving-yojson.syntax deriving-yojson
+# OCamlfind packages for the client
+CLIENT_PACKAGES := deriving-yojson.syntax
+>>
+
+This is due to the fact, that in the code snippet above we use a syntax extension
+provided by the {{{deriving-yojson.syntax}}} package. There is a general rule of
+using syntax extensions in .eliom files: //syntax packages should be added to both
+the {{{SERVER_PACKAGES}}} and {{{CLIENT_PACKAGES}}} variables of {{{Makefile.options}}}.//
+
+>>
+
 ==@@id="services"@@ Services definition==
 
 First, let's define common service parameters:
