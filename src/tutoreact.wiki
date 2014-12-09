@@ -1,13 +1,15 @@
 = Client server reactive application with Ocsigen
 
 This is a short tutorial showing how to write a very simple reactive client-server
-application using Js_of_ocaml, Eliom and Eliom plus. It requires Eliom > 5.0.
+application using Js_of_ocaml, Eliom and Eliom plus. It requires Eliom > 5.0
+(or branch sharedreact of development version while Eliom 5 is not released).
 
-Our application will display a list of items to connected users (for example list of messages
-in a forum), and make possible to add some items.
+Our application will display a list of items to connected users
+(for example a list of messages in a forum),
+and make possible to add new items.
 
 In this tutorial, you will learn:
- * How to use Eliom plus to quickly build an application with user management
+ * How to use Eliom base app to quickly build an application with user management
  * How to create a client-server reactive interface: the HTML is generated indifferently
 on server side or on client side and contains reactive parts, that are updated automatically
 when data changes
@@ -23,8 +25,9 @@ item arrives
 
 == First step: a basic application with user management
 
-Eliom plus contains a set of higher level libraries for Eliom.
-It also conatins a template for Eliom-distillery that will create for an application
+Eliom base app contains a set of higher level libraries for Eliom
+(user management, tips, notifications).
+It also contains a template for Eliom-distillery that will create for an application
 with user management, that you can use as a starting point for your project.
 
 {{{
@@ -34,7 +37,7 @@ eliom-distillery -name tutoreact -template eba.pgocaml
 This template is using Postgresql to save the data.
 You need a recent version of Postgresql installed on your system.
 
-Eliom plus is still young and the creation of the database must be improved
+Eliom base app is still young and the creation of the database must be improved
 (help appreciated). For now you need to create manually a symbolic link to the
 program {{{pg_ctl}}} in you directory. For example:
 
@@ -235,7 +238,7 @@ in
  * {{{changes}}} takes a JS element and a function that will be executed
 every time a "change" event is received on this element.
 
-This function gets the value of the input, clean the content of the input,
+This function gets the value of the input, cleans the content of the input,
 and calls our server side function. Do not forget the conversions between OCaml strings
 and JS strings.
 
@@ -264,7 +267,6 @@ Now we want to update the page.
 More generally, the main difference between a Web application and a Web site is that
 in the first one, a client side program is running and persists accross HTTP calls (remote procedure calls or page changes). The client process must be able to receive notifications
 from the server and update the page accordingly, without regenerating it entirely.
-pr
 A common practice consists in generating the full interface from client side. But this
 is not adapted for all cases. It's usually better to keep the old style Web interaction
 and generate pages from server side (for example to make possible indexation by search
@@ -275,7 +277,7 @@ In this section, we will introduce two patterns that make possible to write this
 * The client-server cache of data
 * Reactive pages
 
-In next section, we will implement the notification system.
+In the following section, we will implement the notification system.
 
 === Client-server cache
 
@@ -314,7 +316,7 @@ If the value is not present in cache, it will be fetched using function
 
 Updating the interface when some data changes is usually not
 straightforward. This is usually done by putting identifiers
-on elements to find them, and modifying ages elements manually
+on elements to find them, and modifying page elements manually
 using low level JS functions.
 
 A very elegant solution to simplify this consists in using Functional Reactive Programming (FRP). In reactive programming, you just need to define once
@@ -329,15 +331,14 @@ page elements from client side.
 
 Module {{{Eliom_csreact}}} makes possible to define client side reactive
 values from server side, also reactive page elements. To do that, it is
-using //shared values//, that is, values that contains both a server
+using //shared values//, that is, values that contain both a server
 side and a client side value. Basically, use modules {{{SharedReact}}}
 and {{{SharedReactiveData}}} instead of {{{React}}}
 and {{{ReactiveData}}} to use client-server reactive values.
 
-//Warning: module Eliom_csreact is still experimental and
-values are not all implemented. Syntax of shared values is also
-not implemented at this moment, you need to call function
-{{{Eliom_lib.create_shared_value}}}.//
+//Warning: While writing this tutorial,
+module Eliom_csreact is still experimental and
+all functions are not implemented.//
 
 === Implementation of the reactive interface
 
