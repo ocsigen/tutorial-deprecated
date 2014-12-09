@@ -133,6 +133,9 @@ let display userid_o =
   in
   Lwt.return [ul l]
 >>
+(Depending on your database, it is probably more efficient to
+fetch all messages and their identifiers using only one request).
+
 
 Compile and run your program:
 

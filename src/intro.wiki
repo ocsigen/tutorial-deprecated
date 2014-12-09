@@ -54,6 +54,14 @@ The tutorial is divided into several parts, mostly independant.
 >>
 
 \\
+<<div class="tutocase"|
+[[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|OUPS meeting at Mozilla Paris}}]]
+;A short talk, in english, that highlights a few features of Js~_of~_ocaml
+and Eliom.
+:Look at [[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|this video]]
+>>
+
+\\
 
 
 <<div class="tutocase"|
