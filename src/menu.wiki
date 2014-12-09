@@ -8,6 +8,8 @@
 = Mini-tutorials: Some little examples
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client server widgets]]
+==[[tutoreact|Reactive client-server Web applications]]
+==[[rest|RESTful JSON API]]
 ==[[macaque|MaCaQue: SQL queries]]
 ==[[custom-conf|Custom configuration]]
 ==[[ocsipersist|Light database]]
@@ -15,7 +17,6 @@
 ==[[music|Playing music]]
 ==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]
-==[[rest|RESTful JSON API]]
 =@@class="howto"@@ HOW-TO
 == My first steps with Ocsigen
 ===[[how-to-install-ocsigen|How to install Ocsigen]]
