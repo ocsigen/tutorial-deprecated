@@ -796,9 +796,7 @@ Ojw_color_picker.init_handler colorpicker;
 Then we'll add a simple Html5 slider to change the size of the brush.
 Near the canvas_elt definition, add simply this code
 
-<<code language="ocaml" class="client"|
-
-
+<<code language="ocaml" class="server"|
 let slider = int_input
    ~a:[a_id "slider"; a_input_min 1.; a_input_max 80.]
    ~input_type:`Range ()
