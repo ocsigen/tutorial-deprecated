@@ -428,7 +428,7 @@ It adds the new identifier in the reactive list of messages:
 >>
 
 We notify the server that we are listen on this piece of data by calling (on server side)
-function {{{Forum_notig.listen}}}. Notifications are received on client side through
+function {{{Forum_notif.listen}}}. Notifications are received on client side through
 a react event {{{Forum_notif.client_ev ()}}}. We map this event to function
 {{{handle_notif_message_list}}}:
 <<code language="ocaml" class="server"|

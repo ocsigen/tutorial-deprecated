@@ -1,5 +1,43 @@
 =How to implement a notification system?=
 
+The easiest way for the server to send notifications to the client
+is to use module
+<<a_api project="eliom-base-app"|module Eba_notif>>
+from Eliom-base-app, but it requires to use EBA's user management
+system. If you are not using EBA, we recommend to get inspiration
+from the code of this module, to implement your notification
+system conveniently and without memory leak.
+
+== With {{{Eba_notif}}}
+
+For each type of data on which you want to receive updates,
+instanciate functor {{{Eba_notif.Make}}} on server side:
+
+<<code language="ocaml" class="server"|
+module My_notif = Eba_notif.Make(struct
+  type key = ... (* The type of the identifier of the data we want listen on. *)
+  type notification = ... (* The type of the notifications that will be sent *)
+end)
+>>
+
+To declare that you are listening on one piece of data {{{i}}},
+call {{{My_notif.listen i}}}.
+
+To notify all the clients listening on data {{{i}}},
+call {{{My_notif.notify i (fun userid_o -> Lwt.return (Some notif))}}}.
+{{{userid_o}}} is the id of the user who will be notified,
+if he is connected ({{{None}}} otherwise).
+This make possible to customize the notifications.
+Return {{{None}}} if you don't want him to be notified.
+
+For more information, have a look at
+<<a_manual project="tutorial" chapter="tutoreact"|the tutorial
+about client-server reactive applications>>.
+
+
+
+== Without {{{Eba_notif}}} (manual implementation)
+
 If you want the user to receive notifications from the server
 (for example: "you have a new message"), first create a channel, and
 register it in an Eliom reference of scope {{{`Client_process}}}:
@@ -7,7 +45,7 @@ register it in an Eliom reference of scope {{{`Client_process}}}:
 let channel_ref =
   Eliom_reference.Volatile.eref_from_fun
     ~scope:Eliom_common.default_process_scope
-    (fun () -> 
+    (fun () ->
        let (s, notify) = Lwt_stream.create () in
        let c = Eliom_comet.Channel.create s in
        (c, notify)
@@ -68,3 +106,5 @@ let notify user_id v =
       you must provide the extra parameter {{{?sitedata}}},
       that you can get by calling {{{Eliom_request_info.get_sitedata}}}
       during the initialisation phase of the Eliom module.
+
+Have a look at the implementation of {{{Eba_notif}}} for more details.
