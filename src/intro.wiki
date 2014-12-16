@@ -98,6 +98,17 @@ from the very beginning, how to:
 It shows on an example the client-server syntax,
 and is a good starting point for understanding Eliom's client-server features.
 
+
+<<div class="tutocase"|
+[[http://www.irill.org/videos/oups-december-2014/Ocsigen|OUPS meeting at IRILL]]
+;A short talk, in english, that shows how to write a small client-server reactive application with Js~_of~_ocaml and Eliom.
+:Look at [[http://www.irill.org/videos/oups-december-2014/Ocsigen|this video]]
+and read this [[wiki:manual/tutoreact|tutorial]].
+>>
+
+It describes the most recent features of Eliom.
+
+
 <<div class="tutocase"|
 ;If you want to write a more traditional Web site, with pages, forms, and sessions:
 :Read tutorial [[wiki:manual/interaction|Service based Web programming]]
