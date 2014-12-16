@@ -115,7 +115,7 @@ let main_service_handler userid_o () () =
   Tutoreact_container.page userid_o content
 >>
 
-Create file tutoreact.eliom with the code below.
+Create file tutoreact_messages.eliom with the code below.
 We will also put module Db here for now.
 
 <<code language="ocaml" class="shared"|
@@ -681,3 +681,185 @@ let display_message id =
 
 To simulate network latency,
 you can add a {{{Lwt_unix.sleep}}} in server side's {{{get_data}}} function.
+
+
+
+
+== The full code
+
+<<code language="ocaml" class="server"|
+module Db = struct
+  let db = Ocsipersist.open_table "messages"
+  let dbf = Ocsipersist.open_table "forums"
+  let last_key =
+    Eliom_reference.eref
+      ~persistent:"index" ~scope:Eliom_common.global_scope (-1)
+  let get_message id = Ocsipersist.find db (string_of_int id)
+  let get_messages forumid =
+    try_lwt Ocsipersist.find dbf (string_of_int forumid)
+    with Not_found -> Lwt.return []
+  let add_message forumid v =
+    lwt index = Eliom_reference.get last_key in
+    let index = index + 1 in
+    lwt () = Eliom_reference.set last_key index in
+    lwt () = Ocsipersist.add db (string_of_int index) v in
+    lwt l = get_messages forumid in
+    lwt () = Ocsipersist.add dbf (string_of_int forumid) (index::l) in
+    Lwt.return index
+end
+>>
+<<code language="ocaml" class="shared"|
+
+{shared{
+  open Eliom_content.Html5
+  open Eliom_content.Html5.D
+  open Eliom_csreact
+}}
+>>
+<<code language="ocaml" class="server"|
+
+(* Notifications on message list *)
+module Forum_notif = Eba_notif.Make(struct
+  type key = int (* The type of the identifier of the data we want listen on.
+                    Here forum identifiers *)
+  type notification = int (* Message identifier *)
+end)
+
+>>
+<<code language="ocaml" class="shared"|
+{shared{
+  type add_message_type = int * string deriving (Json)
+}}
+
+>>
+<<code language="ocaml" class="server"|
+let add_message_rpc =
+  server_function
+    Json.t<add_message_type>
+    (Eba_session.connected_rpc
+       (fun userid (forumid, value) ->
+          lwt id = Db.add_message forumid value in
+          Forum_notif.notify forumid (fun userid -> Lwt.return (Some id));
+          Lwt.return ())
+       )
+
+
+let cache : (int, string) Eliom_cscache.t = Eliom_cscache.create ()
+let forumcache : (int, int SharedReactiveData.RList.t
+                       * int SharedReactiveData.RList.handle) Eliom_cscache.t =
+  Eliom_cscache.create ()
+
+
+let get_data = Db.get_message
+
+let get_data_rpc =
+  server_function Json.t<int>
+    (Eba_session.Opt.connected_rpc (fun userid_o id ->
+       lwt () = Lwt_unix.sleep 1. in get_data id))
+
+>>
+<<code language="ocaml" class="client"|
+{client{
+
+   let get_data id = %get_data_rpc id
+
+}}
+>>
+<<code language="ocaml" class="server"|
+{server{
+
+  let get_data_forum forumid =
+    lwt messages = Db.get_messages forumid in
+    let default = {'a option{
+      try Some (Eliom_cscache.find_if_ready %forumcache %forumid)
+      with _ -> None
+    }}
+    in
+    Lwt.return (SharedReactiveData.RList.make ~default messages)
+
+  let get_data_forum_rpc =
+    server_function Json.t<int>
+      (Eba_session.Opt.connected_rpc
+        (fun userid_o forumid -> get_data_forum forumid))
+
+}}
+>>
+<<code language="ocaml" class="client"|
+{client{
+
+   let get_data_forum forumid = %get_data_forum_rpc forumid
+
+}}
+>>
+<<code language="ocaml" class="shared"|
+
+{shared{
+let display_message id =
+  let th = (lwt msg = Eliom_cscache.find %cache get_data id in
+            Lwt.return (div [pcdata msg]))
+  in
+  lwt v = Ow_spinner.with_spinner th in
+  Lwt.return (li [v])
+ }}
+
+>>
+<<code language="ocaml" class="client"|
+{client{
+
+   let handle_notif_message_list rmessages (_, msgid) =
+     SharedReactiveData.RList.cons msgid (snd rmessages)
+
+ }}
+
+>>
+<<code language="ocaml" class="server"|
+let display_messages forumid =
+  Forum_notif.listen forumid;
+  lwt rmessages = Eliom_cscache.find forumcache get_data_forum forumid in
+  ignore {unit{
+    ignore (React.E.map (handle_notif_message_list %rmessages)
+            %(Forum_notif.client_ev ()));
+  }};
+  lwt content = SharedReactiveData.RList.Lwt.map_p
+      (Eliom_lib.create_shared_value display_message {{display_message}})
+      (fst rmessages)
+  in
+  Lwt.return (R.ul content)
+
+let display userid_o forumid =
+  lwt messages = display_messages forumid in
+  let l = match userid_o with
+    | None -> []
+    | _ ->
+      let inp = Raw.input ~a:[a_input_type `Text] () in
+      let _ = {unit{
+        let open Lwt_js_events in
+        let inp = To_dom.of_input %inp in
+        async (fun () -> changes inp (fun _ _ ->
+          let value = Js.to_string (inp##value) in
+          inp##value <- Js.string "";
+          %add_message_rpc (%forumid, value)
+        ))
+      }}
+      in
+      [inp]
+  in
+  Lwt.return (messages::l)
+
+
+
+let forum_service =
+  Eliom_service.App.service
+    ~path:[]
+    ~get_params:Eliom_parameter.(suffix (int "i"))
+    ()
+
+let forum_service_handler userid_o forumid () =
+  lwt content = display userid_o forumid in
+  Tutoreact_container.page userid_o content
+
+let () =
+  Tutoreact_base.App.register
+    forum_service
+    (Tutoreact_page.Opt.connected_page forum_service_handler)
+>>
