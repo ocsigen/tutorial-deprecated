@@ -5,7 +5,7 @@
 ==[[misc|Miscellaneous features]]
 = Examples: Learning by example
 ==[[chat|Chat]]
-= Mini-tutorials: Some little examples
+= Mini-tutorials: Some small examples
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client server widgets]]
 ==[[tutoreact|Reactive client-server Web applications]]
