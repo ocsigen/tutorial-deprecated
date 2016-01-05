@@ -107,7 +107,8 @@ before continuing. {{{e2}}} must be a Lwt thread itself. {{{Lwt.return}}}
 makes possible to create a Lwt thread already terminated.
 * {{{Lwt_js_events}}} defines a very convenient way to program
 events. Here {{{Lwt_js_events.onload}}} is a Lwt thread that waits
-until the page is loaded.
+until the page is loaded. There are similar functions for example
+to wait for a click on an element of the page, or a key press.
 
 == Second step: bind the button ==
 
@@ -125,16 +126,17 @@ Replace function {{{mywidget}}} by the following lines:
   let mywidget s1 s2 =
     let button  = div ~a:[a_class ["button"]] [pcdata s1] in
     let content = div ~a:[a_class ["content"]] [pcdata s2] in
-    Lwt_js_events.(
-      async (fun () ->
-        clicks (To_dom.of_element button)
-          (fun _ _ -> switch_visibility content; Lwt.return ())));
+    Lwt.async (fun () ->
+        Lwt_js_events.clicks (To_dom.of_element button)
+          (fun _ _ -> switch_visibility content; Lwt.return ()));
     div ~a:[a_class ["mywidget"]] [button; content]
 
 >>
 
-* Once again we use {{{Lwt_js_events}}}. Function {{{async}}} runs a {{{Lwt}}}
-thread asynchronously (without waiting for its result).
+* Once again, we use {{{Lwt_js_events}}}. Function {{{clicks}}} is use
+to bind a handler to every click on an element.
+* Function {{{async}}} runs a {{{Lwt}}} thread asynchronously
+(without waiting for its result).
 * {{{Lwt_js_events.clicks elt f}}} calls function {{{f}}} for each
 mouse click on element {{{elt}}}.
 * {{{To_dom.of_element}}}, {{{Js.string}}} and {{{Js.to_bool}}} are conversion
@@ -182,10 +184,9 @@ module Ex_app =
     let button  = div ~a:[a_class ["button"]] [pcdata s1] in
     let content = div ~a:[a_class ["content"]] [pcdata s2] in
     let _ = {unit{
-      Lwt_js_events.(
-        async (fun () ->
-          clicks (To_dom.of_element %button)
-            (fun _ _ -> switch_visibility %content; Lwt.return ()))) }}
+      Lwt.async (fun () ->
+        Lwt_js_events.clicks (To_dom.of_element %button)
+          (fun _ _ -> switch_visibility %content; Lwt.return ())) }}
     in
     div ~a:[a_class ["mywidget"]] [button; content]
 
@@ -212,10 +213,9 @@ server and client sides.
     let button  = div ~a:[a_class ["button"]] [pcdata s1] in
     let content = div ~a:[a_class ["content"]] [pcdata s2] in
     let _ = {unit{
-      Lwt_js_events.(
-        async (fun () ->
-          clicks (To_dom.of_element %button)
-            (fun _ _ -> switch_visibility %content; Lwt.return ()))) }}
+      Lwt.async (fun () ->
+        Lwt_js_events.clicks (To_dom.of_element %button)
+          (fun _ _ -> switch_visibility %content; Lwt.return ())) }}
     in
     div ~a:[a_class ["mywidget"]] [button; content]
 
@@ -258,13 +258,12 @@ module Ex_app =
     let button  = div ~a:[a_class ["button"]] [pcdata s1] in
     let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
     let _ = {unit{
-      Lwt_js_events.(
-        async (fun () ->
-          clicks (To_dom.of_element %button)
-            (fun _ _ ->
-               !close_last();
-               close_last := (fun () -> switch_visibility %content);
-               switch_visibility %content; Lwt.return ()))) }}
+      Lwt.async (fun () ->
+        Lwt_js_events.clicks (To_dom.of_element %button)
+          (fun _ _ ->
+             !close_last();
+             close_last := (fun () -> switch_visibility %content);
+             switch_visibility %content; Lwt.return ())) }}
     in
     div ~a:[a_class ["mywidget"]] [button; content]
 
@@ -322,13 +321,12 @@ let new_set () = {(unit -> unit) ref{ ref (fun () -> ()) }}
     let button  = div ~a:[a_class ["button"]] [pcdata s1] in
     let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
     let _ = {unit{
-      Lwt_js_events.(
-        async (fun () ->
-          clicks (To_dom.of_element %button)
-            (fun _ _ ->
-               ! %set();
-               %set := (fun () -> switch_visibility %content);
-               switch_visibility %content; Lwt.return ()))) }}
+      Lwt.async (fun () ->
+        Lwt_js_events.clicks (To_dom.of_element %button)
+          (fun _ _ ->
+             ! %set();
+             %set := (fun () -> switch_visibility %content);
+             switch_visibility %content; Lwt.return ())) }}
     in
     div ~a:[a_class ["mywidget"]] [button; content]
 
@@ -364,11 +362,12 @@ in [[site:/eliom/manual/clientserver-communication#rpc|Eliom's manual]].
 
 ===Services===
 For many applications, you will need several services.
-Remember that by default, client-side Eliom program do not
-stop when you follow a link or send a form. This make possible to combine
-Rich client side feature (playing music, animations, stateful applications~ ...)
+Remember that by default, client-side Eliom programs do not
+stop when you follow a link or send a form. This makes possible to combine
+rich client side features
+(playing music, animations, stateful applications~ ...)
 with traditional Web interaction (links, forms, bookmarks, back button~ ...).
-Eliom proposes several way to identify services, either by the URL (and
+Eliom proposes several ways to identify services, either by the URL (and
 parameters) or by a session identifier (we call this kind of service
 a //coservice//). Eliom also makes possible to create dynamically new
 (co-)services dynamically, for example coservices depending on previous

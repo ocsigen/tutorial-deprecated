@@ -7,6 +7,9 @@ drawing application]].  It is a client/server web application
 displaying an area where users can draw using the mouse, and see what
 other users are drawing at the same time and in real-time.
 
+This tutorial is a good starting point if you want a progressive introduction
+course on Eliom programming.
+
 <<webonly| The final eliom code is available
 [[https://github.com/ocsigen/graffiti/tree/master/simple|for download]]. >>
 
@@ -114,6 +117,7 @@ These instructions tell the server to:
 
 <<concept title="Static validation of HTML"|
 
+@@id="tyxml"@@
 There are several ways to create pages for Eliom.  You can generate
 pages as strings (as in other web frameworks).  But we prefer checking
 at compile time that the HTML will be correct.  Eliom provides several
@@ -181,7 +185,8 @@ module Html5.F >>.
 
 <<concept title="Lwt"|
 
-**Important warning:** All the functions you write must be written in
+@@id="lwt"@@**Important warning:** All the functions you write
+must be written in
 cooperative manner using Lwt. Lwt is a convenient way to
 implement concurrent programs in OCaml, and is now also widely used
 for applications not related to Ocsigen.

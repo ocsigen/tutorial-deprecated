@@ -107,21 +107,39 @@ to create HTTP redirections.
 Instead of generating HTML in OCaml strings, we highly recommend to use
 //typed HTML//. It is very easy to use (once you have learned the basics)
 and helps a lot to efficiently write modular and valid HTML.
+See this
+<<a_manual project="tuto" chapter="application" fragment="tyxml"|tutorial>>
+for more information, and more comprehensive documentation
+<<a_manual project="tyxml"|here>>
+and
+<<a_manual project="eliom" chapter="clientserver-html"|here>>.
 
 Eliom also has a way to typecheck forms and GET or POST parameters.
 By giving a description of the parameters your service expects,
 Eliom will check their presence automatically, and convert them
 for you to OCaml types.
+See
+<<a_manual project="tuto" chapter="interaction" |this tutorial>>
+and <<a_manual project="eliom" chapter="server-params"|this manual page>>.
 
 Eliom also has other ways to identify services (rather than just the PATH
 in the URL). For example Eliom can identify a service just by a parameter
 (whatever the path is). This is called //non-attached coservices// and
 this makes possible for example to have the same feature on every page
 (for example a connection service).
+See
+<<a_manual project="tuto" chapter="interaction" |this tutorial>>
+and <<a_manual project="eliom" chapter="server-services"|this manual page>>.
 
 One of the main features of Eliom is the ability to write complete
 Web and mobile applications in OCaml. Annotations are used to
 spearate the code to be executed on server side from the client code.
 Client functions are translated into Javascript using Ocsigen Js_of_ocaml.
+See
+<<a_manual project="tuto" chapter="tutowidgets" |this tutorial>> for
+a quick introduction,
+or <<a_manual project="tuto" chapter="application" |this one>> for a
+more comprehensive one.
+You can also have a look at
+<<a_manual project="eliom" chapter="clientserver-applications"|this manual page>>.
 
-See other tutorials for more details about all this.
