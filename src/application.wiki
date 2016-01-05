@@ -621,8 +621,7 @@ For more clarity, there is a syntax extension for Lwt, defining a
 new keyword {{{lwt}}} to be used instead of {{{let}}} for Lwt
 functions: <<code language="ocaml"| lwt x = f () in>>
 
-{{{Lwt.return}}} creates a terminated thread from a value (without
-inserting a cooperation point):
+{{{Lwt.return}}} creates a terminated thread from a value:
 <<code language="ocaml"| Lwt.return : 'a -> 'a Lwt.t>>
 Use it when you must return something in the Lwt
 monad (for example in a service handler, or often after a
@@ -643,6 +642,8 @@ implemented in cooperative way, that is: if something takes
 from a database), they insert a cooperation point to let other threads
 run.  Cooperative functions return a value in the Lwt monad
 (that is, a value of type {{{'a Lwt.t}}} for some type {{{'a}}}).
+
+{{{Lwt.bind}}} and {{{Lwt.return}}} do not introduce cooperation points.
 
 In our example, the function {{{Lwt_js_events.mouseup}}} may introduce
 a cooperation point, because it is unforseeable when this event
@@ -861,7 +862,7 @@ Then you can test your application ({{{make test.byte}}}).
   Note that you can also use Eliom-widgets for server-client widgets, or use native JavaScript libraries
   via Js_of_ocaml enabled bindings.
 
-<<wip|We are currently working on a binding for JQuery and a native widget
+<<|wip|We are currently working on a binding for JQuery and a native widget
       library for Eliom.>>
 
 >>

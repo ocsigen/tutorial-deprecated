@@ -154,7 +154,7 @@ See
 and the beginning of
 <<a_manual project="eliom" chapter="server-state"|this manual page>>.
 
-We suggest to continue your readings by one of these tutorials:
+We suggest to continue your reading by one of these tutorials:
  * <<a_manual project="tuto" chapter="tutowidgets" |A quick start tutorial for client-server Eliom applications>> (for the people already familiar with OCaml, Lwt, etc.)
  * <<a_manual project="tuto" chapter="application" |A step by step tutorial for client-server Eliom applications>>
  * <<a_manual project="tuto" chapter="interaction" |A tutorial on server side dynamic Web site>>

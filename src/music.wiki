@@ -20,10 +20,10 @@ let player =
 
 And we insert the player in the page.
 
-And that's all ! Since the {{{player}}} node is declared unique, no new
+And that's all! Since the {{{player}}} node is declared unique, no new
 player is created when the page changed: this is exact same node.
 
-<<wip | In fact browser stops the player as soon as the dom
+<<wip | In fact browsers stop the player as soon as the dom
 element is manipulated. That happens when we change the page: to
 continue playing the player should not be present as an element of the
 page>>

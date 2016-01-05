@@ -567,20 +567,12 @@ restart. To do that, add the optional parameter {{{persistent}}} to
 the {{{eref}}} function, with a string value corresponding to the name
 of the table that will contain the values on disk.
 
-<<wip|
-
-For now you need to rename this table every time you change the type
+You need to rename this table every time you change the type
 of your Eliom reference, otherwise the server will crash (we are using
 OCaml's {{{Marshal}}} module).
 
->>
-
-<<wip|
-
 It is not possible to create Eliom references containing functions
-(closures). We hope OCaml will include some mechanism to do that soon.
-
->>
+(closures), due to limitations in OCaml's serialization mechanism.
 
 >> <<| END "encadre" >>
 
