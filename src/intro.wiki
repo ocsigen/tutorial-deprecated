@@ -14,12 +14,14 @@ particular, you need to have the interfaces (cmi) installed for all
 these packages (the ##-dev##-packages in some distributions).
 The [[site:install|installation is described here]].
 
-If you need help, you can send a mail to
-{{{ocsigen@sympa.mancoosi.univ-paris-diderot.fr}}} or chat with us on
+We recommend to register to our 
+[[https://sympa.inria.fr/sympa/subscribe/ocsigen|mailing list]]
+where you can ask your questions and get news from the project.
+You can also come and chat with us on
 IRC in channel {{{#ocsigen}}} on {{{freenode.net}}} (e.g. by using
 their [[http://webchat.freenode.net/?channels=ocsigen|webchat]])!
 
-The first section is an overview of the tutorial.
+The first section of this page is an overview of the tutorial.
 The second section of this introduction lists our main
 software projects.
 
@@ -48,9 +50,16 @@ dive into the details if you want to.
 The tutorial is divided into several parts, mostly independant.
 
 <<div class="tutocase"|
+The basics
+; A short tutorial explaining how to write a dynamic Web site by generating pages using OCaml functions
+:Read tutorial [[wiki:manual/basicwebsite|Basic web site]]
+>>
+
+\\
+<<div class="tutocase"|
 [[http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|{{wiki(79):files/2014-epita-video.png|video}}]]
 ;If you want a wide overview about Ocsigen, for beginners, in french
-:Look at  [[href:http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|this video]], by Vincent Balat
+:Look at  [[href:http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|this video]]
 >>
 
 \\
@@ -64,12 +73,6 @@ and Eliom.
 \\
 
 
-<<div class="tutocase"|
-;If you are an OCaml developer who want to write a Web site by generating page using OCaml functions
-:Read tutorial [[wiki:manual/basicwebsite|Basic web site]]
->>
-
-\\
 
 
 <<div class="tutocase"|

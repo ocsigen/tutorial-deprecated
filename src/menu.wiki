@@ -1,12 +1,12 @@
-= Tutorial: Your first application
+= Tutorial
 ==[[intro|Introduction. Ocsigen: the different projects]]
+==[[basicwebsite|A basic Web site in OCaml]]
 ==[[application|Client/server application]]
 ==[[interaction|Service based Web programming]]
 ==[[misc|Miscellaneous features]]
 = Examples: Learning by example
 ==[[chat|Chat]]
 = Mini-tutorials: Some small examples
-==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client server widgets]]
 ==[[tutoreact|Reactive client-server Web applications]]
 ==[[rest|RESTful JSON API]]
