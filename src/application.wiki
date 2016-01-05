@@ -182,7 +182,7 @@ module Html5.F >>.
 
 >>
 
-<<concept title="Lwt" id="lwt"|
+<<concept title="Lwt"|
 
 **Important warning:** All the functions you write
 must be written in
@@ -599,7 +599,7 @@ terminate:
 * For each mousemove event on the document, call {{{line}}} (never terminates)
 * If there is a mouseup event on the document, call {{{line}}}.
 
-<<concept title="More on Lwt" |
+<<concept title="More on Lwt" id="lwt"|
 
 Functions in Eliom and Js_of_ocaml which do not implement just a
 computation or direct side effect but are waiting for user activity,

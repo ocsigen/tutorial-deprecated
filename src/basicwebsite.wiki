@@ -133,8 +133,9 @@ and <<a_manual project="eliom" chapter="server-services"|this manual page>>.
 
 One of the main features of Eliom is the ability to write complete
 Web and mobile applications in OCaml. Annotations are used to
-spearate the code to be executed on server side from the client code.
-Client functions are translated into Javascript using Ocsigen Js_of_ocaml.
+separate the code to be executed on server side from the client code.
+Client functions are translated into Javascript using
+[[wiki(30):|Ocsigen Js_of_ocaml]].
 See
 <<a_manual project="tuto" chapter="tutowidgets" |this tutorial>> for
 a quick introduction,
@@ -142,3 +143,18 @@ or <<a_manual project="tuto" chapter="application" |this one>> for a
 more comprehensive one.
 You can also have a look at
 <<a_manual project="eliom" chapter="clientserver-applications"|this manual page>>.
+
+Another interesting feature of Eliom is its session model, that uses a
+very simple interface to record session data on server side.
+It is even possible to choose
+the //scope// of this data: either a browser, or a tab, or even a group
+of browsers (belonging for example to a same user).
+See
+<<a_manual project="tuto" chapter="interaction" fragment="eref" |this section>>
+and the beginning of
+<<a_manual project="eliom" chapter="server-state"|this manual page>>.
+
+We suggest to continue your readings by one of these tutorials:
+ * <<a_manual project="tuto" chapter="tutowidgets" |A quick start tutorial for client-server Eliom applications>> (for the people already familiar with OCaml, Lwt, etc.)
+ * <<a_manual project="tuto" chapter="application" |A step by step tutorial for client-server Eliom applications>>
+ * <<a_manual project="tuto" chapter="interaction" |A tutorial on server side dynamic Web site>>

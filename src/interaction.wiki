@@ -534,7 +534,7 @@ let connection_box () =
 >>
 
 
-<<concept title="Eliom references and extended sessions" |
+<<concept title="Eliom references and extended sessions" id="eref"|
 
 Session data is stored in what we call //Eliom references//.
 It is a type of reference whose value depend on the session the user
