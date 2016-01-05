@@ -100,10 +100,6 @@ let post_service =
 
 That is probably all you need for a very basic Web site in OCaml.
 
-Have a look at Eliom's API documentation to see other kinds of services,
-for example <<a_api project="eliom" subproject="server"| module Eliom_registration.Redirection>>
-to create HTTP redirections.
-
 Instead of generating HTML in OCaml strings, we highly recommend to use
 //typed HTML//. It is very easy to use (once you have learned the basics)
 and helps a lot to efficiently write modular and valid HTML.
@@ -113,6 +109,10 @@ for more information, and more comprehensive documentation
 <<a_manual project="tyxml"|here>>
 and
 <<a_manual project="eliom" chapter="clientserver-html"|here>>.
+
+Have a look at Eliom's API documentation to see other kinds of services,
+for example <<a_api project="eliom" subproject="server"| module Eliom_registration.Redirection>>
+to create HTTP redirections.
 
 Eliom also has a way to typecheck forms and GET or POST parameters.
 By giving a description of the parameters your service expects,
@@ -142,4 +142,3 @@ or <<a_manual project="tuto" chapter="application" |this one>> for a
 more comprehensive one.
 You can also have a look at
 <<a_manual project="eliom" chapter="clientserver-applications"|this manual page>>.
-
