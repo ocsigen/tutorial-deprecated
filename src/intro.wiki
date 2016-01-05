@@ -50,7 +50,7 @@ dive into the details if you want to.
 The tutorial is divided into several parts, mostly independant.
 
 <<div class="tutocase"|
-The basics
+Quick start: the basics
 ; A short tutorial explaining how to write a dynamic Web site by generating pages using OCaml functions
 :Read tutorial [[wiki:manual/basicwebsite|Basic web site]]
 >>
@@ -71,10 +71,6 @@ and Eliom.
 >>
 
 \\
-
-
-
-
 <<div class="tutocase"|
 ;If you want to write a client-server Web application
 :Read tutorial [[wiki:manual/application|Client-server application]]
@@ -90,7 +86,6 @@ from the very beginning, how to:
 * Call //JavaScript methods// from OCaml
 * Catch //mouse events//
 * //Communicate// with the server, in both directions
-* Use the //O'Closure// widget library
 * Create services with //non-HTML output//
 
 <<div class="tutocase"|

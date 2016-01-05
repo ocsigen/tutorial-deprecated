@@ -5,7 +5,9 @@ It gives an example of client-server widgets.
 
 It is probably a good starting point if you want to learn quickly how to write a
 client-server Eliom application with a short example and few explanations.
-For more explanation, see the "graffiti" tutorial or read the manuals.
+For more explanation, see the
+<<a_manual project="tuto" chapter="application"|"graffiti" tutorial>>
+or read the manuals.
 
 The goal is to show that,
 unlike many javascript libraries that build their widgets

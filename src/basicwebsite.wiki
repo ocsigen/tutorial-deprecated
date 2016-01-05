@@ -2,7 +2,7 @@
 
 //The code of this tutorial has been tested against Eliom 4.// \\
 
-<<wip|This tutorial is work in progress. Please send us any mistake or comment./>>
+<<|wip|This tutorial is work in progress. Please send us any mistake or comment./>>
 
 In this tutorial, we will show how to use the Ocsigen framework
 (mainly Eliom) to write a lightweight Web site by generating pages
@@ -98,7 +98,7 @@ let post_service =
 
 ==@@id="misc"@@ Going further==
 
-That's probably all you need for a basic Web site in OCaml.
+That is probably all you need for a very basic Web site in OCaml.
 
 Have a look at Eliom's API documentation to see other kinds of services,
 for example <<a_api project="eliom" subproject="server"| module Eliom_registration.Redirection>>
@@ -119,7 +119,9 @@ in the URL). For example Eliom can identify a service just by a parameter
 this makes possible for example to have the same feature on every page
 (for example a connection service).
 
-Eliom also make possible to write client side code in OCaml and to program
-the communication between client and server.
+One of the main features of Eliom is the ability to write complete
+Web and mobile applications in OCaml. Annotations are used to
+spearate the code to be executed on server side from the client code.
+Client functions are translated into Javascript using Ocsigen Js_of_ocaml.
 
 See other tutorials for more details about all this.
