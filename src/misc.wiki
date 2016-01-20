@@ -228,14 +228,14 @@ let multigraffiti_service = Eliom_service.App.service ~path:[""]
   ~get_params:(Eliom_parameter.suffix (Eliom_parameter.string "name")) ()
 
 let choose_drawing_form () =
-  get_form ~service:multigraffiti_service
+  Form.get_form ~service:multigraffiti_service
     (fun (name) ->
       [fieldset
           [label ~a:[a_for name]
              [pcdata "drawing name: "];
-           string_input ~input_type:`Text ~name ();
+           Form.input ~input_type:`Text ~name Form.string;
            br ();
-           string_input ~input_type:`Submit ~value:"Go" ()
+           Form.input ~input_type:`Submit ~value:"Go" Form.string
           ]])
 
 let oclosure_script =
@@ -342,9 +342,10 @@ let () = My_app.register ~service:multigraffiti_service
       img ~alt:name
         ~src:(make_uri
 		~service:imageservice (name,!counter)) () in
-    let slider = Html5.D.int_input
+    let slider = Html5.D.Form.input
         ~a:[Html5.D.a_id "slider"; Html5.D.a_input_min 1.; Html5.D.a_input_max 80.]
-        ~input_type:`Range () in
+        ~input_type:`Range
+        Html5.D.Form.int in
     let canvas =
       canvas ~a:[ a_width width; a_height height ]
         [pcdata "your browser doesn't support canvas"; br (); image] in
@@ -401,21 +402,23 @@ let () =
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
 
 let disconnect_box () =
-  post_form disconnection_service
+  Form.post_form disconnection_service
     (fun _ -> [fieldset
-                 [string_input ~input_type:`Submit ~value:"Log out" ()]]) ()
+                 [Form.input
+                    ~input_type:`Submit ~value:"Log out"
+                    Form.string]]) ()
 
 let login_name_form service button_text =
-  post_form ~service
+  Form.post_form ~service
     (fun (name1, name2) ->
       [fieldset
          [label ~a:[a_for name1] [pcdata "login: "];
-          string_input ~input_type:`Text ~name:name1 ();
+          Form.input ~input_type:`Text ~name:name1 Form.string;
           br ();
           label ~a:[a_for name2] [pcdata "password: "];
-          string_input ~input_type:`Password ~name:name2 ();
+          Form.input ~input_type:`Password ~name:name2 Form.string;
           br ();
-          string_input ~input_type:`Submit ~value:button_text ()
+          Form.input ~input_type:`Submit ~value:button_text Form.string
          ]]) ()
 >>
 

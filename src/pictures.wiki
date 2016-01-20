@@ -67,15 +67,16 @@ let save_image_box name =
       ~post_params:Eliom_parameter.unit
       (fun () () -> save_image name)
   in
-  post_form save_image_service
+  Form.post_form save_image_service
     (fun _ ->
-      [p [string_input ~input_type:`Submit ~value:"save" ()]]) ()
+      [p [Form.input ~input_type:`Submit ~value:"save" Form.string]]) ()
 >>
 
-We find the url of the images with <<a_api project="eliom" subproject="server"| val Eliom_service.static_dir >>.
-It is a service taking file path as
-parameter, serving the content of the static directory. We use <<a_api project="eliom"| val Eliom_uri.make_string_uri >> to get the
-url as a string.
+We find the url of the images with <<a_api project="eliom"
+subproject="server"| val Eliom_service.static_dir >>.  It is a service
+taking file path as parameter, serving the content of the static
+directory. We use <<a_api project="eliom"| val
+Eliom_uri.make_string_uri >> to get the url as a string.
 
 <<code language="ocaml"|
 let feed_service = Eliom_service.Http.service ~path:["feed"]

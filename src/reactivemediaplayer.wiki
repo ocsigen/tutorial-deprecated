@@ -243,7 +243,9 @@ let progress_bar () =
                           (React.S.on unblock_s 0. %progress_value))}}
     ])
   in
-  let d_input = D.(float_input ~input_type:`Range () ~value:0. ~a:attrs) in
+  let d_input =
+    D.(Form.input ~input_type:`Range () ~value:0. ~a:attrs Form.float)
+  in
   let _ = {unit{
     Lwt.async (fun () ->
       let d_input = To_dom.of_input %d_input in

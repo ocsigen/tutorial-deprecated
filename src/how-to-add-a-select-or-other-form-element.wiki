@@ -5,14 +5,15 @@
 <<code language='ocaml'|
 open Eliom_content
 
-Html5.D.string_select ~name:select_name
-  (Html5.D.Option
+Html5.D.Form.select ~name:select_name
+  Html5.D.Form.string (* type of the parameter *)
+  (Html5.D.Form.Option
     ([] (* attributes *),
      "Bob" (* value *),
      None (* Content, if different from value *),
      false (* not selected *))) (* first line *)
-    [Html5.D.Option ([], "Marc", None, false);
-     (Html5.D.Optgroup
+    [Html5.D.Form.Option ([], "Marc", None, false);
+     (Html5.D.Form.Optgroup
         ([],
          "Girls",
          ([], "Karin", None, false),
@@ -20,9 +21,6 @@ Html5.D.string_select ~name:select_name
           ([], "Alice", None, true);
           ([], "Germaine", Some (pcdata "Bob's mother"), false)]))]
 >>
-
-There is also {{{int_select}}}, {{{float_select}}}, etc. depending on
-the type expected by the service.
 
 === Basic HTML5 elements without Eliom services
 For example if you want to use them with client side event handler.

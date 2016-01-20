@@ -35,11 +35,11 @@ let calc_i = Eliom_service.Http.service ~path:["calc"]
 let calc_handler () () =
   let create_form intname =
     [p [pcdata "Write a number: ";
-        int_input ~input_type:`Text ~name:intname ();
+        Form.input ~input_type:`Text ~name:intname Form.int;
         br ();
-        string_input ~input_type:`Submit ~value:"Send" ()]]
+        Form.input ~input_type:`Submit ~value:"Send" Form.string]]
   in
-  let f = get_form calc_i create_form in
+  let f = Form.get_form calc_i create_form in
   Lwt.return (html (head (title (pcdata "")) []) (body [f]))
 
 
@@ -54,9 +54,9 @@ let calc_i_handler i () =
   let create_form is =
     (fun entier ->
        [p [pcdata (is^" + ");
-           int_input ~input_type:`Text ~name:entier ();
+           Form.input ~input_type:`Text ~name:entier Form.int;
            br ();
-           string_input ~input_type:`Submit ~value:"Sum" ()]])
+           Form.input ~input_type:`Submit ~value:"Sum" Form.string]])
   in
   let is = string_of_int i in
   let calc_result =
@@ -72,7 +72,7 @@ let calc_i_handler i () =
              (head (title (pcdata "")) [])
              (body [p [pcdata (is^" + "^js^" = "^ijs)]])))
   in
-  let f = get_form calc_result (create_form is) in
+  let f = Form.get_form calc_result (create_form is) in
   Lwt.return (html (head (title (pcdata "")) []) (body [f]))
 
 

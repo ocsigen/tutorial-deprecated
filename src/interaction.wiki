@@ -411,19 +411,22 @@ Let's create a function for generating the form:
 
 <<code language="ocaml"|
 let connection_box () =
-  post_form ~service:connection_service
+  Form.post_form ~service:connection_service
     (fun (name1, name2) ->
       [fieldset
          [label ~a:[a_for name1] [pcdata "login: "];
-          string_input ~input_type:`Text
-                                          ~name:name1 ();
+          Form.input
+            ~input_type:`Text ~name:name1
+            Form.string;
           br ();
           label ~a:[a_for name2] [pcdata "password: "];
-          string_input ~input_type:`Password
-                                          ~name:name2 ();
+          Form.input
+            ~input_type:`Password ~name:name2
+            Form.string;
           br ();
-          string_input ~input_type:`Submit
-                                          ~value:"Connect" ()
+          Form.input
+            ~input_type:`Submit ~value:"Connect"
+            Form.string
          ]]) ()
 >>
 
@@ -434,8 +437,8 @@ Now, add a call to this function in the handler of the main service
 
 Form creation is very similar to link creation, using the functions
 <<a_api project="eliom" | val
-Eliom_content.Html5.D.get_form >> and <<a_api project="eliom"
-| val Eliom_content.Html5.D.post_form >>.
+Eliom_content.Html5.D.Form.get_form >> and
+<<a_api project="eliom" | val Eliom_content.Html5.D.Form.post_form >>.
 
 The first parameter is the service, and the last parameter (only for
 {{{post_form}}}) is for GET parameters you want sent in the URL, if
@@ -453,12 +456,14 @@ In the example, note that the service is expecting a pair
 {{{(string * string)}}}.  The function given to {{{post_form}}} takes two
 parameters corresponding to the names of each field.
 
-<<a_api project="eliom" | module Eliom_content.Html5.D >> (and
-<<a_api project="eliom" | module Eliom_content.Html5.F >>)
-defines constructors for all possible form fields.  OCaml checks that
-the name you use matches the field.  For example it is not possible to
-use the names above with <<a_api project="eliom" | val
-Eliom_content.Html5.D.int_input >> as it is a name for a string.  >>
+The functions that build widgets like <<a_api project="eliom" |
+Eliom_content.Html5.D.Form.input >> expect an argument of type <<a_api
+project="eliom" | 'a Eliom_content.Html5.D.Form.param >>
+(e.g.,
+{{{ Eliom_content.Html5.D.Form.int : int Eliom_content.Html5.D.Form.param }}})
+specifying the parameter type.  OCaml checks that the name you use
+matches the field.  For example the names above need to be used with
+<<a_api project="eliom" | val Eliom_content.Html5.D.Form.string >>.
 
 ===Opening a session===
 
@@ -488,19 +493,22 @@ let connection_box () =
     (match u with
       | Some s -> p [pcdata "You are connected as "; pcdata s]
       | None ->
-        post_form ~service:connection_service
+        Form.post_form ~service:connection_service
           (fun (name1, name2) ->
             [fieldset
 	       [label ~a:[a_for name1] [pcdata "login: "];
-                string_input ~input_type:`Text
-                                                ~name:name1 ();
+                Form.input
+                  ~input_type:`Text ~name:name1
+                  Form.string;
                 br ();
                 label ~a:[a_for name2] [pcdata "password: "];
-                string_input ~input_type:`Password
-                                                ~name:name2 ();
+                Form.input
+                  ~input_type:`Password ~name:name2
+                  Form.string;
                 br ();
-                string_input ~input_type:`Submit
-                                                ~value:"Connect" ()
+                Form.input
+                  ~input_type:`Submit ~value:"Connect"
+                  Form.string
                ]]) ())
 >>
 
@@ -719,9 +727,10 @@ let disconnection_service =
   Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
 
 let disconnect_box () =
-  post_form disconnection_service
-    (fun _ -> [p [string_input
-                    ~input_type:`Submit ~value:"Log out" ()]]) ()
+  Form.post_form disconnection_service
+    (fun _ -> [p [Form.input
+                    ~input_type:`Submit ~value:"Log out"
+                    Form.string]]) ()
 
 let _ =
   Eliom_registration.Action.register
@@ -766,16 +775,16 @@ let create_account_service =
     ~post_params:Eliom_parameter.(string "name" ** string "password") ()
 
 let account_form =
-  post_form ~service:create_account_service
+  Form.post_form ~service:create_account_service
     (fun (name1, name2) ->
       [fieldset
          [label ~a:[a_for name1] [pcdata "login: "];
-          string_input ~input_type:`Text ~name:name1 ();
+          Form.input ~input_type:`Text ~name:name1 Form.string;
           br ();
           label ~a:[a_for name2] [pcdata "password: "];
-          string_input ~input_type:`Password ~name:name2 ();
+          Form.input ~input_type:`Password ~name:name2 Form.string;
           br ();
-          string_input ~input_type:`Submit ~value:"Connect" ()
+          Form.input ~input_type:`Submit ~value:"Connect" Form.string
          ]]) ()
 
 let _ =
@@ -805,7 +814,7 @@ let connection_box () =
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
                        disconnect_box () ]
       | None ->
-        div [post_form ~service:connection_service
+        div [Form.post_form ~service:connection_service
                 (fun (name1, name2) ->
 ...
                 ) ();
@@ -995,16 +1004,16 @@ let connection_box () =
                        disconnect_box () ]
       | None ->
         let l =
-          [post_form ~service:connection_service
+          [Form.post_form ~service:connection_service
             (fun (name1, name2) ->
               [fieldset
 	         [label ~a:[a_for name1] [pcdata "login: "];
-                  string_input ~input_type:`Text ~name:name1 ();
+                  Form.input ~input_type:`Text ~name:name1 Form.string;
                   br ();
                   label ~a:[a_for name2] [pcdata "password: "];
-                  string_input ~input_type:`Password ~name:name2 ();
+                  Form.input ~input_type:`Password ~name:name2 Form.string;
                   br ();
-                  string_input ~input_type:`Submit ~value:"Connect" ()
+                  Form.input ~input_type:`Submit ~value:"Connect" Form.string
                  ]]) ();
              p [a new_user_form_service
                   [pcdata "Create an account"] ()]]
@@ -1105,16 +1114,16 @@ called when that information is available.
 let authenticated_handler f =
   let handle_anonymous _get _post =
     let connection_box =
-      post_form ~service:connection_service
+      Form.post_form ~service:connection_service
         (fun (name1, name2) ->
 	  [fieldset
               [label ~a:[a_for name1] [pcdata "login: "];
-               string_input ~input_type:`Text ~name:name1 ();
+               Form.input ~input_type:`Text ~name:name1 Form.string;
                br ();
                label ~a:[a_for name2] [pcdata "password: "];
-               string_input ~input_type:`Password ~name:name2 ();
+               Form.input ~input_type:`Password ~name:name2 Form.string;
                br ();
-               string_input ~input_type:`Submit ~value:"Connect" ()
+               Form.input ~input_type:`Submit ~value:"Connect" Form.string
               ]]) ()
     in
     Lwt.return

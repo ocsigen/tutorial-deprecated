@@ -10,16 +10,20 @@ Example:
 let create_form =
   (fun (number_name, (number2_name, string_name)) ->
     [p [pcdata "Write an int: ";
-        Html5.D.int_input ~input_type:`Text ~name:number_name ();
+        Html5.D.Form.input
+          ~input_type:`Text ~name:number_name
+          Html5.D.Form.int;
         pcdata "Write another int: ";
-        Html5.D.int_input ~input_type:`Text ~name:number2_name ();
+        Html5.D.Form.input
+          ~input_type:`Text ~name:number2_name
+          Html5.D.Form.int;
         pcdata "Write a string: ";
-        Html5.D.string_input ~input_type:`Text ~name:string_name ();
-        Html5.D.string_input ~input_type:`Submit ~value:"Click" ()]])
+        Html5.D.Form.input ~input_type:`Text ~name:string_name Form.string;
+        Html5.D.Form.input ~input_type:`Submit ~value:"Click" Form.string]])
 
 let form = register_service ["form"] unit
   (fun () () ->
-     let f = Html5.D.get_form coucou_params create_form in
+     let f = Html5.D.Form.get_form coucou_params create_form in
      return
        (html
          (head (title (pcdata "")) [])
@@ -29,11 +33,11 @@ let form = register_service ["form"] unit
 
 POST forms may also take get parameters, as last argument of function {{{post_form}}}:
 <<code language="ocaml"|
-Eliom_content.Html5.D.post_form
+Eliom_content.Html5.D.Form.post_form
   my_service_with_get_and_post
   (fun chaine ->
     p [pcdata "Write a string: ";
-       string_input ~input_type:`Text ~name:chaine ()])
+       Form.input ~input_type:`Text ~name:chaine Form.string])
   222
 >>
 

@@ -2,10 +2,9 @@
 
 To upload a file, use {{{Eliom_parameter.file}}} as service parameter type.
 
-Ocsigen server will save the file at a temporary location and keep it there during the request.
-Then the file will be removed. 
-You must link it somewhere else on the disk yourself if you want to keep it.
-
+Ocsigen server will save the file at a temporary location and keep it
+there during the request.  Then the file will be removed.  You must
+link it somewhere else on the disk yourself if you want to keep it.
 
 Be careful also to set the right option in Ocsigen server's configuration file.
 For example:
@@ -27,7 +26,7 @@ let upload = Eliom_service.Http.service
     ~get_params:unit
     ()
 
-let upload2 = 
+let upload2 =
   Eliom_registration.Html5.register_post_service
    ~fallback:upload
    ~post_params:(Eliom_parameter.file "file")
@@ -43,15 +42,15 @@ let upload2 =
            (body [h1 [pcdata "ok"]])))
 
 
-let uploadform = 
+let uploadform =
   Eliom_registration.Html5.register upload
     (fun () () ->
       let f =
-        (post_form upload2
+        (Form.post_form upload2
            (fun file ->
-             [p [file_input ~name:file ();
+             [p [Form.file_input ~name:file ();
                  br ();
-                 string_input ~input_type:`Submit ~value:"Send" ()
+                 Form.input ~input_type:`Submit ~value:"Send" Form.string
                ]]) ()) in
       Lwt.return
         (html

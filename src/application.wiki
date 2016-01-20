@@ -802,9 +802,10 @@ Then we'll add a simple Html5 slider to change the size of the brush.
 Near the canvas_elt definition, add simply this code
 
 <<code language="ocaml" class="server"|
-let slider = int_input
-   ~a:[a_id "slider"; a_input_min 1.; a_input_max 80.]
-   ~input_type:`Range ()
+let slider =
+  Form.input
+    ~a:[a_id "slider"; a_input_min 1.; a_input_max 80.]
+    ~input_type:`Range Form.int
 >>
 
 Next, add it to the page's body like this
