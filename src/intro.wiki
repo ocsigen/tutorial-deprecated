@@ -9,9 +9,11 @@ basics, then refer to each project's manual for more detail.
 
 This programming guide assumes you know the //OCaml// language, and
 that you have a working installation of //Ocsigen Server//, //Eliom//,
-//Lwt//, //Js_of_ocaml//, (and //O'Closure// for some examples). In
+//Lwt//, //Js_of_ocaml//, (and //Ocsigen Widgets// for some examples). In
 particular, you need to have the interfaces (cmi) installed for all
 these packages (the ##-dev##-packages in some distributions).
+The best way to install OCaml (on MacOS, Linux ...) is to use the Opam
+package manager.
 The [[site:install|installation is described here]].
 
 We recommend to register to our 
@@ -56,23 +58,19 @@ Quick start: the basics
 >>
 
 \\
+
 <<div class="tutocase"|
-[[http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|{{wiki(79):files/2014-epita-video.png|video}}]]
-;If you want a wide overview about Ocsigen, for beginners, in french
-:Look at  [[href:http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|this video]]
+;If you want a quick introduction to client-server Web programming with Eliom
+:Read tutorial [[wiki:manual/tutowidgets|Eliom apps basics: writing client server widgets]]
 >>
 
-\\
-<<div class="tutocase"|
-[[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|OUPS meeting at Mozilla Paris]]
-;A short talk, in english, that highlights a few features of Js~_of~_ocaml
-and Eliom.
-:Look at [[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|this video]]
->>
+It shows on an example the client-server syntax,
+and is a good starting point for understanding Eliom's client-server features.
 
 \\
+
 <<div class="tutocase"|
-;If you want to write a client-server Web application
+;If you want a full step-by-step tutorial on how to write a client-server Web application
 :Read tutorial [[wiki:manual/application|Client-server application]]
 >>
 
@@ -88,24 +86,7 @@ from the very beginning, how to:
 * //Communicate// with the server, in both directions
 * Create services with //non-HTML output//
 
-<<div class="tutocase"|
-;If you want a quick introduction to client-server Web programming with Eliom
-:Read tutorial [[wiki:manual/tutowidgets|Eliom apps basics: writing client server widgets]]
->>
-
-It shows on an example the client-server syntax,
-and is a good starting point for understanding Eliom's client-server features.
-
-
-<<div class="tutocase"|
-[[http://www.irill.org/videos/oups-december-2014/Ocsigen|OUPS meeting at IRILL]]
-;A short talk, in english, that shows how to write a small client-server reactive application with Js~_of~_ocaml and Eliom.
-:Look at [[http://www.irill.org/videos/oups-december-2014/Ocsigen|this video]]
-and read this [[wiki:manual/tutoreact|tutorial]].
->>
-
-It describes the most recent features of Eliom.
-
+\\
 
 <<div class="tutocase"|
 ;If you want to write a more traditional Web site, with pages, forms, and sessions:
@@ -122,6 +103,34 @@ You will learn how to:
 * Register //session data// or //session services//
 * Create services performing //actions// (with no output)
 * Dynamically register new services (//continuation based// Web programming)
+
+\\
+<<div class="tutocase"|
+[[http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|{{wiki(79):files/2014-epita-video.png|video}}]]
+;If you want a wide overview about Ocsigen, for beginners, in french
+:Look at  [[href:http://www.dailymotion.com/video/k3m1rZBWQCWBCL693Y5|this video]]
+>>
+
+\\
+<<div class="tutocase"|
+[[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|OUPS meeting at Mozilla Paris]]
+;A short talk, in english, that highlights a few features of Js~_of~_ocaml
+and Eliom.
+:Look at [[https://www.irill.org/videos/OUPS-2014-07/Meetup_OCaml_Oscigen|this video]]
+>>
+
+\\
+
+<<div class="tutocase"|
+[[http://www.irill.org/videos/oups-december-2014/Ocsigen|OUPS meeting at IRILL]]
+;A short talk, in english, that shows how to write a small client-server reactive application with Js~_of~_ocaml and Eliom.
+:Look at [[http://www.irill.org/videos/oups-december-2014/Ocsigen|this video]]
+and read this [[wiki:manual/tutoreact|tutorial]].
+>>
+
+It describes the most recent features of Eliom.
+
+
 
 <<div class="tutocase"|
 ;If you want to learn more details about Ocsigen
@@ -188,8 +197,6 @@ applications, for example:
 * the TyXML library for generating typed XML,
 * the database query library Macaque,
 * the Js_of_ocaml compiler (from Ocaml bytecode to JavaScript),
-* the O'Closure library, a binding for the Google closure JavaScript widget
-library to be used with Js_of_ocaml,
 * Ocsigen Server, a full-featured Web server.
 
 {{@@style="width:100%;"@@site:/resources/images/ocsigen-zoo.png|The Ocsigen Zoo}}
@@ -274,14 +281,11 @@ All your Web sites must be written in Lwt-compatible way!
 * The generated code which is independant of Eliom and the Ocsigen Server. You can use it with any Web server.
 * You can use a standard installation of OCaml to compile your programs. In particular, you do not have to recompile a library to use it with Js_of_ocaml. You just have to link your program with a specific library to interface with the browser API.
 
-===Macaque===
-//Macaque// is a library for safe and flexible database queries
-using comprehensions.
+===Eliom Base App===
+//Eliom Base App// is a library and a template of Eliom application,
+with many common features like
+user registration, login box, notification system, etc.
 
-===O'Closure===
-//O'Closure// is a binding for the Google Closure JavaScript widget library.
-It makes possible to write dynamic user interfaces for Web pages in OCaml
-using Js_of_ocaml.
 
 
 [[wiki:manual/application|next]]
