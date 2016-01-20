@@ -103,11 +103,15 @@ That is probably all you need for a very basic Web site in OCaml.
 Instead of generating HTML in OCaml strings, we highly recommend to use
 //typed HTML//. It is very easy to use (once you have learned the basics)
 and helps a lot to efficiently write modular and valid HTML.
+To do this, use module
+<<a_api project="eliom" subproject="server"| module Eliom_registration.Html5>>
+instead of
+<<a_api project="eliom" subproject="server"| module Eliom_registration.Html_text>>.
 See this
 <<a_manual project="tuto" chapter="application" fragment="tyxml"|tutorial>>
-for more information, and more comprehensive documentation
+for more information, and a comprehensive documentation
 <<a_manual project="tyxml"|here>>
-and
+and a more advanced manual
 <<a_manual project="eliom" chapter="clientserver-html"|here>>.
 
 Have a look at Eliom's API documentation to see other kinds of services,

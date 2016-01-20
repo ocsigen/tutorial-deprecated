@@ -3,8 +3,9 @@
 This short tutorial is an example of client-server Eliom application.
 It gives an example of client-server widgets.
 
-It is probably a good starting point if you want to learn quickly how to write a
-client-server Eliom application with a short example and few explanations.
+It is probably a good starting point if you know OCaml well
+and want to learn quickly how to write a
+client-server Eliom application with a short example and concise explanations.
 For more explanation, see the
 <<a_manual project="tuto" chapter="application"|"graffiti" tutorial>>
 or read the manuals.
@@ -105,8 +106,9 @@ client and server sides. The syntax {{{lwt a = e1 in e2}}} allows to wait
 (without blocking the rest of the program) for a Lwt thread to terminate
 before continuing. {{{e2}}} must be a Lwt thread itself. {{{Lwt.return}}}
 makes possible to create a Lwt thread already terminated.
-* {{{Lwt_js_events}}} defines a very convenient way to program
-events. Here {{{Lwt_js_events.onload}}} is a Lwt thread that waits
+* {{{Lwt_js_events}}} defines a convenient way to program
+interface events (mouse, keyboard ...).
+Here {{{Lwt_js_events.onload}}} is a Lwt thread that waits
 until the page is loaded. There are similar functions for example
 to wait for a click on an element of the page, or a key press.
 
@@ -357,12 +359,12 @@ let _ =
 An important feature missing in this tutorial is the ability
 to call server functions from the client side program ("server functions").
 You can have a quick description of this
-[[site:manual/how-to-call-a-server-side-function-from-client-side|in mini HOWTOs]] or
+<<a_manual project="tuto" chapter="how-to-call-a-server-side-function-from-client-side"|in this mini HOWTO>> or
 in [[site:/eliom/manual/clientserver-communication#rpc|Eliom's manual]].
 
 ===Services===
 For many applications, you will need several services.
-Remember that by default, client-side Eliom programs do not
+By default, client-side Eliom programs do not
 stop when you follow a link or send a form. This makes possible to combine
 rich client side features
 (playing music, animations, stateful applications~ ...)
