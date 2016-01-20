@@ -19,8 +19,8 @@
 \def\urljsooc{http://www.ocsigen.org/js_of_ocaml/api/}
 \def\urlcontent{\urleliom server/Eliom_content}
 \def\urlsvg{\urleliom server/Eliom_content.Svg}
-\def\urlsvgF{\urleliom server/Eliom_content_core.Svg.F}
-\def\urlsvgD{\urleliom server/Eliom_content_core.Svg.D}
+\def\urlsvgF{\urleliom server/Eliom_content.Svg.F}
+\def\urlsvgD{\urleliom server/Eliom_content.Svg.D}
 \def\urlhtml{\urleliom server/Eliom_content.Html5}
 \def\urlhtmlF{\urleliom server/Eliom_content.Html5.F}
 \def\urlhtmlD{\urleliom server/Eliom_content.Html5.D}
@@ -96,11 +96,11 @@
       child {node [concept]  {\large \href{\urlxhtml}{Xhtml}}[clockwise from=-45]
         child {node [concept] {\large \href{\urlxhtmlF}{F}}}}
       child {node [concept]  {\large \href{\urlxml}{Xml}}};
-      
 
 
-     
-      
+
+
+
       \node [concept, concept color=jsooc] at (12.5,-31.5) (dom)
             {\large \href{\urljsdom}{Dom}};
       \node [concept, concept color=jsooc] at (12.5,-36) (domhtml)
@@ -110,7 +110,7 @@
 
 
 
-      
+
       \begin{pgfonlayer}{background}
         % The large rectangles:
         \fill [jsoocBgrd] (dom) rectangle ++(-2.5,2.5);
@@ -123,7 +123,7 @@
         \fill [jsoocBgrd] (domhtml) rectangle ++(-2.5,-2.5);
         \fill [jsoocBgrd] (domhtml) rectangle ++(4.7,-2.5);
 
-        
+
         % The shadings:
         %% \shade [left color=upperleft,right color=upperright]
         %% ([xshift=-1cm] dom) rectangle ++(2,20);
@@ -133,7 +133,7 @@
         %% ([yshift=-1cm]Computational Complexity) rectangle ++(-20,2);
         %% \shade [top color=upperright,bottom color=lowerright]
         %% ([yshift=-1cm]Computational Complexity) rectangle ++(20,2);
-        
+
 
 
         % connections
