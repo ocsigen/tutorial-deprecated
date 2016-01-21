@@ -5,8 +5,6 @@
 ==[[application|Client/server application]]
 ==[[interaction|Service based Web programming]]
 ==[[misc|Miscellaneous features]]
-= Examples: Learning by example
-==[[chat|Chat]]
 = Mini-tutorials: Some small examples
 ==[[tutoreact|Reactive client-server Web applications]]
 ==[[rest|RESTful JSON API]]
