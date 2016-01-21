@@ -796,8 +796,8 @@ chapter="intro"|Ocsigen-widgets>>.
 
 In {{{Makefile.options}}}, created by Eliom's distillery, just add
 {{{ocsigen-widgets.client}}} to the
-{{{CLIENT_PACKAGES}}}: <<code language="makefile"| CLIENT_PACKAGES :=
-ocsigen-widgets.client >>
+{{{CLIENT_PACKAGES}}}:
+<<code language="makefile"| CLIENT_PACKAGES := ocsigen-widgets.client >>
 
 To create the widget, we add the following code in the
 {{{init_client}}} immediatly after canvas configuration:
@@ -881,7 +881,7 @@ You can then test your application ({{{make test.byte}}}).
   Ocsigen-widgets is a Js_of_ocaml library providing useful widgets
   for your Eliom applications. You can use it for building complex
   user interfaces. The full documentation is available
-  (<<a_manual project="tyxml" |Ocsigen-widgets>>).
+  (<<a_manual project="ocsigen-widgets" |Ocsigen-widgets>>).
 
 >>
 
