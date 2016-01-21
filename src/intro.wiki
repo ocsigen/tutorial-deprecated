@@ -28,7 +28,7 @@ The second section of this introduction lists our main
 software projects.
 
 
-<<wip|
+<<|wip|
 Manuals are permanently under evolution.
 Please report any error, mistake, for example by doing pull requests
 on Github, and send us your comments and suggestions!
@@ -49,7 +49,7 @@ towards other chapters are made all along the text, so that you can
 dive into the details if you want to.
 >>
 
-The tutorial is divided into several parts, mostly independant.
+The tutorial is divided into several parts, mostly independant:
 
 <<div class="tutocase"|
 Quick start: the basics

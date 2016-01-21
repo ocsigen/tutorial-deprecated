@@ -70,7 +70,7 @@ Unlike typical web programming techniques (CGI, PHP,~ ...), with
 Eliom, you don't write one file for each URL, but a single OCaml module
 (*.cmo or *.cma) for the whole web site.
 
-The <<a_api project="eliom" | module Eliom_service >> module allows
+Module <<a_api project="eliom" | module Eliom_service >> allows
 to create new entry points to your web site, called //services//. In
 general, services are attached to a URL and generate a web page.
 Services are represented by OCaml values, through which you must
@@ -105,13 +105,17 @@ something like:
 </host>
 }}}
 
-These instructions tell the server to:
+{{{<eliommodule ... />}}} asks the server to load Eliom module
+{{{graffiti.cma}}}, containing the Eliom application,
+at startup and attach it to this host (and site).
 
-* serve files from the directory <<code-inline|
-  /path_to/graffiti/static >> if they exist,
-* generate pages from services in the Eliom application
-  {{{graffiti.cma}}} otherwise.
-* and finally, //run// Eliom ({{{<eliom />}}}).
+Extensions {{{<static ... />}}} (staticmod) and {{{<eliom />}}}
+are called successively:
+* If they exist, files from the directory <<code-inline|
+  /path_to/graffiti/static >> will be served,
+* Otherwise, Server will try to generate pages with Eliom
+  ({{{<eliom />}}}),
+* Otherwise it will generate a 404 (Not found) error (default).
 
 >>
 
@@ -119,11 +123,9 @@ These instructions tell the server to:
 
 There are several ways to create pages for Eliom.  You can generate
 pages as strings (as in other web frameworks).  But we prefer checking
-at compile time that the HTML will be correct.  Eliom provides several
-modules to do that, either using OcamlDuce (if you have it installed)
-or using OCaml's polymorphic variants.  This tutorial is using the
-second solution, using the module <<a_api project="eliom"
-| module Eliom_content.Html5.D >>. This module defines a
+at compile time that the HTML will be correct.  Eliom is using OCaml's
+polymorphic variants to do that. Module <<a_api project="eliom"
+| module Eliom_content.Html5.D >> defines a
 construction function for each HTML5 tag.
 
 //Note that it is also possible to use the usual HTML syntax directly
@@ -162,6 +164,13 @@ is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic
 variant type.
 
+Most functions take as parameter the list representing its contents.
+See other examples below. Each of them take un optional {{{?a}}}
+parameter for optional HTML attributes.
+Mandatory HTML attributes correspond to mandatory OCaml parameters.
+See below for examples.
+
+<<|
 **Another example:** In HTML5, some tags cannot be empty. For example
 {{{<table>}}}must contain at least one row.  To enforce this, the
 <<a_api project="tyxml" text="Html5.table"| val
@@ -170,6 +179,7 @@ first row, the second one is a list containing all the other rows
 (same thing for {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...).  This
 forces the user to handle the empty list case specially and thus make
 the output conform to the recommendation from the W3C.
+>>
 
 //Strict typing of HTML may seem arduous initially, but in fact it is
 very easy to get used to.  It actually saves a huge amount of
@@ -380,10 +390,11 @@ value {{{ c }}} is displayed in a message box on the client.
   and its <<a_manual project="eliom" chapter="workflow-compilation"
   fragment="compilation"|compilation process>>.
 
-  Note well, that the value of an injection into a section {{{ {client{ ... }} }}}
+  The value of an injection into a section {{{ {client{ ... }} }}}
   is sent only once when starting the application
   in the browser, and //not// synced automatically later (you may want
   to use <<a_api project="eliom" subproject="server"|module
+  Eliom_comet>> or <<a_api project="eliom" subproject="server"|module
   Eliom_react>>, however).
 
   In contrast, the values of injections into client values which are
@@ -603,7 +614,8 @@ terminate:
 
 Functions in Eliom and Js_of_ocaml which do not implement just a
 computation or direct side effect but are waiting for user activity,
-file system access or need a unforseeable amount of time to return are
+file system or database access,
+distant request, or need a unforseeable amount of time to return are
 defined //in Lwt//; instead of returning a value of type {{{a}}} they
 return an Lwt-thread of type {{{a Lwt.t}}}.
 
@@ -808,6 +820,10 @@ let slider =
     ~input_type:`Range Form.int
 >>
 
+{{{Form.int}}} is a typing information telling that this input takes
+an integer value. This kind of input can only be associated to services
+taking an integer as parameter.
+
 Next, add it to the page's body like this
 <<code language="ocaml" class="server"|
 let page =
@@ -926,7 +942,7 @@ let _ = Lwt_stream.iter draw_server (Eliom_bus.stream bus)
 
 >>
 
-We also define a service that send the picture:
+We also define a service that sends the picture:
 
 <<code language="ocaml" class="server"|
 let imageservice =
