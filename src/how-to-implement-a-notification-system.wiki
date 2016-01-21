@@ -57,12 +57,13 @@ On client side, listen on this channel. To do that, execute this code
 <<code language="ocaml"|
 let (channel, _) = Eliom_reference.Volatile.get channel_ref in
 let _ =
-  {unit{
-    Lwt.async (fun () ->
-      Lwt_stream.iter_s
-        (fun v -> (* do something *))
-        %channel)
-      }}
+  [%client
+    (Lwt.async (fun () ->
+       Lwt_stream.iter_s
+       (fun v -> (* do something *))
+       ~%channel)
+    : unit)
+  ]
 in
 ...
 >>

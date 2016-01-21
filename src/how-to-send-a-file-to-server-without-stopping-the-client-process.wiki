@@ -12,26 +12,23 @@ Example:
 let pic_service =
   post_coservice' ~name:"upload_pic" ~post_params:(file "f") ()
 
-{client{
-let upload_pic_form () =
+let%client upload_pic_form () =
   let file = D.Raw.input ~a:[a_input_type `File] () in
   let submit = D.Raw.input ~a:[a_input_type `Submit; a_value "Send"] () in
   Lwt_js_events.(
     async (fun () ->
       clicks (To_dom.of_input submit)
         (fun _ _ ->
-          Js.Optdef.case ((To_dom.of_input file)##files)
+          Js.Optdef.case ((To_dom.of_input file)##.files)
             Lwt.return
             (fun files ->
-              Js.Opt.case (files##item(0))
+              Js.Opt.case (files##(item (0)))
                 Lwt.return
                 (fun file ->
                   Eliom_client.call_caml_service
-                    ~service:%pic_service
+                    ~service:~%pic_service
                     () file)))));
   [pcdata "Upload a picture:";
    file;
    submit]
-}}
-
 >>

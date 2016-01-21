@@ -54,7 +54,7 @@
 ===[[how-to-know-whether-the-browser-window-has-the-focus-or-not|How to know whether the browser window has the focus or not]]
 ===[[how-to-build-js-object|How to build js object]]
 ===[[how-to-stop-default-behaviour-of-events|How to stop default behaviour of events]]
-===[[how-to-call-an-ocaml-function-from-js-code|Howt to call an OCaml function from js code]]
+===[[how-to-call-an-ocaml-function-from-js-code|How to call an OCaml function from js code]]
 == Eliom client-server applications
 ===[[how-to-call-a-server-side-function-from-client-side|How to call a server side function from a client side]]
 ===[[how-to-make-the-client-side-program-get-an-html-element-from-the-server-and-insert-it-in-the-page|How to make the client side program get an HTML element from the server and insert it in the page]]
