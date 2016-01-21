@@ -12,7 +12,7 @@ The name of the group may be for example the user id:
 To create a session group, open the session by doing something like:
 <<code language="ocaml"|
 let open_session login password =
-  lwt b = check_password login password in
+  let%lwt b = check_password login password in
   if b
   then Eliom_state.set_volatile_data_session_group
       ~scope:Eliom_common.default_session_scope

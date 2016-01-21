@@ -20,7 +20,7 @@ let static_dir = "/tmp/static/"
 
 let image_dir name =
   let dir = static_dir ^ "/graffiti_saved/" ^ (Url.encode name) in
-  (try_lwt Lwt_unix.mkdir dir 511 with
+  (try%lwt Lwt_unix.mkdir dir 511 with
     | _ -> debug "could not create the directory %s" dir; Lwt.return ())
   >|= (fun () -> dir)
 
@@ -29,8 +29,8 @@ let make_filename name number =
   dir ^ "/" ^ (string_of_int number) ^ ".png"
 
 let save image name number =
-  lwt file_name = make_filename name number in
-  lwt out_chan = Lwt_io.open_file ~mode:Lwt_io.output file_name in
+  let%lwt file_name = make_filename name number in
+  let%lwt out_chan = Lwt_io.open_file ~mode:Lwt_io.output file_name in
   Lwt_io.write out_chan image
 >>
 
@@ -51,12 +51,12 @@ times of old images. We need those times to timestamp the entries of the feed.
 <<code language="ocaml"|
 let save_image username =
   let now = CalendarLib.Calendar.now () in
-  lwt number,_,list =
-    try_lwt Ocsipersist.find image_info_table username with
+  let%lwt number,_,list =
+    try%lwt Ocsipersist.find image_info_table username with
       | Not_found -> Lwt.return (0,now,[])
       | e -> Lwt.fail e
   in
-  lwt () = Ocsipersist.add image_info_table
+  let%lwt () = Ocsipersist.add image_info_table
     username (number+1,now,(number,now)::list) in
   let (_,image_string) = Hashtbl.find graffiti_info username in
   save (image_string ()) username number

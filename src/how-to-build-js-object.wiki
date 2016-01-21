@@ -5,11 +5,9 @@ You just have to use jsnew syntax.
 Example:
 
 <<code language="ocaml"|
-
 let get_timestamp () =
-  let date = jsnew Js.date_now () in
-  int_of_float (Js.to_float (date##getTime ()))
-
+  let date = new%js Js.date_now in
+  int_of_float (Js.to_float (date##getTime))
 >>
 
 More details in documentation: [[wiki(72):js_of_ocaml/api/Js#2_Objectconstructors|Js object constructor]]
