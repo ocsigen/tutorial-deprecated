@@ -1005,8 +1005,6 @@ configuration file {{{local/etc/graffiti/graffiti-test.conf}}}:
 
 The first version of the program is now complete.
 
-<<webonly| <<a_file src="tutorial.tar.gz"| Download the code>>.>>
-
 <<div class="exercices"|
 
 ====Exercises====
