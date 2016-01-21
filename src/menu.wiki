@@ -1,7 +1,7 @@
 = Tutorial
 ==[[intro|Introduction. Ocsigen: the different projects]]
 ==[[basicwebsite|A basic Web site in OCaml]]
-==[[tutowidgets|Eliom apps basics: writing client server widgets]]
+==[[tutowidgets|Eliom apps basics: writing client-server widgets]]
 ==[[application|Client/server application]]
 ==[[interaction|Service based Web programming]]
 ==[[misc|Miscellaneous features]]
