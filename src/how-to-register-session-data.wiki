@@ -1,7 +1,7 @@
 =How to register session data?=
 
-It is very easy to register sesion data using Eliom references.
-Just create an Eliom reference of scope session and its value
+It is very easy to register session data using //Eliom references//.
+Just create an Eliom reference of //scope// session and its value
 will be different for each session (one session = one browser process).
 
 But most of the time, what we want is to store data for one user,

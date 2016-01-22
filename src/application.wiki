@@ -276,8 +276,7 @@ to indicate which side the code should run on.
 
 * {{{ [%%client ... ] }}}: the list of enclosed definitions is
   client-only code (similarly for {{{ [%%server ... ] }}}). With
-  {{{ [%%shared ... ] }}}, the code is used both on the server and
-  client.
+  {{{ [%%shared ... ] }}}, the code is used both on the server and client.
 * {{{ let%client }}}, {{{ let%server }}}, {{{ let%shared }}}: same as
   above for a single definition.
 * {{{ [%%client.start] }}}, {{{ [%%server.start] }}},

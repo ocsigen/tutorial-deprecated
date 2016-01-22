@@ -95,6 +95,7 @@ For more detailed explanations, see the tutorial for the graffiti app
 or the manual of each of the projects.
 
 * The {{{##}}} is used to call a JS method from OCaml
+  and {{{##.}}} to access a JS object field
   (See Js_of_ocaml's documentation:
   <<a_api project="js_of_ocaml" | module Ppx_js >>).
 * If there are several services in your application, the client-side

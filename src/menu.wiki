@@ -1,5 +1,5 @@
 = Main tutorial
-==[[intro|Introduction. Ocsigen: the different projects]]
+==[[intro|Introduction. Ocsigen: where to start?]]
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client-server widgets]]
 ==[[application|Client/server application: Graffiti]]
@@ -7,8 +7,9 @@
 ==[[tutoreact|Reactive client-server Web applications]]
 ==[[misc|Mixing traditional Web interaction with client-server app]]
 = Other tutorials: Miscellanous features
-==[[rest|RESTful JSON API]]
+==[[how-to-register-session-data|Session data: Eliom references]]
 ==[[custom-conf|Custom configuration]]
+==[[rest|RESTful JSON API]]
 ==[[ocsipersist|Persistent tables with Ocsipersist]]
 ==[[hash-password|Protecting passwords]]
 ==[[macaque|MaCaQue: SQL queries - Users]]
@@ -46,8 +47,6 @@
 ===[[how-to-write-a-json-service|How to write a JSON service]]
 ===[[how-to-send-file-download|How to send a file (download)]]
 ===[[how-to-send-file-upload|How to send a file (upload)]]
-== Sessions
-===[[how-to-register-session-data|How to register session data]]
 == Js_of_ocaml
 ===[[how-to-attach-ocaml-values-to-dom-elements|How to attach OCaml values to DOM elements]]
 ===[[how-to-know-whether-the-browser-window-has-the-focus-or-not|How to know whether the browser window has the focus or not]]
