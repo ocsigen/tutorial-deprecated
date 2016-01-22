@@ -23,6 +23,17 @@ So when you define your pages, you just call this skeleton with the content of t
 
 
 This method can also be adapted to add elements on all your pages, like a header, a footer and a menu.
+
+Module <<a_api project="eliom" | module Eliom_tools >> has a predefined function
+for this:
+
+<<code language="ocaml"|
+Eliom_tools.D.html
+  ~title:"ex"
+  ~css:[["css"; "ex.css"]]
+  (body [h2 [pcdata "Welcome to Ocsigen!"]]
+>>
+
 <<|The following example is more complete.
 
 

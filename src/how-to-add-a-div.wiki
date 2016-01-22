@@ -1,7 +1,7 @@
 =How to add a div?=
 
 <<code language='ocaml'|
-div [pcdata "Hello!"]
+div ~a:[a_class ["firstclass"; "secondclass"]] [pcdata "Hello!"]
 >>
 
 **Required parameter**: list containing other elements

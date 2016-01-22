@@ -1,6 +1,6 @@
 =How to build js object?=
 
-You just have to use jsnew syntax.
+Use syntax {{{new%js}}}:
 
 Example:
 

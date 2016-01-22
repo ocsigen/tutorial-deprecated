@@ -1,5 +1,4 @@
-=How to make the client side program get an HTML element from the
-server and insert it in the page?=
+=How to make the client side program get an HTML element from the server and insert it in the page?=
 
 A very convenient way to do that is to use server functions :
 

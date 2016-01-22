@@ -4,10 +4,10 @@ Examples:
 
 <<code language="ocaml"|
 (* Link to a service without parameter: *)
-Html5.D.a coucou [pcdata "coucou"] ();
+Html5.D.a ~service:coucou [pcdata "coucou"] ();
 
 (* Link to a service with parameters of type (int * (int * string)): *)
-Html5.D.a coucou_params
+Html5.D.a ~service:coucou_params
   [pcdata "coucou_params"] (42, (22, "ciao"));
 
 (* Link to an external service: *)

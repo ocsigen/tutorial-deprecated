@@ -3,11 +3,11 @@
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client-server widgets]]
 ==[[application|Client/server application: Graffiti]]
+==[[how-to-register-session-data|Session data: Eliom references]]
 ==[[interaction|Service based Web programming]]
 ==[[tutoreact|Reactive client-server Web applications]]
 ==[[misc|Mixing traditional Web interaction with client-server app]]
 = Other tutorials: Miscellanous features
-==[[how-to-register-session-data|Session data: Eliom references]]
 ==[[custom-conf|Custom configuration]]
 ==[[rest|RESTful JSON API]]
 ==[[ocsipersist|Persistent tables with Ocsipersist]]
@@ -29,7 +29,7 @@
 ===[[how-to-use-get-parameters-or-parameters-in-the-url|How to use GET parameters (parameters in the URL)]]
 ===[[how-to-add-css-stylesheet|How to add CSS stylesheet]]
 ===[[how-to-add-a-javascript-script|How to add a Javascript script]]
-===[[how-to-add-a-favicon|How to add a Favicon]]
+<<|===[[how-to-add-a-favicon|How to add a Favicon]] >>
 ===[[how-to-add-a-div|How to add a div]]
 ===[[how-to-add-a-list|How to add lists in pages?]]
 ===[[how-to-add-an-image|How to add an image]]
