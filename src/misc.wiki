@@ -23,7 +23,7 @@ to the corresponding URL.
 
 We need to refactor some parts. In particular, we need to be able to handle
 separately different drawings. To do this, we will turn all global
-variable, like the bus, in local ones.
+variable, like the bus, into local ones.
 
 When an application grows, it start being useful to split it in
 multiple files. For sake of example, we will split graffiti into 4
@@ -79,8 +79,8 @@ let stop_drawing { drawing_thread; drawing_event_thread } =
 
 >>
 
-Notice that the client does not keep data from pages it left.
-{{{Lwt.cancel t}}} stops the thread t. In this case it also closes the
+<<| WTF? Notice that the client does not keep data from pages it left.>>
+{{{Lwt.cancel t}}} stops thread t. In this case it also closes the
   bus on which t is listening. For more informations see the
   <<a_manual project="lwt"| Lwt programming guide >> and
   <<a_api project="eliom" subproject="client" | module Eliom_bus >>.
@@ -357,7 +357,7 @@ let () = My_app.register ~service:multigraffiti_service
        Html5.D.div [slider]])
 >>
 
-At this point, you can run your application on the server provided that you installed the css and images directories in the main directory of your application, build it using this <<a_file src="tutorial/chapter3/multigraffiti/Makefile"|{{{Makefile}}}>> along with this <<a_file src="tutorial/chapter3/multigraffiti/Makefile.common"|{{{Makefile.common}}}>> and configured it using <<a_file src="tutorial/chapter3/multigraffiti/graffiti.conf.in"|{{{graffiti.conf.in}}}>> as groundwork of configuration file.
+At this point, you can run your application on the server provided that you installed the css and images directories in the main directory of your application, build it using this <<a_file src="tutorial/chapter3/multigraffiti/Makefile"|{{{Makefile}}}>> along with this <<a_file src="tutorial/chapter3/multigraffiti/Makefile.common"|{{{Makefile.common}}}>> and configured it using <<a_file src="tutorial/chapter3/multigraffiti/graffiti.conf.in"|{{{graffiti.conf.in}}}>> as basis for your configuration file.
 
 ===Mixing client/server application with traditional web interaction===
 

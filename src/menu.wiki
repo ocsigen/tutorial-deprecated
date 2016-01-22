@@ -2,19 +2,19 @@
 ==[[intro|Introduction. Ocsigen: the different projects]]
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client-server widgets]]
-==[[application|Client/server application]]
+==[[application|Client/server application: Graffiti]]
 ==[[interaction|Service based Web programming]]
-==[[misc|Miscellaneous features]]
-= Mini-tutorials: Some small examples
+==[[misc|Improving Graffiti]]
 ==[[tutoreact|Reactive client-server Web applications]]
+= Other tutorials: Miscellanous examples
 ==[[rest|RESTful JSON API]]
-==[[macaque|MaCaQue: SQL queries]]
 ==[[custom-conf|Custom configuration]]
-==[[ocsipersist|Light database]]
+==[[ocsipersist|Persistent tables with Ocsipersist]]
 ==[[pictures|Download pictures]]
 ==[[music|Playing music]]
 ==[[reactivemediaplayer|Reactive media player]]
 ==[[hash-password|Protecting passwords]]
+==[[macaque|MaCaQue: SQL queries - Users]]
 =@@class="howto"@@ HOW-TO
 == My first steps with Ocsigen
 ===[[how-to-install-ocsigen|How to install Ocsigen]]
@@ -66,5 +66,4 @@
 ===[[how-to-use-a-database-with-eliom|How to use a database with Eliom]]
 == Eliom Server side
 ===[[how-do-i-create-a-cryptographically-safe-identifier|How do I create a Cryptographically safe identifier]]
-===[[how-can-i-extend-the-configuration-file-parsing-with-application-specific-entry|How can I extend the configuration file parsing with applicaiton-specific entry]]
 >>

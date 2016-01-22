@@ -1,12 +1,11 @@
 = Client server reactive application with Ocsigen
 
 This is a short tutorial showing how to write a very simple reactive client-server
-application using Js_of_ocaml, Eliom and Eliom plus. It requires Eliom > 5.0
-(or branch sharedreact of development version while Eliom 5 is not released).
+application using Js_of_ocaml, Eliom and Eliom base app. It requires Eliom ≥ 5.0.
 
 Our application will display a list of items to connected users
 (for example a list of messages in a forum),
-and make possible to add new items.
+and make it possible to add new items.
 
 In this tutorial, you will learn:
  * How to use Eliom base app to quickly build an application with user management
@@ -27,7 +26,7 @@ item arrives
 
 Eliom base app contains a set of higher level libraries for Eliom
 (user management, tips, notifications).
-It also contains a template for Eliom-distillery that will create for an application
+It also contains a template for Eliom-distillery that will create an application
 with user management, that you can use as a starting point for your project.
 
 {{{
@@ -42,7 +41,7 @@ Eliom base app is still young and the creation of the database must be improved
 program {{{pg_ctl}}} in you directory. For example:
 
 {{{
-ln -s /usr/lib/postgresql/9.3/bin/pg_ctl
+ln -s /usr/lib/postgresql/9.4/bin/pg_ctl
 }}}
 
 Now create the local database and start the database server:

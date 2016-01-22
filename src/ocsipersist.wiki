@@ -1,11 +1,21 @@
 =Lightweight database using Ocsipersist=
 <<concepts |Persistent tables with Ocsipersist>>
 
-For maintaining the list of user and password, we do not need the full
-power of a SQL database, a key/value table is sufficient. Ocsigen has
-such a simple table mechanism directly integrated: Ocsipersist.
+Ocsipersist is a module for persistent references and tables.
 
-We first create a table holding ocaml values:
+For persistent references, Eliom has a higher level interface,
+called //Eliom references//, and you probably want to use it instead
+of using Ocsipersist directly.
+For example persistent Eliom references of scope session group
+can be used to store information about a user (if the session group
+corresponds to the user).
+
+Ocsipersist can still be useful for creating persistent key-value tables,
+if you do not need the full power of a SQL database.
+
+This tutorial shows how to implement a table for storing users and passwords.
+
+We first create a table:
 <<code language="ocaml"|
 let user_table = Ocsipersist.open_table "user_table"
 >>
@@ -33,16 +43,9 @@ let () = Eliom_registration.Action.register
 >>
 
 <<concept title="Ocsipersist"|
- Ocsipersist provides simple typed key/value tables. It provides different backends
- (currently sqlite and dbm) and can be extended.
+ Ocsipersist implements simple typed key/value tables.
+ It can use different backends (currently sqlite and dbm).
  For more informations see <<a_api project="ocsigenserver"| type Ocsipersist.table >>.
 >>
 
 
-== Ocsiperist and Eliom
-
-Eliom has a higher level interface above Ocsiperist to store the server side
-state of an application, called //Eliom references//.
-For example persistent Eliom references of scope session group
-can be used to store information about a user (if the session group
-corresponds to the user).
