@@ -55,7 +55,7 @@
 ===[[how-to-stop-default-behaviour-of-events|How to stop default behaviour of events]]
 ===[[how-to-call-an-ocaml-function-from-js-code|How to call an OCaml function from js code]]
 == Eliom client-server applications
-===[[how-to-call-a-server-side-function-from-client-side|How to call a server side function from a client side]]
+===[[how-to-call-a-server-side-function-from-client-side|How to call a server-side function from the client side]]
 ===[[how-to-make-the-client-side-program-get-an-html-element-from-the-server-and-insert-it-in-the-page|How to make the client side program get an HTML element from the server and insert it in the page]]
 ===[[how-to-attach-ocaml-values-to-the-html-nodes-sent-to-the-client|How to attach OCaml values to the HTML nodes sent to the client]]
 ===[[how-to-iterate-on-all-sessions-for-one-user-or-all-tabs|How to iterate on all sessions for one user, or all tabs]]
