@@ -7,7 +7,7 @@ will be different for each session (one session = one browser process).
 But most of the time, what we want is to store data for one user,
 not for one browser instance. To do that, we group all the sessions
 for one user together, by creating a group of sessions.
-The name of the group may be for example the user id:
+The name of the group may be for example the user id.
 
 To create a session group, open the session by doing something like:
 <<code language="ocaml"|

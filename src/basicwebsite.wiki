@@ -50,7 +50,7 @@ configuration file for Ocsigen Server).
 
 
 <<code language="shell"|
-$ eliom-distillery -name mysite -template basic -target-directory mysite
+$ eliom-distillery -name mysite -template basic.ppx -target-directory mysite
 >>
 
 Put these lines in file {{{mysite.eliom}}}, compile and run the server by
