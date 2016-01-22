@@ -1,20 +1,21 @@
-= Tutorial
+= Main tutorial
 ==[[intro|Introduction. Ocsigen: the different projects]]
 ==[[basicwebsite|A basic Web site in OCaml]]
 ==[[tutowidgets|Eliom apps basics: writing client-server widgets]]
 ==[[application|Client/server application: Graffiti]]
 ==[[interaction|Service based Web programming]]
-==[[misc|Improving Graffiti]]
 ==[[tutoreact|Reactive client-server Web applications]]
-= Other tutorials: Miscellanous examples
+==[[misc|Mixing traditional Web interaction with client-server app]]
+= Other tutorials: Miscellanous features
 ==[[rest|RESTful JSON API]]
 ==[[custom-conf|Custom configuration]]
 ==[[ocsipersist|Persistent tables with Ocsipersist]]
+==[[hash-password|Protecting passwords]]
+==[[macaque|MaCaQue: SQL queries - Users]]
+= Improving Graffiti
 ==[[pictures|Download pictures]]
 ==[[music|Playing music]]
 ==[[reactivemediaplayer|Reactive media player]]
-==[[hash-password|Protecting passwords]]
-==[[macaque|MaCaQue: SQL queries - Users]]
 =@@class="howto"@@ HOW-TO
 == My first steps with Ocsigen
 ===[[how-to-install-ocsigen|How to install Ocsigen]]

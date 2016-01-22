@@ -1,7 +1,7 @@
 =Saving favorite pictures=
 <<concepts |Atom feed>>
 
-We will now add a button to the application to save the current
+We will now add a button to the Graffiti application to save the current
 image. The images will be saved to the filesystem using the module
 <<a_api project="lwt"| module Lwt_io>>. We will then make an Atom feed
 with the saved images using <<a_api project="eliom" | module Atom_feed >>.
