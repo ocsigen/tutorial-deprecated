@@ -800,10 +800,17 @@ lines are drawn on both windows.
 
 In this section, we add a color picker and slider to choose the size
 of the brush. For the colorpicker we used a widget available in
-<<a_manual project="ocsigen-widgets"
-chapter="intro"|Ocsigen-widgets>>.
+<<a_manual project="ocsigen-widgets" chapter="intro"|Ocsigen-widgets>>.
 
-In {{{Makefile.options}}}, created by Eliom's distillery, just add
+To install Ocsigen widgets, do:
+{{{
+opam pin add ocsigen-widgets https://github.com/ocsigen/ocsigen-widgets.git
+opam install ocsigen-widgets
+}}}
+
+
+
+In {{{Makefile.options}}}, created by Eliom's distillery, add
 {{{ocsigen-widgets.client}}} to the
 {{{CLIENT_PACKAGES}}}:
 <<code language="makefile"|
