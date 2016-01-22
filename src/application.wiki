@@ -146,7 +146,7 @@ HTML5 standard (with some limitations). For example if you write:
    (body [pcdata "Hallo"]))
 >>
 
-You will get an error message similar to the following, referring at
+You will get an error message similar to the following, referring to
 the end of line 2:
 
 {{{
@@ -275,12 +275,13 @@ or other server- /client-parts), you can use the following constructs
 to indicate which side the code should run on.
 
 * {{{ [%%client ... ] }}}: the list of enclosed definitions is
-  client-only code (similarly for {{{ [%%server ... ] }}}). With {{{
-  [%%shared ... ] }}}, the code is used both on the server and client.
+  client-only code (similarly for {{{ [%%server ... ] }}}). With
+  {{{ [%%shared ... ] }}}, the code is used both on the server and
+  client.
 * {{{ let%client }}}, {{{ let%server }}}, {{{ let%shared }}}: same as
   above for a single definition.
-* {{{ [%%client.start] }}}, {{{ [%%server.start] }}}, {{{
-  [%%shared.start] }}}: these set the default location for all
+* {{{ [%%client.start] }}}, {{{ [%%server.start] }}},
+  {{{ [%%shared.start] }}}: these set the default location for all
   definitions that follow, and which do not use the preceding
   constructs.
 
@@ -310,11 +311,11 @@ code by the following quotation:
 >>
 
 where {{{typ}}} is the type of an expression {{{expr}}} on the client.
-Note, that such a client values is abstract on the server, but becomes
+Note, that such a client value is abstract on the server, but becomes
 concrete, once it is sent to the client with the next request.
 
-(The {{{typ}}} can be ommitted when it can be inferred from the usage
-of the client value in the server code.)
+(The {{{typ}}} can be ommitted if it can be inferred from the usage of
+the client value in the server code.)
 
 **Client values are executed on the client after the service
 returns.** You can use client values when a service wants to ask the
@@ -381,12 +382,12 @@ let main_service =
 
 Here, we are increasing the reference {{{count}}} each time the page
 is accessed. When the page is loaded and the document is in-place, the
-client program initializes the value inside {{{ [%client ... ] }} }}},
-and thus triggers an alert window. More specifically, the variable {{{
-c }}}, in the scope of the client value on the server is made
+client program initializes the value inside {{{ [%client ... ] }}},
+and thus triggers an alert window. More specifically, the variable
+{{{c}}}, in the scope of the client value on the server is made
 available to the client value using the syntax extension {{{~%c}}}. In
-doing so, the server side value {{{ c }}} is displayed in a message
-box on the client.
+doing so, the server side value {{{c}}} is displayed in a message box
+on the client.
 
 
 <<concept
@@ -548,13 +549,12 @@ Mouse events with Lwt
 
 We now want to catch mouse events to draw lines with the mouse like
 with the //brush// tools of any classical drawing application. One
-solution would be to mimic classical JavaScript code in OCaml ; for
+solution would be to mimic typical JavaScript code in OCaml; for
 example by using the function <<a_api project="js_of_ocaml"| val
 Dom_events.listen >> that is the Js_of_ocaml's equivalent of
-{{{addEventListener}}}. However, this solution is at least as much
-verbose than the JavaScript equivalent, hence not
-satisfactory. Js_of_ocaml's library provides a much easier way to do
-that, together with Lwt.
+{{{addEventListener}}}. However, this solution is at least as verbose
+as the JavaScript equivalent, hence not satisfactory. Js_of_ocaml's
+library provides a much easier way to do that with the help of Lwt.
 
 Replace the {{{init_client}}} of the previous example by the
 following piece of code, then compile and draw!
@@ -617,12 +617,22 @@ they return an Lwt thread of type {{{a Lwt.t}}}.
 The only way to use the result of such functions (ones that return
 values in the //Lwt monad//), is to use {{{Lwt.bind}}}.
 
-<<code language="ocaml"| Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b
-Lwt.t>> It is convenient to define an infix operator like this: <<code
-language="ocaml"| let (~>>=) = Lwt.bind>> Then the code <<code
-language="ocaml"| f () ~>>= fun x -> >> has to be read as <<code
-language="ocaml"| let x = f () in>> but only for functions returning a
-value in the Lwt monad.\\
+<<code language="ocaml"|
+Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t
+>>
+
+It is convenient to define an infix operator like this:
+<<code language="ocaml"| let (~>>=) = Lwt.bind>>
+
+Then the code
+
+<<code language="ocaml"| f () ~>>= fun x -> >>
+
+is conceptually similar to
+
+<<code language="ocaml"| let x = f () in>>
+
+but only for functions returning a value in the Lwt monad.
 
 For more clarity, there is a syntax extension for Lwt, defining
 {{{let%lwt}}} to be used instead of {{{let}}} for Lwt functions:
@@ -657,7 +667,7 @@ happens. That's why it returns a value in the Lwt monad.
 
 Using cooperative threads has a huge advantage: given that you know
 precisely where the cooperation points are, //you need very few
-mutexes// and you have //very little risk of deadlocks//!
+mutexes// and you have //very low risk of deadlocks//!
 
 Using Lwt is very easy and does not cause trouble, provided you never
 use //blocking functions// (non-cooperative functions).  //Blocking
@@ -797,10 +807,12 @@ chapter="intro"|Ocsigen-widgets>>.
 In {{{Makefile.options}}}, created by Eliom's distillery, just add
 {{{ocsigen-widgets.client}}} to the
 {{{CLIENT_PACKAGES}}}:
-<<code language="makefile"| CLIENT_PACKAGES := ocsigen-widgets.client >>
+<<code language="makefile"|
+CLIENT_PACKAGES := ... ocsigen-widgets.client
+>>
 
 To create the widget, we add the following code in the
-{{{init_client}}} immediatly after canvas configuration:
+{{{init_client}}} immediately after canvas configuration:
 
 <<code language="ocaml" class="client"|
 (* Color of the brush *)
@@ -897,7 +909,7 @@ arrives. To do that, we will use the
 For using Cairo, first, make sure that it is installed (it is
 available as {{{cairo2}}} via OPAM). Second, add it to the
 {{{SERVER_PACKAGES}}} in your {{{Makefile.options}}}: <<code
-language="makefile"| SERVER_PACKAGES := cairo2 >>
+language="makefile"| SERVER_PACKAGES := ... cairo2 >>
 
 The {{{draw_server}}} function below is the equivalent of the
 {{{draw}}} function on the server side and the {{{image_string}}}
@@ -992,15 +1004,15 @@ img##.onload := Dom_html.handler
     (fun ev -> ctx##drawImage img 0. 0.; Js._false);
 >>
 
-You are then ready to try your graffiti-application by {{{make
-test.byte}}}.
+You are then ready to try your graffiti-application by
+{{{make test.byte}}}.
 
 Note, that the {{{Makefile}}} from the distillery automatically adds
 the packages defined in {{{SERVER_PACKAGES}}} as an extension in your
 configuration file {{{local/etc/graffiti/graffiti-test.conf}}}:
 
 <<code language="xml"|
-  <extension findlib-package="cairo2" />
+<extension findlib-package="cairo2" />
 >>
 
 The first version of the program is now complete.
