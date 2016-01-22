@@ -461,10 +461,12 @@ The functions that build widgets like
 expect an argument of type
 <<a_api project="eliom" | type Eliom_content.Html5.D.Form.param >>
 (e.g.,
-{{{ Eliom_content.Html5.D.Form.int : int Eliom_content.Html5.D.Form.param }}})
+{{{ Eliom_content.Html5.D.Form.int : int Eliom_content.Html5.D.Form.param}}})
 specifying the parameter type.  OCaml checks that the name you use
 matches the field.  For example the names above need to be used with
 <<a_api project="eliom" | val Eliom_content.Html5.D.Form.string >>.
+
+>>
 
 ===Opening a session===
 
