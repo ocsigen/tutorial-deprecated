@@ -287,7 +287,7 @@ to indicate which side the code should run on.
 If no location is specified, the code is assumed to be for the server.
 
 The above constructs are implemented by means of PPX, OCaml's new
-mechanism for implementing syntax extensions.
+mechanism for implementing syntax extensions. See <<a_api subproject="ppx"|module Ppx_eliom>> for details.
 
 **Client parts are executed once, when the client side process is
 launched.** The client process is not restarted after each page
@@ -397,9 +397,9 @@ on the client.
   the {{{~%variable}}} syntax.  Values sent that way are weakly type
   checked: the name of the client side type must match the server side
   one. If you define a type and want it to be available on both sides,
-  declare it in {{{ [%shared ... ] }}}. The Eliom manual provides more
-  information on the <<a_manual project="eliom"
-  chapter="clientserver-language" | Eliom's syntax extension >> and
+  declare it in {{{ [%%shared ... ] }}}. The Eliom manual provides more
+  information on the <<a_api subproject="ppx"
+  text="Eliom's syntax extension"|module Ppx_eliom>> and
   its <<a_manual project="eliom" chapter="workflow-compilation"
   fragment="compilation"|compilation process>>.
 
