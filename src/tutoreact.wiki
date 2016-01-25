@@ -309,17 +309,20 @@ In the following section, we will implement the notification system.
 
 === Client-server cache
 
-The module {{{Eliom_cscache}}} implements a cache of data, that is, an
-association table where you will put the data of your application on
-client side. For the sake of uniformity (given that pages can be
-generated from either side), the cache is also implemented on the
-server side, with scope "request". This avoids retrieving the same
-data from the database twice for the same request.
+The module
+<<a_api project="eliom" subproject="server"| module Eliom_cscache >>
+implements a cache of data, that is, an association table where you
+will put the data of your application on client side. For the sake of
+uniformity (given that pages can be generated from either side), the
+cache is also implemented on the server side, with scope
+"request". This avoids retrieving the same data from the database
+twice for the same request.
 
-Create a cache by calling the function {{{Eliom_cscache.create}}} from
-server side.  Implement a function {{{get_data}}} to fetch the data
-from the database. This function must have an implementation both on
-server side and client side:
+Create a cache by calling the function
+<<a_api project="eliom" subproject="server"| val Eliom_cscache.create >>
+from server side.  Implement a function {{{get_data}}} to fetch the
+data from the database. This function must have an implementation both
+on server side and client side:
 
 <<code language="ocaml" class="server"|
 let%server get_data = Db.get_message
@@ -353,23 +356,29 @@ Reactive Programming (FRP). In reactive programming, you define
 relations between different pieces of data once, and each update
 automatically produces the recomputation of all the dependent data. In
 Ocsigen we use the module [[http://erratique.ch/logiciel/react|React]]
-combined with [[https://github.com/hhugo/reactiveData/|ReactiveData]],
+combined with [[https://github.com/ocsigen/reactiveData/|ReactiveData]],
 which extends {{{React}}} to deal with incremental updates in
 lists. Have a look at the documentation of the above modules if you
 are not familiar with FRP.
 
-The client-side module {{{Eliom_content.Html5.R}}} enables defining
-reactive page elements.
+The client-side module
+<<a_api project="eliom" subproject="client"| module Eliom_content.Html5.R >>
+enables defining reactive page elements.
 
-The module {{{Eliom_shared}}} enables defining shared (client-side)
-reactive signals from server side. To do that, it is using //shared
-values//, that is, values that contain both a server side and a client
-side value. The server-side module {{{Eliom_content.Html5.R}}} enables
-constructing HTML5 elements that get updated automatically based on
-the signals in {{{Eliom_shared}}}. The modules
-{{{Eliom_shared.React}}} and {{{Eliom_shared.ReactiveData}}} implement
-interfaces very similar to {{{React}}} and {{{ReactiveData}}}, but
-operate on shared signals.
+The module
+<<a_api project="eliom" subproject="server"| module Eliom_shared >>
+enables defining shared (client-side) reactive signals from server
+side. To do that, it is using //shared values//, that is, values that
+contain both a server-side and a client-side value. The server-side
+module
+<<a_api project="eliom" subproject="server"| module Eliom_content.Html5.R >>
+enables constructing HTML5 elements that get updated automatically
+based on the signals in {{{Eliom_shared}}}. The modules
+<<a_api project="eliom" subproject="server"| module Eliom_shared.React >>
+and
+<<a_api project="eliom" subproject="server"| module Eliom_shared.ReactiveData >>
+implement interfaces very similar to {{{React}}} and
+{{{ReactiveData}}}, but operate on shared signals.
 
 === Implementation of the reactive interface
 
@@ -692,12 +701,14 @@ you can add a {{{Lwt_unix.sleep}}} in server side's {{{get_data}}} function.
 
 == The full code ({{{tutoreact_messages.eliom}}}):
 
-<<code language="ocaml"|
+<<code language="ocaml" class="shared"|
 [%%shared
     open Eliom_content.Html5
     open Eliom_content.Html5.D
 ]
+>>
 
+<<code language="ocaml" class="server"|
 module Db = struct
   let db = Ocsipersist.open_table "messages"
   let dbf = Ocsipersist.open_table "forums"
@@ -728,11 +739,15 @@ module Forum_notif = Eba_notif.Make(struct
   type key = int
   type notification = int
 end)
+>>
 
+<<code language="ocaml" class="shared"|
 [%%shared
     type add_message_type = int * string [@@deriving json]
 ]
+>>
 
+<<code language="ocaml" class="server"|
 let add_message_rpc =
   server_function
     [%derive.json: add_message_type]
@@ -741,7 +756,6 @@ let add_message_rpc =
           let%lwt id = Db.add_message forumid value in
           Forum_notif.notify forumid (fun userid -> Lwt.return (Some id));
           Lwt.return ()))
-
 
 let cache : (int, string) Eliom_cscache.t = Eliom_cscache.create ()
 
@@ -757,9 +771,13 @@ let get_data_rpc =
   server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o id -> get_data id))
+>>
 
+<<code language="ocaml" class="client"|
 let%client get_data id = ~%get_data_rpc id
+>>
 
+<<code language="ocaml" class="server"|
 let get_data_forum forumid =
   let%lwt messages = Db.get_messages forumid in
   let default = [%client
@@ -775,7 +793,9 @@ let get_data_forum_rpc =
   server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o forumid -> get_data_forum forumid))
+>>
 
+<<code language="ocaml" class="shared"|
 let%shared display_message id =
   let th =
     let%lwt msg = Eliom_cscache.find ~%cache get_data id in
@@ -783,10 +803,14 @@ let%shared display_message id =
   in
   let%lwt v = Ow_spinner.with_spinner th in
   Lwt.return (li [v])
+>>
 
+<<code language="ocaml" class="client"|
 let%client handle_notif_message_list rmessages (_, msgid) =
   Eliom_shared.ReactiveData.RList.cons msgid (snd rmessages)
+>>
 
+<<code language="ocaml" class="server"|
 let display_messages forumid =
   Forum_notif.listen forumid;
   let%lwt rmessages =
