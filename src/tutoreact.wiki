@@ -610,7 +610,7 @@ Otherwise you will have several reactive data for the same forum and
 the page updates will fail!
 
 To do that, we give as optional argument {{{?default}}} to function
-{{{Eliom_shared.ReactiveData.RList.make}}}, a client value
+{{{Eliom_shared.ReactiveData.RList.create}}}, a client value
 (optionally) containing the current reactive list. If it does not
 exist in the cache, a new one will be created like previously:
 

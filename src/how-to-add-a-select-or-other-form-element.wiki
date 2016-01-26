@@ -37,6 +37,6 @@ Raw.select [option (pcdata "hello");
 
 * [[wiki:manual/how-to-write-forms|How to write forms]]
 * <<a_manual project="eliom" chapter="server-links"|Eliom forms and links>>
-* API <<a_api project="eliom" subproject="server"|module Eliom_content.Html5.D>>
-* module <<a_api project="tyxml"|module Html5.M>> (HTML5 Elements)
+* API
+  <<a_api project="eliom" subproject="server"|module Eliom_content.Html5.D.Form>>
 * signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)

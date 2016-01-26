@@ -4,17 +4,17 @@ You should read the [[site:/tuto/manual/music|Playing Music]] tutorial before th
 
 Since version 4, Eliom embeds the
 [[http://erratique.ch/logiciel/react|React]] library in order to
-provide reactive HTML elements. The documentation for the the React
-library itself can be found
+provide reactive HTML elements
+(<<a_api project="eliom"| module Eliom_content.Html5.R >>).
 
-<<webonly| The final eliom code is available
+
+<<webonly| The final Eliom code is available
 [[https://github.com/ocsigen/tutorial/tree/master/files/tutorial/chapter3/reactive_media_player/reactive_media_player.eliom|for download]]. >>
 
 ==@@id="basics"@@ Basics==
 
 A reactive element, or more generally a reactive value, depends on the
 current value of a signal. For instance :
-
 
 <<code language="ocaml" class="shared"|
 [%%shared
@@ -243,11 +243,12 @@ let progress_bar () =
 
 <<concept title="Reactive attributes and React.S.on" |
 
-The function {{{R.a_value}}} is a reactive attribute
-value. {{{React.S.on c d s}}} is equal to {{{s}}} when {{{c}}} is
-true, otherwise it is equal to {{{d}}} (in case {{{c}}} has never been
-true). Which means we update the attribute value of our input only if
-unblock is true.
+The function {{{R.a_value}}}
+(under <<a_api project="eliom"| module Eliom_content.Html5 >>)
+is a reactive attribute value. {{{React.S.on c d s}}} is equal to
+{{{s}}} when {{{c}}} is true, otherwise it is equal to {{{d}}} (in
+case {{{c}}} has never been true). Which means we update the attribute
+value of our input only if unblock is true.
 
 >>
 

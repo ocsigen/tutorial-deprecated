@@ -27,6 +27,8 @@ p [pcdata "Some text, blah blah blah"]
 
 === Links
 
-* module <<a_api project="tyxml"|module Html5.M>> (HTML5 Elements)
+* Modules <<a_api project="eliom"|module Eliom_content.Html5.D>> and
+  <<a_api project="eliom"|module Eliom_content.Html5.F>>
+  (HTML5 Elements)
 * The <<a_api project="tyxml"|val Html5_sigs.T.h1>> element
 * signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)

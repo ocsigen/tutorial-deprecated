@@ -414,12 +414,12 @@ let connection_box () =
   Form.post_form ~service:connection_service
     (fun (name1, name2) ->
       [fieldset
-         [label ~a:[a_for name1] [pcdata "login: "];
+         [label [pcdata "login: "];
           Form.input
             ~input_type:`Text ~name:name1
             Form.string;
           br ();
-          label ~a:[a_for name2] [pcdata "password: "];
+          label [pcdata "password: "];
           Form.input
             ~input_type:`Password ~name:name2
             Form.string;
@@ -499,12 +499,12 @@ let connection_box () =
         Form.post_form ~service:connection_service
           (fun (name1, name2) ->
             [fieldset
-	       [label ~a:[a_for name1] [pcdata "login: "];
+	       [label [pcdata "login: "];
                 Form.input
                   ~input_type:`Text ~name:name1
                   Form.string;
                 br ();
-                label ~a:[a_for name2] [pcdata "password: "];
+                label [pcdata "password: "];
                 Form.input
                   ~input_type:`Password ~name:name2
                   Form.string;
@@ -786,10 +786,10 @@ let account_form =
   Form.post_form ~service:create_account_service
     (fun (name1, name2) ->
       [fieldset
-         [label ~a:[a_for name1] [pcdata "login: "];
+         [label [pcdata "login: "];
           Form.input ~input_type:`Text ~name:name1 Form.string;
           br ();
-          label ~a:[a_for name2] [pcdata "password: "];
+          label [pcdata "password: "];
           Form.input ~input_type:`Password ~name:name2 Form.string;
           br ();
           Form.input ~input_type:`Submit ~value:"Connect" Form.string
@@ -1015,10 +1015,10 @@ let connection_box () =
           [Form.post_form ~service:connection_service
             (fun (name1, name2) ->
               [fieldset
-	         [label ~a:[a_for name1] [pcdata "login: "];
+	         [label [pcdata "login: "];
                   Form.input ~input_type:`Text ~name:name1 Form.string;
                   br ();
-                  label ~a:[a_for name2] [pcdata "password: "];
+                  label [pcdata "password: "];
                   Form.input ~input_type:`Password ~name:name2 Form.string;
                   br ();
                   Form.input ~input_type:`Submit ~value:"Connect" Form.string
@@ -1125,10 +1125,10 @@ let authenticated_handler f =
       Form.post_form ~service:connection_service
         (fun (name1, name2) ->
 	  [fieldset
-              [label ~a:[a_for name1] [pcdata "login: "];
+              [label [pcdata "login: "];
                Form.input ~input_type:`Text ~name:name1 Form.string;
                br ();
-               label ~a:[a_for name2] [pcdata "password: "];
+               label [pcdata "password: "];
                Form.input ~input_type:`Password ~name:name2 Form.string;
                br ();
                Form.input ~input_type:`Submit ~value:"Connect" Form.string

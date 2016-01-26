@@ -1,8 +1,9 @@
 =How to create a link to the current page (whithout knowing its URL)?=
 
 Void coservices are here for that:
-<<code language="ocaml"| a ~service:Eliom_service.void_coservice'
-          [pcdata "Click to reload"] ();
+<<code language="ocaml"|
+a ~service:Eliom_service.void_coservice'
+  [pcdata "Click to reload"] ();
 >>
 
 More information in

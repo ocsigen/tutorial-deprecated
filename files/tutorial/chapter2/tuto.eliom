@@ -43,10 +43,10 @@ let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
 
 (* Page widgets: *)
 let disconnect_box () =
-  post_form disconnection_service
+  Form.post_form disconnection_service
     (fun _ -> [fieldset
-		  [string_input
-                      ~input_type:`Submit ~value:"Log out" ()]]) ()
+		  [Form.input
+                      ~input_type:`Submit ~value:"Log out" Form.string]]) ()
 
 let connection_box () =
   lwt u = Eliom_reference.get username in
@@ -57,16 +57,16 @@ let connection_box () =
                        disconnect_box () ]
       | None ->
         let l =
-          [post_form ~service:connection_service
+          [Form.post_form ~service:connection_service
             (fun (name1, name2) ->
               [fieldset
-		  [label ~a:[a_for name1] [pcdata "login: "];
-                   string_input ~input_type:`Text ~name:name1 ();
+		  [label [pcdata "login: "];
+                   Form.input ~input_type:`Text ~name:name1 Form.string;
                    br ();
-                   label ~a:[a_for name2] [pcdata "password: "];
-                   string_input ~input_type:`Password ~name:name2 ();
+                   label [pcdata "password: "];
+                   Form.input ~input_type:`Password ~name:name2 Form.string;
                    br ();
-                   string_input ~input_type:`Submit ~value:"Connect" ()
+                   Form.input ~input_type:`Submit ~value:"Connect" Form.string
                  ]]) ();
              p [a new_user_form_service [pcdata "Create an account"] ()]]
         in
@@ -76,16 +76,16 @@ let connection_box () =
     )
 
 let create_account_form () =
-  post_form ~service:account_confirmation_service
+  Form.post_form ~service:account_confirmation_service
     (fun (name1, name2) ->
       [fieldset
-	  [label ~a:[a_for name1] [pcdata "login: "];
-           string_input ~input_type:`Text ~name:name1 ();
-           br ();
-           label ~a:[a_for name2] [pcdata "password: "];
-           string_input ~input_type:`Password ~name:name2 ();
-           br ();
-           string_input ~input_type:`Submit ~value:"Connect" ()
+	 [label [pcdata "login: "];
+          Form.input ~input_type:`Text ~name:name1 Form.string;
+          br ();
+          label [pcdata "password: "];
+          Form.input ~input_type:`Password ~name:name2 Form.string;
+          br ();
+          Form.input ~input_type:`Submit ~value:"Connect" Form.string
          ]]) ()
 
 
