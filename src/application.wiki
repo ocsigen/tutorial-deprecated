@@ -11,7 +11,10 @@ This tutorial is a good starting point if you want a step-by-step
 introduction to Eliom programming.
 
 <<webonly| The final eliom code is available
-[[https://github.com/ocsigen/graffiti/tree/master/simple|for download]]. >>
+[[https://github.com/ocsigen/graffiti/tree/master/simple|for download]].
+[[https://github.com/ocsigen/graffiti/releases/tag/eliom-5.0|Tag eliom-5.0]]
+has been tested against Eliom 5.0.
+>>
 
 <<|outline target="documentation">>
 
