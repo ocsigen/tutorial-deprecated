@@ -18,9 +18,9 @@ let%client f_rpc = ~%(server_function [%derive.json: int] f)
 Server functions are just syntactic sugar for non-attached coservices
 returning OCaml values.
 
-Note that your project needs to load the {{{json}}} plugin for
-{{{ppx_deriving}}}, which is available as the Ocamlfind package
-{{{js_of_ocaml.deriving.ppx}}}.
+Note that you need to install {{{ppx_deriving}}}, and load our JSON
+{{{ppx_deriving}}} plugin in your project. The plugin is available as
+the Ocamlfind package {{{js_of_ocaml.deriving.ppx}}}.
 
 If the function takes a more complex type, this type must have been
 declared with {{{ppx_deriving}}}. For example,

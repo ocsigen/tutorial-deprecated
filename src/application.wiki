@@ -732,9 +732,9 @@ describing the color (as RGB values) and coordinates of drawn lines.
 We annotate the type declaration with {{{[@@deriving json]}}} to allow
 type-safe deserialization of this type. Eliom forces you to use this
 in order to avoid server crashes if a client sends corrupted data.
-This is defined using the
-[[https://github.com/whitequark/ppx_deriving|ppx_deriving]] syntax
-extension.  You need to do that for each type of data sent by the
+This is defined using a JSON plugin for
+[[https://github.com/whitequark/ppx_deriving|ppx_deriving]], which you
+need to install. You need to do that for each type of data sent by the
 client to the server.  This annotation can only be added on types
 containing exclusively basic types, or other types annotated with
 {{{[@@deriving json]}}}.

@@ -34,7 +34,7 @@ management. You can use this template as a starting point for your
 project.
 
 {{{
-eliom-distillery -name tutoreact -template eba.ppx.pgocaml
+eliom-distillery -name tutoreact -template eba.pgocaml
 }}}
 
 This template is using Postgresql to save the data.
