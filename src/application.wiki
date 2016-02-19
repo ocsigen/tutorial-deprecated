@@ -241,7 +241,7 @@ module Graffiti_app =
     end)
 >>
 
-It is now possible to use {{{My_app}}} for registering our main
+It is now possible to use {{{Graffiti_app}}} for registering our main
 service (now at URL {{{/}}}):
 
 <<code language="ocaml" class="server"|
@@ -426,7 +426,7 @@ a copy of the {{{<body>}}} element. Hence, the actual page's
 
 <<code language="ocaml" class="server"|
 let main_service =
-  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  Graffiti_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
       Eliom_service.onload {{
@@ -468,7 +468,7 @@ Here is the (full) new version of the program:
 ]
 >>
 <<code language="ocaml" class="server"|
-module My_app =
+module Graffiti_app =
   Eliom_registration.App (
     struct
       let application_name = "graffiti"
@@ -508,7 +508,7 @@ let%client init_client () =
 >>
 <<code language="ocaml" class="server"|
 let main_service =
-  My_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  Graffiti_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
        (* Cf. the box "Client side side-effects on the server" *)
        let _ = [%client (init_client () : unit) ] in
@@ -786,7 +786,7 @@ lines are drawn on both windows.
   [[http://erratique.ch/software/react/doc/React|React events]] from
   the server to the client, and conversely.
 * <<a_api project="eliom" subproject="server" | type
-  Eliom_comet.Channels.t >> are one-way communication channels
+  Eliom_comet.Channel.t >> are one-way communication channels
   allowing finer-grained control. It allows sending <<a_api
   project="lwt" | module Lwt_stream >> to the client.
   {{{Eliom_react}}} and {{{Eliom_bus}}} are implemented over
