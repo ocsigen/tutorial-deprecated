@@ -36,6 +36,8 @@ one service, registered at URL {{{/}}} (the root of the website).
 The code also defines a client-side application (section
 {{{ [%%client ... ] }}})
 that appends a client-side generated widget to the page.
+Section {{{ [%%shared ... ] }}} is compiled on both the server and client side programs. Alternatively, you can write {{{ let%client }}}, {{{ let%server }}} or {{{ let%shared }}} (default) to define values on client side, on server side, or on both sides.
+
 
 <<code language="ocaml" |
 [%%shared
@@ -94,6 +96,8 @@ This section gives very quick explanations on the rest of the program.
 For more detailed explanations, see the tutorial for the graffiti app
 or the manual of each of the projects.
 
+* The client side program is sent with the first page belonging to the
+  application (registered through module {{{Ex_app}}}).
 * The {{{##}}} is used to call a JS method from OCaml
   and {{{##.}}} to access a JS object field
   (See Js_of_ocaml's documentation:
