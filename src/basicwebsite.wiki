@@ -9,7 +9,7 @@ In this tutorial, we will show how to use the Ocsigen framework
 using OCaml functions. The goal is to show that,
 even though Eliom makes it possible to write complete client-server
 Web and mobile apps,
-you can still use Eliom even if you don't need all these features (for example if you don't want HTML type checking or client side features). Besides, this will allow you to extend your Web site in a full Web application if you need, later on. This tutorial is also a good overview of the basics of Eliom.
+you can still use Eliom even if you don't need all these features (for example if you don't want HTML type checking or client-side features). Besides, this will allow you to extend your Web site in a full Web application if you need, later on. This tutorial is also a good overview of the basics of Eliom.
 
 
 
@@ -31,7 +31,7 @@ the list of URL parameters (GET parameters).
 <<code language="ocaml" |
 
 let f _ () =
-  Lwt.return "<html><head><title>A</title></head><body>B</body></html>"
+  Lwt.return "<html><head><title>Hello world</title></head><body>Welcome</body></html>"
 
 let main_service =
   Eliom_registration.Html_text.register_service
@@ -52,9 +52,9 @@ configuration file for Ocsigen Server).
 $ eliom-distillery -name mysite -template basic.ppx -target-directory mysite
 >>
 
-Put the piece of code above in file {{{mysite.eliom}}},
-compile and run the server by
-doing:
+Modify file {{{mysite.eliom}}} to include the piece of code above,
+instead of the default one.
+Then compile and run the server by doing:
 
 <<code language="shell"|
 $ make test.byte

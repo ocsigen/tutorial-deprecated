@@ -181,9 +181,9 @@ See below for examples.
 
 <<|
 **Another example:** In HTML5, some tags cannot be empty. For example
-{{{<table>}}}must contain at least one row. To enforce this, the
-<<a_api project="tyxml" text="Html5.table"| val Html5.F.table >>
-function takes two parameters: the first one is the first row, while
+{{{<table>}}}must contain at least one row. To enforce this, function
+<<a_api project="tyxml" text="Html5.table"| val Html5.F.table ~>>
+takes two parameters: the first one is the first row, while
 the second one is a list containing all the other rows (same thing for
 {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...). This prevents tables
 of zero rows, and thus ensures that the W3C recommendation is met.
@@ -195,7 +195,7 @@ pages afterwards.//
 
 A more detailed introduction to the construction of HTML5 tree is
 available in the <<a_api project="tyxml" text="TyXML reference API" |
-module Html5.F >>.
+module Html5.F ~>>.
 
 >>
 
@@ -454,7 +454,7 @@ drawing primitive is defined in the client-side function called
 {{{draw}}} that just draws a line between two given points in a canvas.
 
 To start our collaborative drawing application, we define another
-client-side function {{{ init_client }}}, which just draws a single,
+client-side function {{{ init_client }}}, which just draws a single
 line for now.
 
 Here is the (full) new version of the program:
