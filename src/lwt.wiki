@@ -145,13 +145,13 @@ on all list elements:
 <<code language="ocaml"|
 let rec map f l =
   match l with
-  | [] -> return []
+  | [] -> Lwt.return []
   | v :: r ->
       let t = f v in
       let rt = map f r in
-      t >>= fun v' ->
-      rt >>= fun l' ->
-      return (v' :: l')
+      let%lwt v' = t in
+      let%lwt l' = rt in
+      Lwt.return (v' :: l')
 >>
 
 whereas the following one waits for the one to complete before
@@ -161,9 +161,9 @@ let rec map_serial f l =
   match l with
   | [] -> return []
   | v :: r ->
-      f v >>= fun v' ->
-      map_serial f r >>= fun l' ->
-      return (v' :: l')
+      let%lwt v' = f v in
+      let%lwt l' = map_serial f r in
+      Lwt.return (v' :: l')
 >>
 
 
