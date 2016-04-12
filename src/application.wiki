@@ -510,7 +510,7 @@ let%client init_client () =
 let main_service =
   Graffiti_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
     (fun () () ->
-       (* Cf. the box "Client side side-effects on the server" *)
+       (* Cf. section "Client side side-effects on the server" *)
        let _ = [%client (init_client () : unit) ] in
        Lwt.return (page ()))
 >>
@@ -888,9 +888,8 @@ let page =
 
 You need to install the corresponding stylesheets and images into your
 project. The stylesheet files should go to the directory
-{{{static/css}}}:
-
-* the <<a_file
+{{{static/css}}}.
+File <<a_file
   src="tutorial/static/css/graffiti.css"|{{{graffiti.css}}}>> is a
   custom-made CSS file.
 
