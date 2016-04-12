@@ -171,7 +171,7 @@ where <<a_api project="tyxml" | type Html5_types.head_content_fun >>
 is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.). Notice that
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic
-variant type.
+variant type, which means that {{{<head>}}} cannot contain raw text.
 
 Most functions take as parameter the list representing its contents.
 See other examples below. Each of them take un optional {{{?a}}}
