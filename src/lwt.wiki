@@ -1,43 +1,46 @@
 <<header| = Lwt in 5 minutes >>
 
-== Principle
+== Principles
 
-The Lwt library implements cooperative threads for OCaml.
-Cooperative threads are an alternative to preemptive threads (used
-in many languages and in OCaml's {{{Thread}}} module), that solves
-most usual issues of preemptive threads: very few risks of deadlocks,
-very need of locks.
-Lwt threads are even usable in programs compiled to JavaScript
-using Js_of_ocaml.
+The Lwt library implements cooperative threads for OCaml.  Cooperative
+threads are an alternative to preemptive threads (used in many
+languages and in OCaml's {{{Thread}}} module) that solve most common
+issues with preemptive threads: with Lwt, there is very limited risk
+of deadlocks and very limited need for locks.  Lwt threads are even
+usable in programs compiled to JavaScript using Js_of_ocaml.
 
-Lwt is based on the fact that most program spend most of their time
-waiting for inputs (keys, data coming from a socket, mouse events, etc).
-Instead of using a preemptive scheduler, that switches from one thread
-to another at arbitrary moments, it uses these waiting times, as
-//cooperation points//. This means that instead of blocking (for example
-on a {{{read}}}), Lwt will resume another waiting thread (if one is ready
-to continue). All you have to do is to use the cooperative version of
-each blocking function, for example {{{Lwt_unix.sleep}}} or {{{Lwt_unix.read}}}
-instead of {{{Unix.sleep}}} or {{{Unix.read}}}.
+Lwt is based on the fact that most programs spend most of their time
+waiting for inputs, e.g., keys, data coming from sockets, and mouse
+events. Instead of relying on a preemptive scheduler that switches
+between threads at arbitrary moments, Lwt uses these waiting times as
+//cooperation points//. This means that instead of blocking (for
+example on a {{{read}}}), Lwt resumes another waiting thread, if there
+is one that is ready to continue. All you have to do is to use the
+cooperative version of each blocking function, for example
+{{{Lwt_unix.sleep}}} instead of {{{Unix.sleep}}}
+and {{{Lwt_unix.read}}} instead of {{{Unix.read}}}.
 If one of your computations takes a lot of time, it is also possible
-to insert manually cooperation points using function {{{Lwt_main.yield}}}.
+to manually insert cooperation points using the function
+{{{Lwt_main.yield}}}.
 
 == Promises
 
-Lwt defines one type {{{'a Lwt.t}}}, which is the type of promises.
-For example, a function:
+Lwt defines a type {{{'a Lwt.t}}}, which is the type of promises.
+For example, the function:
 
 <<code language="ocaml"|
 val f : unit -> int Lwt.t
 >>
 
-returns immediately a promise of {{{int}}}, that is, something that
+immediately returns a promise of {{{int}}}, that is, something that
 will eventually become an integer once the computation is finished.
 
 The following code will launch the computation of {{{f ()}}}
-(asynchronously). If it reaches a cooperation point (for example the integer
-comes from a network connection), it will continue the program (print "hello")
-and resume at a subsequent cooperation point, when the data is available.
+(asynchronously). If the code reaches a cooperation point (for example
+when the integer is requested via the network), it will continue the
+program (print "hello") and resume at a subsequent cooperation point,
+when the data is available.
+
 <<code language="ocaml"|
 let g1 () =
   let p = f () in
@@ -46,19 +49,17 @@ let g1 () =
 
 == Bind: Using the value of promises
 
-It is possible to tell Lwt to execute a function once a promise is completed,
-by using function:
+It is possible to tell Lwt to execute a function once a promise is
+completed, by using the function:
 
 <<code language="ocaml"|
 Lwt.bind : 'a Lwt.t -> ('a -> 'b Lwt.t) -> 'b Lwt.t
 >>
 
-For instance
-{{{Lwt.bind p h}}}
-will call function {{{h}}} with the return value of promise {{{p}}}
-as soon as it is known.
-The expression {{{(Lwt.bind p h)}}} is also a promise (it may take time
-to complete). Function {{{h}}} must return a promise.
+For instance {{{Lwt.bind p h}}} will call the function {{{h}}} with
+the return value of the promise {{{p}}} as soon as the value is known.
+The expression {{{(Lwt.bind p h)}}} is also a promise (it may take
+time to complete). Function {{{h}}} must return a promise.
 
 To create a (terminated) promise from a value, use {{{Lwt.return}}}.
 
@@ -69,8 +70,8 @@ let g2 () =
   Lwt.bind p (fun i -> print_int i; Lwt.return ())
 >>
 Function {{{g2}}} calls function {{{f}}} to create a promise.
-Then it waits (in cooperative manner) the result,
-and prints it. The expression {{{g2 ()}}} has type {{{unit Lwt.t}}}.
+Then it waits (in a cooperative manner) for the result,
+and prints the result. The expression {{{g2 ()}}} has type {{{unit Lwt.t}}}.
 
 
 == Syntax extension
@@ -118,7 +119,7 @@ let%lwt () = g () in
 ...
 >>
 
-The following code launches both {{{f ()}}} and {{{g ()}}} concurrently,
+The following code launches {{{f ()}}} and {{{g ()}}} concurrently,
 then waits for both to terminate before continuing:
 <<code language="ocaml"|
 let p1 = f () in
@@ -171,7 +172,7 @@ let rec map_serial f l =
 
 Have a look at <<a_manual project="lwt" chapter="manual"|Lwt's manual>>
 for more details about Lwt.
-You will learn how to handle exception (using {{{Lwt.fail}}}
+You will learn how to handle exceptions (using {{{Lwt.fail}}}
 and {{{Lwt.catch}}} or {{{try%lwt}}}).
 You will also learn for example how to create a thread that waits until it is
-awoken (using {{{Lwt.wait}}} and {{{Lwt.wakeup}}}).
+awaken (using {{{Lwt.wait}}} and {{{Lwt.wakeup}}}).

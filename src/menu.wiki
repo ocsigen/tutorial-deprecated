@@ -7,7 +7,7 @@
 ==[[interaction|Service based Web programming]]
 ==[[tutoreact|Reactive client-server Web applications]]
 ==[[misc|Mixing traditional Web interaction with client-server app]]
-= 5 minutes tutorials
+= 5-minute tutorials
 ==[[lwt|Lwt]]
 = Other tutorials: Miscellanous features
 ==[[custom-conf|Custom configuration]]
