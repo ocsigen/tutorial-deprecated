@@ -9,6 +9,7 @@
 ==[[misc|Mixing traditional Web interaction with client-server app]]
 = 5-minute tutorials
 ==[[lwt|Lwt]]
+==[[html|HTML]]
 = Other tutorials: Miscellanous features
 ==[[custom-conf|Custom configuration]]
 ==[[rest|RESTful JSON API]]

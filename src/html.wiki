@@ -149,3 +149,9 @@ be updated automatically when the data on which they depend change.
 
 It is based on module [[http://erratique.ch/software/react/doc/React|React]],
 which implements functional reactive programming for OCaml.
+
+== More documentation
+
+Have a look at <<a_manual project="tyxml" chapter="intro"|Tyxml's manual>>
+and <<a_manual project="eliom" chapter="clientserver-html"|Eliom's manual>>
+for more documentation about HTML manipulation in OCaml.
