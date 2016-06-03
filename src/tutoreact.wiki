@@ -127,8 +127,8 @@ We will also put module Db here for now.
 
 <<code language="ocaml" class="shared"|
 [%%shared
-    open Eliom_content.Html5
-    open Eliom_content.Html5.D
+    open Eliom_content.Html
+    open Eliom_content.Html.D
 ]
 >>
 <<code language="ocaml" class="server"|
@@ -202,7 +202,7 @@ let display userid_o =
     | _ ->
       [Raw.input ~a:[a_input_type `Text] ()]
   in
-  Lwt.return (messages :: l)
+  Lwt.return (messages @ l)
 >>
 
 === Make function {{{Db.add_message}}} accessible from the client
@@ -211,7 +211,7 @@ To be able to call a function from the client side program,
 use {{{server_function}}}:
 <<code language="ocaml" class="server"|
 let add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: string]
     (Eba_session.connected_rpc (fun userid value -> Db.add_message value))
 >>
@@ -328,7 +328,7 @@ on server side and client side:
 let%server get_data = Db.get_message
 
 let%server get_data_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc (fun userid_o id -> get_data id))
 
 >>
@@ -362,7 +362,7 @@ lists. Have a look at the documentation of the above modules if you
 are not familiar with FRP.
 
 The client-side module
-<<a_api project="eliom" subproject="client"| module Eliom_content.Html5.R >>
+<<a_api project="eliom" subproject="client"| module Eliom_content.Html.R >>
 enables defining reactive page elements.
 
 The module
@@ -371,7 +371,7 @@ enables defining shared (client-side) reactive signals from server
 side. To do that, it is using //shared values//, that is, values that
 contain both a server-side and a client-side value. The server-side
 module
-<<a_api project="eliom" subproject="server"| module Eliom_content.Html5.R >>
+<<a_api project="eliom" subproject="server"| module Eliom_content.Html.R >>
 enables constructing HTML5 elements that get updated automatically
 based on the signals in {{{Eliom_shared}}}. The modules
 <<a_api project="eliom" subproject="server"| module Eliom_shared.React >>
@@ -466,7 +466,7 @@ piece of data:
 
 <<code language="ocaml" class="server"|
 let add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: string]
     (Eba_session.connected_rpc
        (fun userid value ->
@@ -703,8 +703,8 @@ you can add a {{{Lwt_unix.sleep}}} in server side's {{{get_data}}} function.
 
 <<code language="ocaml" class="shared"|
 [%%shared
-    open Eliom_content.Html5
-    open Eliom_content.Html5.D
+    open Eliom_content.Html
+    open Eliom_content.Html.D
 ]
 >>
 
@@ -848,7 +848,7 @@ let display userid_o forumid =
       ] in
       [inp]
   in
-  Lwt.return (messages :: l)
+  Lwt.return (messages @ l)
 
 let forum_service =
   Eliom_service.App.service
