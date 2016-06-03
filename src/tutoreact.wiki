@@ -579,7 +579,7 @@ let add_message_rpc =
 >>
 <<code language="ocaml" class="client"|
   ...
-  ~%add_message_rpc (%forumid, value)
+  ~%add_message_rpc (~%forumid, value)
 >>
 
 Update function {{{display}}} accordingly, and add a {{{forumid}}}
