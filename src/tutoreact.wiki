@@ -113,15 +113,6 @@ module Db = struct
 end
 >>
 
-The content of the main page is defined in file {{{tutoreact.eliom}}}.
-Replace the code of {{{main_service_handler}}} by:
-
-<<code language="ocaml" class="server"|
-let main_service_handler userid_o () () =
-  let%lwt content = Tutoreact_messages.display userid_o in
-  Tutoreact_container.page userid_o content
->>
-
 Create file tutoreact_messages.eliom with the code below.
 We will also put module Db here for now.
 
@@ -146,6 +137,15 @@ let display userid_o =
 (Depending on your database, it is probably more efficient to
 fetch all messages and their identifiers using only one request).
 
+
+The content of the main page is defined in file {{{tutoreact.eliom}}}.
+Replace the code of {{{main_service_handler}}} by:
+
+<<code language="ocaml" class="server"|
+let main_service_handler userid_o () () =
+  let%lwt content = Tutoreact_messages.display userid_o in
+  Tutoreact_container.page userid_o content
+>>
 
 Compile and run your program:
 
