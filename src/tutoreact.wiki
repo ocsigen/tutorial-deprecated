@@ -20,11 +20,6 @@ You will learn:
 
 
 
-
-
-
-
-
 == First step: a basic application with user management
 
 Eliom-base-app contains a set of higher level libraries for Eliom
@@ -70,10 +65,6 @@ activation links will be printed on the console.
 
 
 
-
-
-
-
 == Display messages from db
 
 To make this example more realistic, suppose that we do not want to
@@ -85,6 +76,7 @@ In this tutorial we will not implement the database part. We suppose
 you have a module {{{Db}}} with these functions:
 
 <<code language="ocaml" class="server"|
+[%%server.start]
 val get_messages : unit -> int list Lwt.t
 val get_message : int -> string Lwt.t
 val add_message : string -> int Lwt.t
@@ -93,6 +85,7 @@ val add_message : string -> int Lwt.t
 Implement them for example using pgocaml, or, for a first version, using Ocsipersist:
 
 <<code language="ocaml" class="server"|
+[%%server
 module Db = struct
   let db = Ocsipersist.open_table "messages"
   let last_key =
@@ -104,13 +97,17 @@ module Db = struct
     let%lwt index = Eliom_reference.get last_key in
     let rec aux n l = if n > index then l else aux (n+1) (n::l) in
     Lwt.return (aux 0 [])
+  let lock = Lwt_mutex.create ()       
   let add_message v =
+    let%lwt () = Lwt_mutex.lock lock in
     let%lwt index = Eliom_reference.get last_key in
     let index = index + 1 in
     let%lwt () = Eliom_reference.set last_key index in
+    Lwt_mutex.unlock lock;
     let%lwt () = Ocsipersist.add db (string_of_int index) v in
     Lwt.return index
 end
+]
 >>
 
 Create file tutoreact_messages.eliom with the code below.
@@ -123,7 +120,7 @@ We will also put module Db here for now.
 ]
 >>
 <<code language="ocaml" class="server"|
-let display userid_o =
+let%server display userid_o =
   let%lwt messages = Db.get_messages () in
   let%lwt l =
     Lwt_list.map_s
@@ -134,15 +131,15 @@ let display userid_o =
   in
   Lwt.return [ul l]
 >>
-(Depending on your database, it is probably more efficient to
-fetch all messages and their identifiers using only one request).
-
+Depending on your database, it is probably more efficient to
+fetch all messages and their identifiers using only one request.
+Here we use {{{Lwt_list.map_s}}} to do the requests sequentially.
 
 The content of the main page is defined in file {{{tutoreact.eliom}}}.
 Replace the code of {{{main_service_handler}}} by:
 
 <<code language="ocaml" class="server"|
-let main_service_handler userid_o () () =
+let%server main_service_handler userid_o () () =
   let%lwt content = Tutoreact_messages.display userid_o in
   Tutoreact_container.page userid_o content
 >>
@@ -162,28 +159,15 @@ To see something, you can add some data manually by calling {{{Db.add_message}}}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 == Adding new messages
 
 === Add an input in the page, for connected users
 
-To add an input in the page, replace function {{{display}}} by:
+To add an input in the page, replace function {{{display}}} by the following
+version, that adds the input for connected users:
 
 <<code language="ocaml" class="server"|
-let display_messages () =
+let%server display_messages () =
   let%lwt messages = Db.get_messages () in
   let%lwt l =
     Lwt_list.map_s
@@ -194,7 +178,7 @@ let display_messages () =
   in
   Lwt.return (ul l)
 
-let display userid_o =
+let%server display userid_o =
   let%lwt messages = display_messages () in
   let l = match userid_o with
     | None ->
@@ -210,7 +194,7 @@ let display userid_o =
 To be able to call a function from the client side program,
 use {{{server_function}}}:
 <<code language="ocaml" class="server"|
-let add_message_rpc =
+let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: string]
     (Eba_session.connected_rpc (fun userid value -> Db.add_message value))
@@ -258,7 +242,9 @@ let _ = [%client
 * Syntax {{{~%v}}} allows using a server-side value from the client side.
 * {{{To_dom.of_input}}} returns the JS element corresponding to the
   OCaml value {{{~%inp}}}.
-* {{{Lwt_js_events.async}}} is similair to {{{Lwt.async}}}.
+* {{{Lwt_js_events.async}}} is similar to {{{Lwt.async}}}.
+* {{{obj##.a}}} allows to access field {{{a}}}
+  of JavaScript object {{{obj}}} (see Js_of_ocaml PPX extension).
 * {{{changes}}} takes a JS element and a function that will be
   executed every time a "change" event is received on this element.
 
@@ -313,14 +299,17 @@ The module
 <<a_api project="eliom" subproject="server"| module Eliom_cscache >>
 implements a cache of data, that is, an association table where you
 will put the data of your application on client side. For the sake of
-uniformity (given that pages can be generated from either side), the
+uniformity (as we want to use it in shared sections), the
 cache is also implemented on the server side, with scope
 "request". This avoids retrieving the same data from the database
 twice for the same request.
 
-Create a cache by calling the function
+Create a client-server cache by calling the function
 <<a_api project="eliom" subproject="server"| val Eliom_cscache.create >>
-from server side.  Implement a function {{{get_data}}} to fetch the
+from server side. Client version of a cache {{{c}}} created by this function
+will be accessible as {{{~%c}}}.
+
+Implement a function {{{get_data}}} to fetch the
 data from the database. This function must have an implementation both
 on server side and client side:
 
@@ -416,10 +405,12 @@ We first define a notification module for the type of data we want
 clients to be able to listen on (here lists of message identifiers):
 
 <<code language="ocaml" class="server"|
+[%%server
 module Forum_notif = Eba_notif.Make(struct
   type key = unit
   type notification = int
 end)
+]
 >>
 
 {{{key}}} is the type of the identifier of the data we want to listen
@@ -465,7 +456,7 @@ When we add a message, we notify all the clients listening on this
 piece of data:
 
 <<code language="ocaml" class="server"|
-let add_message_rpc =
+let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: string]
     (Eba_session.connected_rpc
@@ -506,18 +497,18 @@ We now want a forum with several pages, located at URLs
 We first define a new service, and register a handler.
 
 <<code language="ocaml" class="server"|
-let forum_service =
+let%server forum_service =
   Eliom_service.create
     ~id:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get 
           (Eliom_parameter.(suffix (int "i"))))
     ()
 
-let forum_service_handler userid_o forumid () =
+let%server forum_service_handler userid_o forumid () =
   let%lwt content = display userid_o forumid in
   Tutoreact_container.page userid_o content
 
-let () =
+let%server () =
   Tutoreact_base.App.register
     forum_service
     (Tutoreact_page.Opt.connected_page forum_service_handler)
@@ -532,6 +523,7 @@ accordingly. For example, we can display forum 0.
 Functions Db.get_messages and Db.add_message now take the forum identifier:
 
 <<code language="ocaml" class="server"|
+[%%server
 module Db = struct
   let db = Ocsipersist.open_table "messages"
   let dbf = Ocsipersist.open_table "forums"
@@ -557,6 +549,7 @@ module Db = struct
     in
     Lwt.return index
 end
+]
 >>
 
 Also, the function {{{add_message_rpc}}} takes the forum ID as new
@@ -568,7 +561,7 @@ parameter:
 ]
 >>
 <<code language="ocaml" class="server"|
-let add_message_rpc =
+let%server add_message_rpc =
   server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
@@ -594,7 +587,7 @@ We will create a new client-server cache to keep the reactive list of
 message identifiers for each forums:
 
 <<code language="ocaml" class="server"|
-let forumcache :
+let%server forumcache :
   (int,
    int Eliom_shared.ReactiveData.RList.t *
    int Eliom_shared.ReactiveData.RList.handle) Eliom_cscache.t =
@@ -616,7 +609,7 @@ To do that, we give as optional argument {{{?default}}} to function
 exist in the cache, a new one will be created like previously:
 
 <<code language="ocaml" class="server"|
-let get_data_forum forumid =
+let%server get_data_forum forumid =
   let%lwt messages = Db.get_messages forumid in
   let default = [%client
     ((try Some (Eliom_cscache.find_if_ready ~%forumcache ~%forumid)
@@ -625,7 +618,7 @@ let get_data_forum forumid =
   ] in
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
-let get_data_forum_rpc =
+let%server get_data_forum_rpc =
   server_function [%derive.json: int]
   (Eba_session.Opt.connected_rpc
      (fun userid_o forumid -> get_data_forum forumid))
@@ -633,7 +626,7 @@ let get_data_forum_rpc =
 
 {{{display_messages}}} now takes the reactive list from the cache:
 <<code language="ocaml" class="server"|
-let display_messages forumid =
+let%server display_messages forumid =
   Forum_notif.listen ();
   let%lwt rmessages =
     Eliom_cscache.find forumcache get_data_forum forumid
@@ -653,10 +646,12 @@ forums. We just change the type {{{key}}} of module {{{Forum_notif}}}
 to use an integer (instead of {{{unit}}}):
 
 <<code language="ocaml" class="server"|
+[%server
 module Forum_notif = Eba_notif.Make(struct
   type key = int
   type notification = int
 end)
+]
 >>
 
 Functions {{{Forum_notif.notify}}} and {{{Forum_notif.listen}}}
@@ -710,6 +705,7 @@ you can add a {{{Lwt_unix.sleep}}} in server side's {{{get_data}}} function.
 >>
 
 <<code language="ocaml" class="server"|
+[%%server
 module Db = struct
   let db = Ocsipersist.open_table "messages"
   let dbf = Ocsipersist.open_table "forums"
@@ -740,6 +736,7 @@ module Forum_notif = Eba_notif.Make(struct
   type key = int
   type notification = int
 end)
+]
 >>
 
 <<code language="ocaml" class="shared"|
@@ -749,7 +746,7 @@ end)
 >>
 
 <<code language="ocaml" class="server"|
-let add_message_rpc =
+let%server add_message_rpc =
   server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
@@ -758,17 +755,17 @@ let add_message_rpc =
           Forum_notif.notify forumid (fun userid -> Lwt.return (Some id));
           Lwt.return ()))
 
-let cache : (int, string) Eliom_cscache.t = Eliom_cscache.create ()
+let%server cache : (int, string) Eliom_cscache.t = Eliom_cscache.create ()
 
-let forumcache :
+let%server forumcache :
   (int,
    int Eliom_shared.ReactiveData.RList.t *
    int Eliom_shared.ReactiveData.RList.handle) Eliom_cscache.t =
   Eliom_cscache.create ()
 
-let get_data = Db.get_message
+let%server get_data = Db.get_message
 
-let get_data_rpc =
+let%server get_data_rpc =
   server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o id -> get_data id))
@@ -779,7 +776,7 @@ let%client get_data id = ~%get_data_rpc id
 >>
 
 <<code language="ocaml" class="server"|
-let get_data_forum forumid =
+let%server get_data_forum forumid =
   let%lwt messages = Db.get_messages forumid in
   let default = [%client
     (try
@@ -790,7 +787,7 @@ let get_data_forum forumid =
   ] in
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
-let get_data_forum_rpc =
+let%server get_data_forum_rpc =
   server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o forumid -> get_data_forum forumid))
@@ -812,7 +809,7 @@ let%client handle_notif_message_list rmessages (_, msgid) =
 >>
 
 <<code language="ocaml" class="server"|
-let display_messages forumid =
+let%server display_messages forumid =
   Forum_notif.listen forumid;
   let%lwt rmessages =
     Eliom_cscache.find forumcache get_data_forum forumid
@@ -830,7 +827,7 @@ let display_messages forumid =
   in
   Lwt.return (R.ul content)
 
-let display userid_o forumid =
+let%server display userid_o forumid =
   let%lwt messages = display_messages forumid in
   let l =
     match userid_o with
@@ -851,17 +848,17 @@ let display userid_o forumid =
   in
   Lwt.return (messages :: l)
 
-let forum_service =
+let%server forum_service =
   Eliom_service.App.service
     ~path:[]
     ~get_params:Eliom_parameter.(suffix (int "i"))
     ()
 
-let forum_service_handler userid_o forumid () =
+let%server forum_service_handler userid_o forumid () =
   let%lwt content = display userid_o forumid in
   Tutoreact_container.page userid_o content
 
-let () =
+let%server () =
   Tutoreact_base.App.register
     forum_service
     (Tutoreact_page.Opt.connected_page forum_service_handler)
