@@ -93,7 +93,7 @@ let post_service =
 
 What if the user comes back later without POST parameters, for example
 because he put a bookmark on this URL?
-This would produce an error, to prevent this from happening we can
+This could produce an error, to prevent this from happening we can
 create a service without POST parameters using the same URL as the first one,
 which will be used whenever the POST parameters are not provided.
 
