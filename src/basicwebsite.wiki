@@ -1,6 +1,6 @@
 <<header| =Writing a basic Web site in OCaml >>
 
-//The code of this tutorial has been tested against Eliom 5.// \\
+//The code of this tutorial has been tested against Eliom dev.// \\
 
 <<|wip|This tutorial is work in progress. Please send us any mistake or comment./>>
 
@@ -25,8 +25,7 @@ Ocaml function {{{f}}} of type:
 
 >>
 
-Function {{{f}}} generates HTML as a string, taking as argument
-the list of URL parameters (GET parameters).
+Function {{{f}}} generates HTML as a string, taking as argument the list of URL parameters (GET parameters).
 
 <<code language="ocaml" |
 
@@ -34,14 +33,14 @@ let f _ () =
   Lwt.return "<html><head><title>Hello world</title></head><body>Welcome</body></html>"
 
 let main_service =
-  Eliom_registration.Html_text.register_service
-    ~path:["aaa"; "bbb"]
-    ~get_params:Eliom_parameter.any
+  Eliom_registration.Html_text.create
+    ~id:(Eliom_service.Path ["aaa"; "bbb"])
+    ~meth:(Eliom_service.Get Eliom_parameter.any)
     f
 
 >>
 
-{{{Eliom_paramer.any}}} means that the service takes any GET parameter.
+{{{Eliom_service.Get Eliom_paramer.any}}} means that the service uses the GET method and takes any GET parameter.
 
 We recommend to use the program {{{eliom-distillery}}}
 to generate a template for your application (a Makefile and a default
@@ -77,23 +76,37 @@ by replacing mysite.cma by your cmo.
 
 ==@@id="post"@@ POST service==
 
-Services using the POST HTTP method are created using the function
-<<a_api project="eliom" | val Eliom_service.Http.post_service >>.
-To create a service with POST parameters, first you must create
-a service without POST parameters, and then the service with POST
-parameters, with the first service as fallback. The fallback is used
-if the user comes back later without POST parameters, for example
-because he put a bookmark on this URL.
+Services using the POST HTTP method can be created and registered using the function
+<<a_api project="eliom" | val Eliom_registration.Html.create >>.
 
 <<code language="ocaml"|
 
-let g getp postp = Lwt.return "..."
+let g getp postp = Lwt.return ("t = " ^ (string_of_int postp))
 
 let post_service =
-  Eliom_registration.Html_text.register_post_service
-    ~fallback:main_service
-    ~post_params:Eliom_parameter.any
+  Eliom_registration.Html_text.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Post (Eliom_parameter.any,Eliom_parameter.int "t"))
     g
+
+>>
+
+What if the user comes back later without POST parameters, for example
+because he put a bookmark on this URL?
+This may produce an error, to prevent this from happening we can
+create a service without POST parameters using the same URL as the first one,
+which will be used whenever the POST parameters are not provided.
+
+<<code language="ocaml"|
+
+let g' getp postp = Lwt.return "..."
+
+let post_service =
+  Eliom_registration.Html_text.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.any)
+    g'
+
 >>
 
 ==@@id="misc"@@ Going further==
@@ -104,7 +117,7 @@ Instead of generating HTML in OCaml strings, we highly recommend to use
 //typed HTML//. It is very easy to use, once you have learned the basics,
 and helps a lot to efficiently write modular and valid HTML.
 To do this, use module
-<<a_api project="eliom" subproject="server"| module Eliom_registration.Html5>>
+<<a_api project="eliom" subproject="server"| module Eliom_registration.Html>>
 instead of
 <<a_api project="eliom" subproject="server"| module Eliom_registration.Html_text>>.
 See this
