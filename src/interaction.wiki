@@ -1,6 +1,6 @@
 =Implementing Web Interaction Using Eliom=
 
-//The code of this tutorial has been tested with Eliom 4.// \\
+//The code of this tutorial has been tested with Eliom dev.// \\
 
 <<|outline target="documentation">>
 
@@ -31,18 +31,19 @@ of the program can be downloaded.
 Let's start again from scratch with the following site.
 
 <<code language="ocaml"|
-open Eliom_content.Html5.D
+open Eliom_content.Html.D
 
 let main_service =
-  Eliom_registration.Html5.register_service
-    ~path:[""] ~get_params:Eliom_parameter.unit
+  Eliom_registration.Html.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
         (html (head (title (pcdata "")) [])
-                       (body [h1 [pcdata "Hello"]])))
+           (body [h1 [pcdata "Hello"]])))
 >>
 
-Note that we are using {{{Eliom_registration.Html5}}}, as we are not building a
+Note that we are using {{{Eliom_registration.Html}}}, as we are not building a
 client side program for now.
 
 For the same reason, you may want to remove the {{{.eliom}}}-file
@@ -68,12 +69,13 @@ new service, taking the user name as parameter:
 
 <<code language="ocaml"|
 let user_service =
-  Eliom_registration.Html5.register_service
-    ~path:[""] ~get_params:(Eliom_parameter.string "name")
+  Eliom_registration.Html.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get (Eliom_parameter.string "name"))
     (fun name () ->
       Lwt.return
         (html (head (title (pcdata name)) [])
-                       (body [h1 [pcdata name]])))
+           (body [h1 [pcdata name]])))
 >>
 
 Add these lines to the same file, compile, start the server and verify
@@ -92,7 +94,7 @@ in the request.
 
 To define a service that accepts parameters in the URL (GET
 parameters), just add a description of the parameters you want in the
-{{{~get_params}}} argument of the {{{register_service}}} function. In
+{{{~meth}}} argument of the {{{Eliom_service.create}}} function. In
 our example, the service is expecting a parameter called {{{name}}},
 of type {{{string}}}.
 
@@ -108,7 +110,7 @@ The module <<a_api project="eliom" | module Eliom_parameter >>
 defines the possible parameter types. For example if you write:
 
 {{{
-~get_params:(Eliom_parameter.int "i")
+~meth:(Eliom_service.Get (Eliom_parameter.int "i"))
 }}}
 
 Eliom will try to find a parameter called {{{i}}} and to translate it
@@ -118,7 +120,7 @@ into an {{{int}}}.  In that case, the handler function will accept an
 If you want to accept several parameters, you can do, for example:
 
 {{{
-~get_params:(int "i" ** string "s")
+~meth:(Eliom_service.Get (int "i" ** string "s"))
 }}}
 
 after opening the {{{Eliom_parameter}}} module.  In that case, the
@@ -136,14 +138,14 @@ It is also possible to define your own parameter types.
 
 For our program, we would prefer to take one part of the URL path as the parameter
 describing the name of the user.
-I change the definition of my service this way:
+To achieve this we change the definition of the previous service this way:
 
 <<code language="ocaml"|
 let user_service =
-  Eliom_registration.Html5.register_service
-    ~path:["users"]
-    ~get_params:
-       (Eliom_parameter.suffix (Eliom_parameter.string "name"))
+  Eliom_registration.Html.create
+    ~id:(Eliom_service.Path ["users"])
+    ~meth:(Eliom_service.Get (
+      Eliom_parameter.suffix (Eliom_parameter.string "name")))
     (fun name () -> ... )
 >>
 
@@ -196,7 +198,7 @@ Change the handler of {{{user_service}}} into:
 <<concept title="Creating hyperlinks" |
 
 The function <<a_api project="eliom" | val
-Eliom_content.Html5.D.a >> accepts the following parameters:
+Eliom_content.Html.D.a >> accepts the following parameters:
 * the service
 * the content of the link
 * URL parameters to be given to the service
@@ -224,56 +226,64 @@ of user pages on the main page. Here is the new version of the full
 program:
 
 <<code language="ocaml"|
-open Eliom_content.Html5.D
+open Eliom_content.Html.D
+open Eliom_parameter
 
-let main_service =
-  Eliom_service.Http.service ~path:[""] ~get_params:Eliom_parameter.unit ()
+(** Services **)
+let main_service = Eliom_service.create
+  ~id:(Eliom_service.Path [""])
+  ~meth:(Eliom_service.Get unit)
+  ()
 
-let user_service =
-  Eliom_service.Http.service
-    ~path:["users"] ~get_params:Eliom_parameter.(suffix (string "name")) ()
+let user_service  = Eliom_service.create
+  ~id:(Eliom_service.Path ["users"])
+  ~meth:(Eliom_service.Get (suffix (string "name")))
+  ()
 
-(* User names and passwords: *)
+(** User names and passwords: **)
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
-let user_links () =
-  ul (List.map (fun (name, _) ->
-                  li [a
-                        ~service:user_service [pcdata name] name])
-               !users)
+let user_links =
+  let link_of_user = fun (name, _) ->
+    li [a ~service:user_service [pcdata name] name]
+  in
+  fun () -> ul (List.map link_of_user !users)
 
+
+(** Services Registration **)
 let () =
-  Eliom_registration.Html5.register
+
+  Eliom_registration.Html.register
     ~service:main_service
     (fun () () ->
       Lwt.return
         (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata "Hello"];
-                     user_links ()])));
+           (body [h1 [pcdata "Hello"];
+                  user_links ()])));
 
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:user_service
     (fun name () ->
       Lwt.return
         (html (head (title (pcdata name)) [])
-              (body [h1 [pcdata name];
-                     p [a ~service:main_service [pcdata "Home"] ()]])));
+           (body [h1 [pcdata name];
+                  p [a ~service:main_service [pcdata "Home"] ()]])))
 >>
 
 <<concept title="Mutually recursive services" |
 
 As my two services are mutually recursive (the first one contains
 links towards the second one and vice versa), we split the
-{{{register_service}}} in two steps:
+{{{create}}} function application in two steps:
 
 * First we create all the services using
-  <<a_api project="eliom" | val Eliom_service.Http.service >>
+  <<a_api project="eliom" | val Eliom_service.create >>
   or <<a_api project="eliom" | val Eliom_service.App.service >>
   (depending on the type of services you want)
 * Then we register the handlers using the {{{register}}} function from
   the right module.
 
-The function {{{register_service}}} is just a shortcut for these two functions.
+The function {{{create}}} we previously used is just a shortcut for these two functions (we create the service, then we register the handler).
 
 >>
 
@@ -317,30 +327,26 @@ and password to be shown in the URL, I will use //hidden parameters//
 these parameters:
 
 <<code language="ocaml"|
-let connection_service =
-  Eliom_service.Http.post_service
-    ~fallback:main_service
-    ~post_params:Eliom_parameter.(string "name" ** string "password")
-    ()
+let connection_service = Eliom_parameter.(Eliom_service.create
+  ~id:(Eliom_service.Fallback main_service)
+  ~meth:(Eliom_service.Post (unit, string "name" ** string "password"))
+  ()
+)
 >>
 
 <<concept title="Hidden (POST) services" |
 
 Services using the POST HTTP method are created using the function
-<<a_api project="eliom" | val Eliom_service.Http.post_service >>
+<<a_api project="eliom" | val Eliom_service.create >>
 or <<a_api project="eliom" | val Eliom_service.App.post_service >>
 (depending on what type of service you want to create).
 As you can see, there is a major
-difference from the function <<a_api project="eliom" |
-val Eliom_service.Http.service >>
-(and <<a_api project="eliom" | val Eliom_service.App.service >>):
-{{{post_service}}} does not take a path
-as parameter, but a GET service as a //fallback//.
-
-This means that for each POST service, you must first create a GET
-service at the same path that will answer if the user sets a bookmark
-on the page and returns later without POST parameters.  In this way,
-you will not get 404 errors if POST parameters are missing.
+difference from the way we created our previous services.
+Instead of providing a path for the {{{~id}}} argument, we gave a
+//fallback// service. This //fallback// is the service that will be used
+if the POST parameters are missing (for example, the user sets a bookmark
+on the page and returns later without POST parameters).
+This way, we will not get 404 errors if this occurs.
 
 If the fallback has GET parameters, your service will have both GET
 and POST parameters. In that case, GET parameters will be in the URL
@@ -375,7 +381,7 @@ the Ocsigen server manual >>).  >>
 Now you can register a handler for the new service:
 
 <<code language="ocaml"|
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:connection_service
     (fun () (name, password) ->
       let message =
@@ -385,8 +391,8 @@ Now you can register a handler for the new service:
       in
       Lwt.return
         (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata message];
-                     user_links ()])));
+           (body [h1 [pcdata message];
+                  user_links ()])));
 >>
 
 where {{{check_pwd}}} is defined by:
@@ -404,7 +410,7 @@ Forms
 
 >>
 
-For now, I will add the connection form only on the main page of the
+For now, we will add the connection form only on the main page of the
 site.
 
 Let's create a function for generating the form:
@@ -437,8 +443,8 @@ Now, add a call to this function in the handler of the main service
 
 Form creation is very similar to link creation, using the functions
 <<a_api project="eliom" | val
-Eliom_content.Html5.D.Form.get_form >> and
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.post_form >>.
+Eliom_content.Html.D.Form.get_form >> and
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.post_form >>.
 
 The first parameter is the service, and the last parameter (only for
 {{{post_form}}}) is for GET parameters you want sent in the URL, if
@@ -457,14 +463,14 @@ In the example, note that the service is expecting a pair
 parameters corresponding to the names of each field.
 
 The functions that build widgets like
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.input >>
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.input >>
 expect an argument of type
-<<a_api project="eliom" | type Eliom_content.Html5.D.Form.param >>
+<<a_api project="eliom" | type Eliom_content.Html.D.Form.param >>
 (e.g.,
-{{{ Eliom_content.Html5.D.Form.int : int Eliom_content.Html5.D.Form.param}}})
+{{{ Eliom_content.Html.D.Form.int : int Eliom_content.Html.D.Form.param}}})
 specifying the parameter type.  OCaml checks that the name you use
 matches the field.  For example the names above need to be used with
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.string >>.
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.string >>.
 
 >>
 
@@ -491,7 +497,7 @@ Here is the new {{{connection_box}}} function:
 
 <<code language="ocaml"|
 let connection_box () =
-  lwt u = Eliom_reference.get username in
+  let%lwt u = Eliom_reference.get username in
   Lwt.return
     (match u with
       | Some s -> p [pcdata "You are connected as "; pcdata s]
@@ -518,24 +524,24 @@ let connection_box () =
 ...~ and replace the registration of the main service and the connection service by:
 
 <<code language="ocaml"|
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:main_service
     (fun () () ->
-      lwt cf = connection_box () in
+      let%lwt cf = connection_box () in
       Lwt.return
         (html (head (title (pcdata "")) [])
               (body [h1 [pcdata "Hello"];
                      cf;
                      user_links ()])));
 
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:connection_service
     (fun () (name, password) ->
-      lwt message =
+      let%lwt message =
         if check_pwd name password
         then begin
-          lwt () = Eliom_reference.set username (Some name) in
-          Lwt.return ("Hello "^name)
+          let%lwt () = Eliom_reference.set username (Some name) in
+          Lwt.return ("Hello " ^ name)
         end else
 	  Lwt.return "Wrong name or password" in
       Lwt.return
@@ -550,7 +556,7 @@ let connection_box () =
 Session data is stored in what we call //Eliom references//.
 It is a type of reference whose value depend on the session the user
 belongs to.
-
+<UPDATED UP TO THAT POINT>
 Eliom is making the notion of session much more powerful by adding
 other //scopes// for Eliom references. Instead of limiting the scope
 to a session (that is: one browser), it is also possible to create
