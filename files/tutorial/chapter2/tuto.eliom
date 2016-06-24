@@ -1,56 +1,75 @@
-open Eliom_content.Html5.D
+open Eliom_content.Html.D
 open Eliom_parameter
 
 (* Services *)
-let main_service = Eliom_service.Http.service ~path:[""] ~get_params:unit ()
 
-let user_service =
-  Eliom_service.Http.service
-    ~path:["users"] ~get_params:(suffix (string "name")) ()
+let main_service = Eliom_service.create
+  ~id:(Eliom_service.Path [""])
+  ~meth:(Eliom_service.Get unit)
+  ()
 
-let connection_service =
-  Eliom_service.Http.post_service
-    ~fallback:main_service
-    ~post_params:(string "name" ** string "password")
-    ()
+let user_service  = Eliom_service.create
+  ~id:(Eliom_service.Path ["users"])
+  ~meth:(Eliom_service.Get (string "name" |> suffix))
+  ()
 
-let disconnection_service = Eliom_service.Http.post_coservice' ~post_params:unit ()
+let connection_service = Eliom_service.create
+  ~id:(Eliom_service.Global)
+  ~meth:(Eliom_service.Post (unit, string "name" ** string "password"))
+  ()
 
-let new_user_form_service = Eliom_service.Http.service ~path:["create account"] ~get_params:unit ()
+let disconnection_service = Eliom_service.create
+  ~id:(Eliom_service.Global)
+  ~meth:(Eliom_service.Post (unit,unit))
+  ()
+
+let new_user_form_service = Eliom_service.create
+  ~id:(Eliom_service.Path ["create account"])
+  ~meth:(Eliom_service.Get unit)
+  ()
 
 let account_confirmation_service =
-  Eliom_service.Http.post_coservice ~fallback:new_user_form_service ~post_params:(string "name" ** string "password") ()
-
-
-
+  Eliom_service.create
+    ~id:(Eliom_service.Fallback new_user_form_service)
+    ~meth:(Eliom_service.Post (unit, string "name" ** string "password"))
+    ()
 
 (* User names and passwords: *)
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
-let user_links () =
-  ul (List.map (fun (name, _) -> li [a ~service:user_service [pcdata name] name]) !users)
+let user_links =
+  let link_of_user = fun (name, _) ->
+    li [a ~service:user_service [pcdata name] name]
+  in
+  fun () -> ul (List.map link_of_user !users)
 
-let check_pwd name pwd = try List.assoc name !users = pwd with Not_found -> false
+let check_pwd name pwd =
+  try List.assoc name !users = pwd with Not_found -> false
 
 
 
 (* Eliom references *)
-let username = Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
+let username =
+  Eliom_reference.eref
+    ~scope:Eliom_common.default_session_scope
+    None
 
-let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
-
-
+let wrong_pwd =
+  Eliom_reference.eref
+    ~scope:Eliom_common.request_scope
+    false
 
 (* Page widgets: *)
 let disconnect_box () =
   Form.post_form disconnection_service
-    (fun _ -> [fieldset
-		  [Form.input
-                      ~input_type:`Submit ~value:"Log out" Form.string]]) ()
+    (fun _ ->
+      [fieldset [Form.input ~input_type:`Submit ~value:"Log out" Form.string]]
+    )
+    ()
 
 let connection_box () =
-  lwt u = Eliom_reference.get username in
-  lwt wp = Eliom_reference.get wrong_pwd in
+  let%lwt u = Eliom_reference.get username in
+  let%lwt wp = Eliom_reference.get wrong_pwd in
   Lwt.return
     (match u with
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
@@ -88,35 +107,34 @@ let create_account_form () =
           Form.input ~input_type:`Submit ~value:"Connect" Form.string
          ]]) ()
 
-
-
-
 (* Registration of services *)
 let _ =
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:main_service
     (fun () () ->
-      lwt cf = connection_box () in
-      Lwt.return
-        (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata "Hello"];
-                     cf;
-                     user_links ()])));
+      let%lwt cf = connection_box () in
+      html
+	(head (title (pcdata "")) [])
+        (body [h1 [pcdata "Hello"];
+               cf;
+               user_links ()
+	      ])
+	|> Lwt.return);
 
   Eliom_registration.Any.register
     ~service:user_service
     (fun name () ->
       if List.exists (fun (n, _) -> n = name) !users
       then begin
-        lwt cf = connection_box () in
-        Eliom_registration.Html5.send
+        let%lwt cf = connection_box () in
+        Eliom_registration.Html.send
           (html (head (title (pcdata name)) [])
              (body [h1 [pcdata name];
                     cf;
                     p [a ~service:main_service [pcdata "Home"] ()]]))
       end
       else
-        Eliom_registration.Html5.send
+        Eliom_registration.Html.send
           ~code:404
           (html (head (title (pcdata "404")) [])
              (body [h1 [pcdata "404"];
@@ -134,7 +152,7 @@ let _ =
     ~service:disconnection_service
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ());
 
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:new_user_form_service
     (fun () () ->
       Lwt.return
@@ -143,14 +161,20 @@ let _ =
                      create_account_form ();
                     ])));
 
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:account_confirmation_service
     (fun () (name, pwd) ->
       let create_account_service =
-        Eliom_registration.Action.register_coservice
-          ~fallback:main_service
-          ~get_params:Eliom_parameter.unit
+	Eliom_service.create
+          ~id:(Eliom_service.Fallback main_service)
+          ~meth:(Eliom_service.Get unit)
           ~timeout:60.
+	  ~max_use:1
+	  ()
+      in
+      let _ =
+        Eliom_registration.Action.register
+	  ~service:create_account_service
           (fun () () ->
             users := (name, pwd)::!users;
             Lwt.return ())
