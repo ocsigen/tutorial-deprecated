@@ -42,18 +42,23 @@ Section {{{ [%%shared ... ] }}} is compiled on both the server and client side p
 <<code language="ocaml" |
 [%%shared
     open Eliom_content
-    open Html5
-    open Html5.D
+    open Html
+    open Html.D
 ]
 
 module Ex_app =
-  Eliom_registration.App (struct let application_name = "ex" end)
+  Eliom_registration.App (struct
+    let application_name = "ex"
+    let global_data_path = None
+  end)
 
 let _ =
-  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+  Ex_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        Lwt.return
-         (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+         (Eliom_tools.D.html ~title:"tutowidgets" ~css:[["css"; "ex.css"]]
             (body [h2 [pcdata "Welcome to Ocsigen!"]])))
 
 [%%client
@@ -171,12 +176,15 @@ The code is exactly the same, with the following modifications:
 <<code language="ocaml" |
 [%%shared
     open Eliom_content
-    open Html5
-    open Html5.D
+    open Html
+    open Html.D
 ]
 
 module Ex_app =
-  Eliom_registration.App(struct let application_name = "ex" end)
+  Eliom_registration.App (struct
+    let application_name = "ex"
+    let global_data_path = None
+  end)
 
 let%client switch_visibility elt =
   let elt = To_dom.of_element elt in
@@ -197,12 +205,15 @@ let mywidget s1 s2 =
   div ~a:[a_class ["mywidget"]] [button; content]
 
 let _ =
-  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+  Ex_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        Lwt.return
          (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
             (body [h2 [pcdata "Welcome to Ocsigen!"];
                    mywidget "Click me" "Hello!"])))
+
 >>
 
 == Fourth step: widget usable either on client or server sides ==
@@ -226,12 +237,15 @@ closing the currently opened window.
 <<code language="ocaml" |
 [%%shared
     open Eliom_content
-    open Html5
-    open Html5.D
+    open Html
+    open Html.D
 ]
 
 module Ex_app =
-  Eliom_registration.App (struct let application_name = "ex" end)
+  Eliom_registration.App (struct
+    let application_name = "ex"
+    let global_data_path = None
+  end)
 
 let%client close_last = ref (fun () -> ())
 
@@ -244,35 +258,41 @@ let%client switch_visibility elt =
 
 let%shared mywidget s1 s2 =
   let button  = div ~a:[a_class ["button"]] [pcdata s1] in
-  let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
+  let content = div ~a:[a_class ["content"]] [pcdata s2] in
   let _ = [%client
     (Lwt.async (fun () ->
-       Lwt_js_events.clicks (To_dom.of_element ~%button)
-         (fun _ _ ->
-            !close_last();
-            close_last := (fun () -> switch_visibility ~%content);
-            switch_visibility ~%content; Lwt.return ()))
+       Lwt_js_events.clicks (To_dom.of_element ~%button) (fun _ _ ->
+	 !close_last ();
+	 close_last := (fun () -> switch_visibility ~%content);
+	 switch_visibility ~%content;
+	 Lwt.return ()
+       ))
      : unit)
   ] in
   div ~a:[a_class ["mywidget"]] [button; content]
 
+
 let _ =
-  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+  Ex_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
-       let _ = [%client
-         (Dom.appendChild
-            (Dom_html.document##.body)
-            (To_dom.of_element (mywidget "Click me" "client side"))
-          : unit)
-       ] in
-       Lwt.return
-         (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
-            (body [
-               h2 [pcdata "Welcome to Ocsigen!"];
-               mywidget "Click me" "server side";
-               mywidget "Click me" "server side";
-               mywidget "Click me" "server side"
-             ])))
+      let _ =
+	[%client
+	    (Dom.appendChild
+	       (Dom_html.document##.body)
+               (To_dom.of_element (mywidget "Click me" "client side"))
+               : unit)
+	] in
+      Lwt.return
+        (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+           (body [
+             h2 [pcdata "Welcome to Ocsigen!"];
+             mywidget "Click me" "server side";
+             mywidget "Click me" "server side";
+             mywidget "Click me" "server side"
+           ])))
+
 >>
 
 == Last step: several sets of widgets ==
@@ -287,12 +307,15 @@ evaluated, and it has an abstract type.
 <<code language="ocaml" |
 [%%shared
     open Eliom_content
-    open Html5
-    open Html5.D
+    open Html
+    open Html.D
 ]
 
 module Ex_app =
-  Eliom_registration.App (struct let application_name = "ex" end)
+  Eliom_registration.App (struct
+    let application_name = "ex"
+    let global_data_path = None
+  end)
 
 let new_set () = [%client ( ref (fun () -> ()) : (unit -> unit) ref)]
 
@@ -308,34 +331,36 @@ let%shared mywidget set s1 s2 =
   let content = div ~a:[a_class ["content"; "hidden"]] [pcdata s2] in
   let _ = [%client
     (Lwt.async (fun () ->
-       Lwt_js_events.clicks (To_dom.of_element ~%button)
-         (fun _ _ ->
-            ! ~%set();
-            ~%set := (fun () -> switch_visibility ~%content);
-            switch_visibility ~%content; Lwt.return ()))
-     : unit)]
+       Lwt_js_events.clicks (To_dom.of_element ~%button) (fun _ _ ->
+         ! ~%set ();
+         ~%set := (fun () -> switch_visibility ~%content);
+         switch_visibility ~%content;
+	 Lwt.return ()))
+       : unit)]
   in
   div ~a:[a_class ["mywidget"]] [button; content]
 
 let _ =
-  Ex_app.register_service ~path:[] ~get_params:Eliom_parameter.unit
+  Ex_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
-       let set1 = new_set () in
-       let set2 = new_set () in
-       let _ = [%client
-         (Dom.appendChild
-            (Dom_html.document##.body)
-            (To_dom.of_element (mywidget ~%set2 "Click me" "client side"))
-          : unit)
-       ] in
-       Lwt.return
-         (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
-            (body [
-               h2 [pcdata "Welcome to Ocsigen!"];
-               mywidget set1 "Click me" "server side";
-               mywidget set1 "Click me" "server side";
-               mywidget set2 "Click me" "server side"
-             ])))
+      let set1 = new_set () in
+      let set2 = new_set () in
+      let _ = [%client (
+	Dom.appendChild
+	  (Dom_html.document##.body)
+	  (To_dom.of_element (mywidget ~%set2 "Click me" "client side"))
+	  : unit)
+	      ] in
+      Lwt.return
+        (Eliom_tools.D.html ~title:"ex" ~css:[["css"; "ex.css"]]
+           (body [
+             h2 [pcdata "Welcome to Ocsigen!"];
+             mywidget set1 "Click me" "server side";
+             mywidget set1 "Click me" "server side";
+             mywidget set2 "Click me" "server side"
+           ])))
 >>
 
 @@class="screenshot"@@{{wiki(79):files/tutorial/tutowidgets/ex-final.png|screenshot}}
