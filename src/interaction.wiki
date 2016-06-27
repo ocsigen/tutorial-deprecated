@@ -949,7 +949,9 @@ service and modify the user creation form to make it points towards
 {{{account_confirmation_service}}}.
 
 We created dynamically a service with a limited lifespan as specified by the
-{{{~timeout}}} parameter and a limited number of uses defined by the {{{~max_use}}} parameter. Now if we refresh the page after creating the account, it works as intented.
+{{{?timeout}}} parameter and a limited number of uses of this service defined
+by the {{{?max_use}}} parameter. Now if we refresh the page after creating the
+account, it works as intented.
 
 <<concept title="Dynamic creation of services" |
 
@@ -1030,7 +1032,7 @@ example when she logs in.
 <<concepts|
 Scope "request"
 >>
-<UPTOHERE>
+
 In the current version, our web site fails silently when the password
 is wrong.  Let's improve this behavior by displaying an error message.
 To do that, we need to pass information to the service occurring after
@@ -1190,7 +1192,7 @@ let authenticated_handler f =
       handle_anonymous (* Called when [username] is [None] *)
       f (* Called [username] contains something *)
 
-let () = Eliom_registration.Html5.register ~service:main_service
+let () = Eliom_registration.Html.register ~service:main_service
   (authenticated_handler
     (fun username _get _post ->
        Lwt.return
