@@ -538,16 +538,18 @@ let connection_box () =
     ~service:connection_service
     (fun () (name, password) ->
       let%lwt message =
-        if check_pwd name password
-        then begin
-          let%lwt () = Eliom_reference.set username (Some name) in
-          Lwt.return ("Hello " ^ name)
-        end else
-	  Lwt.return "Wrong name or password" in
+        if check_pwd name password then
+	  begin
+            let%lwt () = Eliom_reference.set username (Some name) in
+            Lwt.return ("Hello "^name)
+	  end
+	else
+	  Lwt.return "Wrong name or password"
+      in
       Lwt.return
         (html (head (title (pcdata "")) [])
-              (body [h1 [pcdata message];
-                     user_links ()])));
+           (body [h1 [pcdata message];
+                  user_links ()])));
 >>
 
 
@@ -556,7 +558,7 @@ let connection_box () =
 Session data is stored in what we call //Eliom references//.
 It is a type of reference whose value depend on the session the user
 belongs to.
-<UPDATED UP TO THAT POINT>
+
 Eliom is making the notion of session much more powerful by adding
 other //scopes// for Eliom references. Instead of limiting the scope
 to a session (that is: one browser), it is also possible to create
@@ -674,28 +676,28 @@ automatically by Eliom in each form (as hidden field) and link.
 
 >>
 
-Transform the connection service into a non-attached coservice:
+We transform the connection service into a non_attached coservice,
+to do so we replace the path we specified earlier for the {{{~id}}} parameter:
 
 <<code language="ocaml"|
-let connection_service =
-  Eliom_service.Http.post_coservice'
-    ~post_params:Eliom_parameter.(string "name" ** string "password")
-    ()
+let connection_service = Eliom_service.create
+  ~id:(Eliom_service.Global)
+  ~meth:(Eliom_service.Post (unit, string "name" ** string "password"))
+  ()
 >>
 
 Now you can add the connection box on user pages.
 
 <<code language="ocaml"|
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:user_service
     (fun name () ->
-      lwt cf = connection_box () in
+      let%lwt cf = connection_box () in
       Lwt.return
         (html (head (title (pcdata name)) [])
               (body [h1 [pcdata name];
-                     cf;
-                     p [a
-                          ~service:main_service [pcdata "Home"] ()]])));
+		     cf;
+                     p [a ~service:main_service [pcdata "Home"] ()]])));
 >>
 
 <<concept title="Alternative: register a redirection" |
@@ -711,10 +713,29 @@ redirections.  Such services return a service without parameter.
 Example:
 
 <<code language="ocaml"|
-let redir_service = Eliom_registration.Redirection.register_service
-    ~path:["redir"]
-    ~get_params:Eliom_parameter.unit
-   (fun () () -> Lwt.return main_service)
+
+let redir_service = Eliom_service.create
+    ~id:(Eliom_service.Path ["redir"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
+    ()
+
+let service_to_redirect = Eliom_service.create
+  ~id:(Eliom_service.Fallback redir_service)
+  ~meth:(Eliom_service.Post (unit, string "something"))
+  ()
+
+let () =
+  (** redir_service registration **)
+  Eliom_registration.Redirection.register
+    ~service:redir_service
+    (fun () () ->
+    	 Lwt.return
+		(Eliom_registration.Redirection some_service_to_redirect_to));
+
+  (** service_to_redirect registration **)
+  Eliom_registration.Any.register
+  ~service:service_to_redirect
+  (fun () something -> ..... )
 >>
 
 (If you want to give parameters to the service you return, use <<a_api
@@ -723,8 +744,8 @@ more information in the <<a_manual project="eliom" chapter="server-services"
 fragment="p3preapplied" | Eliom manual >>.)
 
 If you want to do a redirection towards the current page (as in our
-case), use the special service <<a_api project="eliom" |
-val Eliom_service.void_coservice' >>, which is some kind of POST
+case), use the special service {{{~id}}} parameter <<a_api project="eliom" |
+val Eliom_service.Global >>, which is some kind of POST
 non-attached coservice without parameter at all.  >>
 
 ===Disconnection===
@@ -737,16 +758,19 @@ Eliom_state.discard >> with scope <<a_api project="eliom"
 data.
 
 <<code language="ocaml"|
-let disconnection_service =
-  Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
+let disconnection_service = Eliom_service.create
+  ~id:(Eliom_service.Global)
+  ~meth:(Eliom_service.Post (unit,unit))
+  ()
 
 let disconnect_box () =
   Form.post_form disconnection_service
-    (fun _ -> [p [Form.input
-                    ~input_type:`Submit ~value:"Log out"
-                    Form.string]]) ()
+    (fun _ ->
+      [fieldset [Form.input ~input_type:`Submit ~value:"Log out" Form.string]]
+    )
+    ()
 
-let _ =
+let () =
   Eliom_registration.Action.register
     ~service:disconnection_service
     (fun () () -> Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
@@ -756,7 +780,7 @@ Then add this form in the connection box:
 
 <<code language="ocaml"|
 let connection_box () =
-  lwt u = Eliom_reference.get username in
+  let%lwt u = Eliom_reference.get username in
   Lwt.return
     (match u with
       | Some s -> div [p [pcdata "You are connected as "; pcdata s; ];
@@ -780,13 +804,15 @@ displays a registration form, and an action that will add the user to
 the "database":
 
 <<code language="ocaml"|
-let new_user_form_service =
-  Eliom_service.Http.service ~path:["registration"] ~get_params:Eliom_parameter.unit ()
+let new_user_form_service = Eliom_service.create
+  ~id:(Eliom_service.Path ["registration"])
+  ~meth:(Eliom_service.Get unit)
+  ()
 
-let create_account_service =
-  Eliom_service.Http.post_coservice
-    ~fallback:main_service
-    ~post_params:Eliom_parameter.(string "name" ** string "password") ()
+let create_account_service = Eliom_service.create
+  ~id:(Eliom_service.Fallback main_service)
+  ~meth:(Eliom_service.Post (unit, (string "name" **  string "password")))
+  ()
 
 let account_form =
   Form.post_form ~service:create_account_service
@@ -802,7 +828,7 @@ let account_form =
          ]]) ()
 
 let _ =
-  Eliom_registration.Html5.register
+  Eliom_registration.Html.register
     ~service:new_user_form_service
     (fun () () ->
       Lwt.return
@@ -854,12 +880,20 @@ are made for.
 
 >>
 
+It looks great, but if we refresh the page after creating an account,
+we can see there is a problem. We are creating the same account over and 
+over again. This because we are calling the create_account_service each time
+we refresh the page, obviously we don't want that. To solve this issue we will
+implement a dynamically created and registered service with limited lifespan and
+number of uses.
+
 ===Registration form with confirmation===
 
 <<concepts|
 
 Dynamic registration of services\\
-Session services
+Session services\\
+Limited services
 
 >>
 
@@ -868,11 +902,10 @@ account.  We //replace// the service {{{create_account_service}}} by a
 new POST attached coservice called {{{account_confirmation_service}}}:
 
 <<code language="ocaml"|
-let account_confirmation_service =
-  Eliom_service.Http.post_coservice
-    ~fallback:new_user_form_service
-    ~post_params:Eliom_parameter.(string "name" ** string "password")
-    ()
+let account_confirmation_service = Eliom_service.create
+  ~id:(Eliom_service.Fallback new_user_form_service)
+  ~meth:(Eliom_service.Post (unit, (string "name" **  string "password")))
+  ()
 >>
 
 and we make the account creation form point at this new service.
@@ -882,37 +915,41 @@ page.  As a side effect, this page will create the actual account
 creation service:
 
 <<code language="ocaml"|
-Eliom_registration.Html5.register
-  ~service:account_confirmation_service
-  (fun () (name, pwd) ->
-    let create_account_service =
-      Eliom_registration.Action.register_coservice
-        ~fallback:main_service
-        ~get_params:Eliom_parameter.unit
-        ~timeout:60.
+
+  Eliom_registration.Html.register
+    ~service:account_confirmation_service
+    (fun () (name, pwd) ->
+      let create_account_service =
+	Eliom_service.create
+          ~id:(Eliom_service.Fallback main_service)
+          ~meth:(Eliom_service.Get Eliom_parameter.unit)
+          ~timeout:60.
+	  ~max_use:1
+	  ()
+      in
+      let _ = Eliom_registration.Action.register
+	~service:create_account_service
         (fun () () ->
           users := (name, pwd)::!users;
           Lwt.return ())
-    in
-    Lwt.return
-      (html
-        (head (title (pcdata "")) [])
-          (body
-            [h1 [pcdata "Confirm account creation for "; pcdata name];
-             p [a ~service:create_account_service [pcdata "Yes"] ();
-                pcdata " ";
-                a ~service:main_service [pcdata "No"] ()]
-            ])));
+      in
+      Lwt.return
+	(html
+           (head (title (pcdata "")) [])
+           (body
+              [h1 [pcdata "Confirm account creation for "; pcdata name];
+               p [a ~service:create_account_service [pcdata "Yes"] ();
+                  pcdata " ";
+                  a ~service:main_service [pcdata "No"] ()]
+              ])));
 >>
 
 Also remove the registration of the {{{create_account_service}}}
 service and modify the user creation form to make it points towards
 {{{account_confirmation_service}}}.
 
-<<|BB
-  After the actual creation of the user, {{{create_account_service}}} stays
-  accessible. Reloading re-creates the same user again.
-  >>
+We created dynamically a service with a limited lifespan as specified by the
+{{{~timeout}}} parameter and a limited number of uses defined by the {{{~max_use}}} parameter. Now if we refresh the page after creating the account, it works as intented.
 
 <<concept title="Dynamic creation of services" |
 
@@ -993,7 +1030,7 @@ example when she logs in.
 <<concepts|
 Scope "request"
 >>
-
+<UPTOHERE>
 In the current version, our web site fails silently when the password
 is wrong.  Let's improve this behavior by displaying an error message.
 To do that, we need to pass information to the service occurring after
@@ -1003,7 +1040,8 @@ scope {{{Eliom_common.request_scope}}}.
 Define an Eliom reference:
 
 <<code language="ocaml"|
-let wrong_pwd = Eliom_reference.eref ~scope:Eliom_common.request_scope false
+let wrong_pwd =
+  Eliom_reference.eref ~scope:Eliom_common.request_scope false
 >>
 
 Modify the connection box this way:
@@ -1062,28 +1100,29 @@ Our service {{{user_service}}} responds to any request parameter, even
 if the user does not exist in the database.  We want to check that the
 user is in the database before displaying the page, and send a 404
 error if the user is not.  To do that, we will replace module
-{{{ Eliom_registration.Html5 }}}
+{{{ Eliom_registration.Html }}}
 by <<a_api project="eliom" | module
 Eliom_registration.Any >> to register the service {{{user_service}}}:
 
 <<code language="ocaml"|
-Eliom_registration.Any.register
-  ~service:user_service
-  (fun name () ->
-    if List.exists (fun (n, _) -> n = name) !users
-    then begin
-      lwt cf = connection_box () in
-      Eliom_registration.Html5.send
-        (html (head (title (pcdata name)) [])
-              (body [h1 [pcdata name];
-                     cf;
-                     p [a ~service:main_service [pcdata "Home"] ()]]))
-    end else
-      Eliom_registration.Html5.send
-        ~code:404
-        (html (head (title (pcdata "404")) [])
-              (body [h1 [pcdata "404"];
-                     p [pcdata "That page does not exist"]]))
+  Eliom_registration.Any.register
+    ~service:user_service
+    (fun name () ->
+      if List.mem_assoc name !users then
+	begin
+	  let%lwt cf = connection_box () in
+	  Eliom_registration.Html.send
+            (html (head (title (pcdata name)) [])
+               (body [h1 [pcdata name];
+                      cf;
+                      p [a ~service:main_service [pcdata "Home"] ()]]))
+	end
+      else
+	Eliom_registration.Html.send
+          ~code:404
+          (html (head (title (pcdata "404")) [])
+             (body [h1 [pcdata "404"];
+                    p [pcdata "That page does not exist"]]))
     );
 >>
 
