@@ -1,8 +1,5 @@
-open Eliom_content.Html.D
-open Eliom_parameter
 
-
-(** ============================Eliom references============================ **)
+(* =============================Eliom references============================= *)
 
 let username =
   Eliom_reference.eref ~scope:Eliom_common.default_session_scope None
@@ -11,16 +8,16 @@ let wrong_pwd =
   Eliom_reference.eref ~scope:Eliom_common.request_scope false
 
 
-(** ================================Services================================ **)
+(* =================================Services================================= *)
 
 let main_service = Eliom_service.create
   ~id:(Eliom_service.Path [""])
-  ~meth:(Eliom_service.Get unit)
+  ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
 let user_service  = Eliom_service.create
   ~id:(Eliom_service.Path ["users"])
-  ~meth:(Eliom_service.Get (suffix (string "name")))
+  ~meth:(Eliom_service.Get Eliom_parameter.(suffix (string "name")))
   ()
 
 let redir_service = Eliom_service.create
@@ -30,41 +27,48 @@ let redir_service = Eliom_service.create
 
 let connection_service = Eliom_service.create
   ~id:(Eliom_service.Global)
-  ~meth:(Eliom_service.Post (unit, string "name" ** string "password"))
+  ~meth:(Eliom_service.Post (
+    Eliom_parameter.unit,
+    Eliom_parameter.(string "name" ** string "password")))
   ()
 
 let disconnection_service = Eliom_service.create
   ~id:(Eliom_service.Fallback redir_service)
-  ~meth:(Eliom_service.Post (unit,unit))
+  ~meth:(Eliom_service.Post (
+    Eliom_parameter.unit,
+    Eliom_parameter.unit))
   ()
 
 let new_user_form_service = Eliom_service.create
   ~id:(Eliom_service.Path ["registration"])
-  ~meth:(Eliom_service.Get unit)
+  ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
 let account_confirmation_service = Eliom_service.create
   ~id:(Eliom_service.Fallback new_user_form_service)
-  ~meth:(Eliom_service.Post (unit, (string "name" **  string "password")))
+  ~meth:(Eliom_service.Post (
+    Eliom_parameter.unit,
+    Eliom_parameter.(string "name" **  string "password")))
   ()
 
-(** ==========================Usernames/Passwords=========================== **)
+(* ===========================Usernames/Passwords============================ *)
 
 let users = ref [("Calvin", "123"); ("Hobbes", "456")]
 
-let user_links =
+let user_links = Eliom_content.Html.D.(
   let link_of_user = fun (name, _) ->
     li [a ~service:user_service [pcdata name] name]
   in
   fun () -> ul (List.map link_of_user !users)
+)
 
 let check_pwd name pwd =
   try List.assoc name !users = pwd with Not_found -> false
 
 
-(** ================================Widgets================================= **)
+(* =================================Widgets================================== *)
 
-let account_form =
+let account_form = Eliom_content.Html.D.(
   Form.post_form ~service:account_confirmation_service
     (fun (name1, name2) ->
       [fieldset
@@ -76,19 +80,20 @@ let account_form =
           br ();
           Form.input ~input_type:`Submit ~value:"Create Account" Form.string
          ]]) ()
+)
 
-let disconnect_box () =
+let disconnect_box () = Eliom_content.Html.D.(
   Form.post_form disconnection_service
     (fun _ ->
       [fieldset [Form.input ~input_type:`Submit ~value:"Log out" Form.string]]
     )
     ()
   |> Lwt.return
+)
 
+(* =========================Authentification Handler========================= *)
 
-(** ========================Authentification Handler=========================**)
-
-let authenticated_handler g f =
+let authenticated_handler g f = Eliom_content.Html.D.(
   let handle_anonymous _get _post =
     let connection_box =
       div[
@@ -116,10 +121,10 @@ let authenticated_handler g f =
       (fun () -> Eliom_reference.get username)
       handle_anonymous (* Called when [username] is [None]     *)
       f                (* Called [username] contains something *)
+)
+(* ===========================Services Registration========================== *)
 
-(** ==========================Services Registration========================= **)
-
-let () =
+let () = Eliom_content.Html.D.(
 
   Eliom_registration.Html.register
     ~service:main_service
@@ -201,3 +206,4 @@ let () =
                   pcdata " ";
                   a ~service:main_service [pcdata "No"] ()]
               ])));
+)
