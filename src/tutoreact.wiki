@@ -599,7 +599,7 @@ parameter:
 >>
 <<code language="ocaml" class="server"|
 let%server add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
        (fun userid (forumid, value) ->
@@ -656,7 +656,7 @@ let%server get_data_forum forumid =
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
 let%server get_data_forum_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
   (Eba_session.Opt.connected_rpc
      (fun userid_o forumid -> get_data_forum forumid))
 >>
@@ -791,7 +791,7 @@ end)
 
 <<code language="ocaml" class="server"|
 let%server add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
        (fun userid (forumid, value) ->
@@ -810,7 +810,7 @@ let%server forumcache :
 let%server get_data = Db.get_message
 
 let%server get_data_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o id -> get_data id))
 >>
@@ -832,7 +832,7 @@ let%server get_data_forum forumid =
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
 let%server get_data_forum_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o forumid -> get_data_forum forumid))
 >>
