@@ -95,8 +95,9 @@ let disconnect_box () = Eliom_content.Html.D.(
 
 let authenticated_handler g f = Eliom_content.Html.D.(
   let handle_anonymous _get _post =
+    let%lwt wp = Eliom_reference.get wrong_pwd in
     let connection_box =
-      div[
+      let l = [
 	Form.post_form ~service:connection_service
           (fun (name1, name2) ->
 	    [fieldset
@@ -110,6 +111,8 @@ let authenticated_handler g f = Eliom_content.Html.D.(
 		]]) ();
         p [a new_user_form_service
               [pcdata "Create an account"] ()]]
+      in
+      div (if wp then p [pcdata "Wrong login or password"]::l else l)
     in
     g
       (html
