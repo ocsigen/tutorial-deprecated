@@ -1,6 +1,6 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested against Eliom 5.// \\
+//The code of this tutorial has been tested against Eliom dev (30/06/2016).// \\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]]. It is a client/server web application
@@ -39,12 +39,12 @@ creating a very basic page. We define the service that will implement
 this page by the following declaration:
 
 <<code language="ocaml" class="server"|
-open Eliom_content.Html5.D (* provides functions to create HTML nodes *)
+open Eliom_content.Html.D (* provides functions to create HTML nodes *)
 
 let main_service =
-  Eliom_registration.Html5.register_service
-    ~path:["graff"]
-    ~get_params:Eliom_parameter.unit
+  Eliom_registration.Html.create
+    ~id:(Eliom_service.Path ["graff"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
         (html
@@ -131,17 +131,17 @@ There are several ways to create pages for Eliom.  You can generate
 pages as strings (as in other web frameworks). However, it is
 preferable to generate HTML in a way that provides compile-time HTML
 correctness guarantees. This tutorial achieves this by using the
-module <<a_api project="eliom" | module Eliom_content.Html5.D >>,
+module <<a_api project="eliom" | module Eliom_content.Html.D >>,
 which is implemented using the <<a_manual project="tyxml" |TyXML>>
-library.  The module defines a construction function for each HTML5
+library.  The module defines a construction function for each HTML
 tag.
 
 //Note that it is also possible to use the usual HTML syntax directly
  in OCaml, cf.  <<a_api project="tyxml" | module Pa_tyxml >>.//
 
 The TyXML library (and thus <<a_api project="eliom" | module
-Eliom_content.Html5.D >>) is very strict and compels you to respect
-HTML5 standard (with some limitations). For example if you write:
+Eliom_content.Html.D >>) is very strict and compels you to respect
+HTML standard (with some limitations). For example if you write:
 
 <<code language="ocaml"|
 (html
@@ -153,10 +153,10 @@ You will get an error message similar to the following, referring to
 the end of line 2:
 
 {{{
-Error: This expression has type ([> `PCDATA ] as 'a) Html5.elt
+Error: This expression has type ([> `PCDATA ] as 'a) Html.elt
        but an expression was expected of type
-         Html5_types.head_content_fun Html5.elt
-       Type 'a is not compatible with type Html5_types.head_content_fun =
+         Html_types.head_content_fun Html.elt
+       Type 'a is not compatible with type Html_types.head_content_fun =
            [ `Base
            | `Command
            | `Link
@@ -167,22 +167,22 @@ Error: This expression has type ([> `PCDATA ] as 'a) Html5.elt
        The second variant type does not allow tag(s) `PCDATA
 }}}
 
-where <<a_api project="tyxml" | type Html5_types.head_content_fun >>
+where <<a_api project="tyxml" | type Html_types.head_content_fun >>
 is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.). Notice that
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic
 variant type, which means that {{{<head>}}} cannot contain raw text.
 
 Most functions take as parameter the list representing its contents.
-See other examples below. Each of them take un optional {{{?a}}}
+See other examples below. Each of them take an optional {{{?a}}}
 parameter for optional HTML attributes.
 Mandatory HTML attributes correspond to mandatory OCaml parameters.
 See below for examples.
 
 <<|
-**Another example:** In HTML5, some tags cannot be empty. For example
+**Another example:** In HTML, some tags cannot be empty. For example
 {{{<table>}}}must contain at least one row. To enforce this, function
-<<a_api project="tyxml" text="Html5.table"| val Html5.F.table ~>>
+<<a_api project="tyxml" text="Html.table"| val Html.F.table ~>>
 takes two parameters: the first one is the first row, while
 the second one is a list containing all the other rows (same thing for
 {{{<tr>}}}, {{{<form>}}}, {{{<select>}}}, ...). This prevents tables
@@ -195,7 +195,7 @@ pages afterwards.//
 
 A more detailed introduction to the construction of HTML5 tree is
 available in the <<a_api project="tyxml" text="TyXML reference API" |
-module Html5.F ~>>.
+module Html.F ~>>.
 
 >>
 
@@ -222,8 +222,8 @@ Calling JavaScript methods with Js_of_ocaml\\
 >>
 
 To create our first service, we used the function <<a_api
-project="eliom" | val Eliom_registration.Html5.register_service>>, as
-all we wanted to do was return HTML5. But we actually want a service
+project="eliom" | val Eliom_registration.Html.create>>, as
+all we wanted to do was return HTML. But we actually want a service
 that corresponds to a full Eliom application with client and server
 parts. To do so, we need to create our own registration module by
 using the functor {{{Eliom_registration.App}}}:
@@ -238,6 +238,7 @@ using the functor {{{Eliom_registration.App}}}:
 module Graffiti_app =
   Eliom_registration.App (struct
       let application_name = "graffiti"
+      let global_data_path = None
     end)
 >>
 
@@ -246,9 +247,9 @@ service (now at URL {{{/}}}):
 
 <<code language="ocaml" class="server"|
 let main_service =
-  Graffiti_app.register_service
-    ~path:[""]
-    ~get_params:Eliom_parameter.unit
+  Graffiti_app.create
+    ~id:(Eliom_servie.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
         (html
@@ -366,9 +367,9 @@ instance:
 let count = ref 0
 
 let main_service =
-  Graffiti_app.register_service
-    ~path:[""]
-    ~get_params:Eliom_parameter.unit
+  Graffiti_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        let c = incr count; !count in
        ignore [%client
@@ -426,11 +427,13 @@ a copy of the {{{<body>}}} element. Hence, the actual page's
 
 <<code language="ocaml" class="server"|
 let main_service =
-  Graffiti_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  Graffiti_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
       Eliom_service.onload {{
-        Html5.Manip.appendChild %container (div [pcdata "some text"]);
+        Html.Manip.appendChild %container (div [pcdata "some text"]);
       }}
       Lwt.return
         (html
@@ -449,7 +452,7 @@ Canvas
 
 >>
 
-We now want to draw something on the page using an HTML5 canvas. The
+We now want to draw something on the page using an HTML canvas. The
 drawing primitive is defined in the client-side function called
 {{{draw}}} that just draws a line between two given points in a canvas.
 
@@ -463,7 +466,7 @@ Here is the (full) new version of the program:
 [%%shared
   (* Modules opened in the shared-section are available in client-
      and server-code *)
-  open Eliom_content.Html5.D
+  open Eliom_content.Html.D
   open Lwt
 ]
 >>
@@ -472,10 +475,11 @@ module Graffiti_app =
   Eliom_registration.App (
     struct
       let application_name = "graffiti"
+      let global_data_path = None
     end)
 >>
 <<code language="ocaml" class="shared"|
-let%shared width = 700
+let%shared width  = 700
 let%shared height = 400
 >>
 <<code language="ocaml" class="client"|
@@ -494,21 +498,23 @@ let canvas_elt =
     [pcdata "your browser doesn't support canvas"]
 
 let page () =
-  (html
+  html
      (head (title (pcdata "Graffiti")) [])
      (body [h1 [pcdata "Graffiti"];
-            canvas_elt]))
+            canvas_elt])
 >>
 <<code language="ocaml" class="client"|
 let%client init_client () =
-  let canvas = Eliom_content.Html5.To_dom.of_canvas ~%canvas_elt in
+  let canvas = Eliom_content.Html.To_dom.of_canvas ~%canvas_elt in
   let ctx = canvas##(getContext (Dom_html._2d_)) in
   ctx##.lineCap := Js.string "round";
   draw ctx ((0, 0, 0), 12, (10, 10), (200, 100))
 >>
 <<code language="ocaml" class="server"|
 let main_service =
-  Graffiti_app.register_service ~path:[""] ~get_params:Eliom_parameter.unit
+  Graffiti_app.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        (* Cf. section "Client side side-effects on the server" *)
        let _ = [%client (init_client () : unit) ] in
@@ -565,7 +571,7 @@ following piece of code, then compile and draw!
 <<code language="ocaml" class="client"|
 let%client init_client () =
 
-  let canvas = Eliom_content.Html5.To_dom.of_canvas ~%canvas_elt in
+  let canvas = Eliom_content.Html.To_dom.of_canvas ~%canvas_elt in
   let ctx = canvas##(getContext (Dom_html._2d_)) in
   ctx##.lineCap := Js.string "round";
 
@@ -790,7 +796,7 @@ lines are drawn on both windows.
   allowing finer-grained control. It allows sending <<a_api
   project="lwt" | module Lwt_stream >> to the client.
   {{{Eliom_react}}} and {{{Eliom_bus}}} are implemented over
-  {{{Eliom_coment}}}.
+  {{{Eliom_comet}}}.
 
   It is possible to control the idle behaviour with module <<a_api
   project="eliom" subproject="client" | module
@@ -831,20 +837,20 @@ Ow_color_picker.append_at (Dom_html.document##.body) colorpicker;
 Ow_color_picker.init_handler colorpicker;
 >>
 
-We subsequently add a simple HTML5 slider to change the size of the
+We subsequently add a simple HTML slider to change the size of the
 brush. Near the {{{canvas_elt}}} definition, simply add the following
 code:
 
 <<code language="ocaml" class="server"|
 let slider =
-  Eliom_content.Html5.D.Form.input
+  Eliom_content.Html.D.Form.input
     ~a:[
-      Html5.D.a_id "slider";
-      Html5.D.a_input_min 1.;
-      Html5.D.a_input_max 80.
+      Html.D.a_id "slider";
+      Html.D.a_input_min (`Number 1);
+      Html.D.a_input_max (`Number 80)
     ]
     ~input_type:`Range
-    Html5.D.Form.int
+    Html.D.Form.int
 >>
 
 {{{Form.int}}} is a typing information telling that this input takes
@@ -854,7 +860,7 @@ services taking an integer as parameter.
 We then add the slider to the page body, as follows:
 
 <<code language="ocaml" class="server"|
-let page =
+let page () =
   (html
     (head (title (pcdata "Graffiti")) [])
     (body [h1 [pcdata "Graffiti"];
@@ -867,7 +873,7 @@ line of the function {{{compute_line}}} in {{{init_client}}} by:
 
 <<code language="ocaml" class="client"|
 let rgb = Ow_color_picker.get_rgb colorpicker in
-let size_slider = Eliom_content.Html5.To_dom.of_input ~%slider in
+let size_slider = Eliom_content.Html.To_dom.of_input ~%slider in
 let size = int_of_string (Js.to_string size_slider##.value) in
 (rgb, size, (oldx, oldy), (!x, !y))
 >>
@@ -877,9 +883,10 @@ easily create the {{{head}}} HTML element, we use the function <<a_api
 project="eliom" subproject="server"|val Eliom_tools.F.head>>:
 
 <<code language="ocaml" class="server"|
-let page =
+let page () =
   html
-    (Eliom_tools.F.head ~title:"Graffiti"
+    (Eliom_tools.F.head
+       ~title:"Graffiti"
        ~css:[
          ["css";"graffiti.css"];]
       ~js:[] ())
@@ -965,9 +972,9 @@ We also define a service that sends the picture:
 
 <<code language="ocaml" class="server"|
 let imageservice =
-  Eliom_registration.String.register_service
-    ~path:["image"]
-    ~get_params:Eliom_parameter.unit
+  Eliom_registration.String.create
+    ~id:(Eliom_service.Path ["image"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () -> Lwt.return (image_string (), "image/png"))
 >>
 
@@ -976,8 +983,8 @@ let imageservice =
   title="Eliom_registration"|
 
   The module {{{Eliom_registration}}} defines several modules with
-  registration functions for a variety of data types. We have already
-  seen {{{Eliom_registration.Html5}}} and {{{Eliom_registration.App}}}.
+  registration and creation functions for a variety of data types.
+  We have already seen {{{Eliom_registration.Html}}} and {{{Eliom_registration.App}}}.
   The module {{{Eliom_registration.String}}} sends arbitrary byte output
   (represented by an OCaml string). The handler function must return
   a pair consisting of the content and the content-type.
@@ -1003,14 +1010,13 @@ creation of the slider:
 
 <<code language="ocaml" class="server"|
 (* The initial image: *)
-let img =
-  Eliom_content.Html5.To_dom.of_img
+let img = Eliom_content.Html.To_dom.of_img
     (img ~alt:"canvas"
        ~src:(make_uri ~service:~%imageservice ())
        ())
 in
-img##.onload := Dom_html.handler
-    (fun ev -> ctx##drawImage img 0. 0.; Js._false);
+img##.onload := Dom_html.handler (fun ev ->
+  ctx##drawImage img 0. 0.; Js._false);
 >>
 
 You are then ready to try your graffiti-application by
