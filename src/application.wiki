@@ -501,7 +501,7 @@ let page () =
   html
      (head (title (pcdata "Graffiti")) [])
      (body [h1 [pcdata "Graffiti"];
-            canvas_elt]))
+            canvas_elt])
 >>
 <<code language="ocaml" class="client"|
 let%client init_client () =
@@ -513,7 +513,7 @@ let%client init_client () =
 <<code language="ocaml" class="server"|
 let main_service =
   Graffiti_app.create
-    ~id:(Eliom_service.Path [""]
+    ~id:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        (* Cf. section "Client side side-effects on the server" *)
