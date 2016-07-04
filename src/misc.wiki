@@ -2,7 +2,7 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested with Eliom 5.// \\
+//The code of this tutorial has been tested with Eliom dev (30/06/2016).// \\
 
 ==Multi-user collaborative drawing application==
 
@@ -89,11 +89,11 @@ let stop_drawing { message_thread; drawing_thread } =
 
 <<code language="ocaml"|
 let launch_client_canvas bus image_elt canvas_elt slider =
-  let canvas = Html5.To_dom.of_canvas canvas_elt in
+  let canvas = Html.To_dom.of_canvas canvas_elt in
   let ctx = canvas##(getContext (Dom_html._2d_)) in
   ctx##.lineCap := Js.string "round";
 
-  let img = Html5.To_dom.of_img image_elt in
+  let img = Html.To_dom.of_img image_elt in
   let copy_image () = ctx##(drawImage img (0.) (0.)) in
   if Js.to_bool (img##.complete)
   then copy_image ()
@@ -113,7 +113,7 @@ let launch_client_canvas bus image_elt canvas_elt slider =
     let oldx = !x and oldy = !y in
     set_coord ev;
     let rgb = Ow_color_picker.get_rgb colorpicker in
-    let size_slider = Html5.To_dom.of_input slider in
+    let size_slider = Html.To_dom.of_input slider in
     let size = int_of_string (Js.to_string size_slider##.value) in
     (rgb, size, (oldx, oldy), (!x, !y))
   in
@@ -148,6 +148,7 @@ open Lwt
 module My_app =
   Eliom_registration.App (struct
     let application_name = "graffiti"
+    let global_data_path = None
   end)
 >>
 
@@ -190,10 +191,12 @@ let launch_server_canvas () =
 let graffiti_info = Hashtbl.create 0
 
 let imageservice =
-  Eliom_registration.String.register_service
-    ~path:["image"]
+  Eliom_registration.String.create
+    ~id:(Eliom_service.Path ["image"])
     ~headers:Http_headers.dyn_headers
-    ~get_params:(let open Eliom_parameter in string "name" ** int "q")
+    ~meth:
+      (Eliom_service.Get
+         (let open Eliom_parameter in string "name" ** int "q"))
     (* we add another parameter for the browser not to cache: at least
        for chrome, there is no way to force the browser to reload the
        image without leaving the application *)
@@ -221,45 +224,52 @@ want to go.  The drawing will be sent by the
 {{{graffiti.eliom}}}.
 
 <<code language="ocaml"|
-let main_service = Eliom_service.App.service ~path:[""]
-  ~get_params:(Eliom_parameter.unit) ()
-let multigraffiti_service = Eliom_service.App.service ~path:[""]
-  ~get_params:(Eliom_parameter.suffix (Eliom_parameter.string "name")) ()
+let main_service =
+  Eliom_service.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get (Eliom_parameter.unit))
+    ()
+
+let multigraffiti_service =
+  Eliom_service.create
+    ~id:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get (Eliom_parameter.(suffix (string "name"))))
+    ()
 
 let choose_drawing_form () =
-  Html5.D.Form.get_form ~service:multigraffiti_service
+  Html.D.Form.get_form ~service:multigraffiti_service
     (fun (name) ->
-       [Html5.D.p [
-           Html5.D.pcdata "drawing name: ";
-           Html5.D.Form.input ~input_type:`Text ~name
-             Html5.D.Form.string;
-           Html5.D.br ();
-           Html5.D.Form.input ~input_type:`Submit ~value:"Go"
-             Html5.D.Form.string
+       [Html.D.p [
+           Html.D.pcdata "drawing name: ";
+           Html.D.Form.input ~input_type:`Text ~name
+             Html.D.Form.string;
+           Html.D.br ();
+           Html.D.Form.input ~input_type:`Submit ~value:"Go"
+             Html.D.Form.string
          ]])
 
 let oclosure_script =
-  Html5.Id.create_global_elt
-    (Html5.D.js_script
-       ~uri:(Html5.D.Raw.uri_of_string "./graffiti_oclosure.js") ())
+  Html.Id.create_global_elt
+    (Html.D.js_script
+       ~uri:(Html.D.Raw.uri_of_string "./graffiti_oclosure.js") ())
 
 let make_page body =
   Lwt.return
-    (Html5.D.html
-       (Html5.D.head
-	  (Html5.D.title (Html5.D.pcdata "Graffiti"))
+    (Html.D.html
+       (Html.D.head
+	  (Html.D.title (Html5.D.pcdata "Graffiti"))
  	  [
-	    Html5.D.css_link
-	      ~uri:(Html5.D.Raw.uri_of_string"./css/closure/common.css") ();
-	    Html5.D.css_link
-	      ~uri:(Html5.D.Raw.uri_of_string"./css/closure/hsvpalette.css") ();
-	    Html5.D.css_link
-	      ~uri:(Html5.D.Raw.uri_of_string"./css/slider.css") ();
+	    Html.D.css_link
+	      ~uri:(Html.D.Raw.uri_of_string"./css/closure/common.css") ();
+	    Html.D.css_link
+	      ~uri:(Html.D.Raw.uri_of_string"./css/closure/hsvpalette.css") ();
+	    Html.D.css_link
+	      ~uri:(Html.D.Raw.uri_of_string"./css/slider.css") ();
             oclosure_script;
-	    Html5.D.css_link
+	    Html.D.css_link
 	      ~uri:(Html5.D.Raw.uri_of_string"./css/graffiti.css") ();
           ])
-       (Html5.D.body body))
+       (Html.D.body body))
 
 let () = My_app.register ~service:main_service
   (fun () () ->
@@ -275,7 +285,7 @@ let () = My_app.register ~service:main_service
   We usually don't want that.
 
   Using <<a_api project="eliom"| val
-  Eliom_content.Html5.Id.create_global_elt>> we can create an xml node
+  Eliom_content.Html.Id.create_global_elt>> we can create an xml node
   manipulated 'by reference'. If a reference to a script node is
   included in a page, it will only be loaded the first time it appears
   in the header. This is the case for {{{oclosure_script}}} above.
@@ -289,7 +299,7 @@ application.
 
 <<code language="ocaml"|
 [%%shared
-    open Eliom_content.Html5.D
+    open Eliom_content.Html.D
     open Common
 ]
 [%%client
@@ -335,8 +345,8 @@ let () =
       Form.input
         ~a:[
           a_id "slider";
-          a_input_min 1.;
-          a_input_max 80.
+          a_input_min (`Number 1);
+          a_input_max (`Number 80)
         ]
         ~input_type:`Range
         Form.int
@@ -371,21 +381,29 @@ From the previous chapter, we copy the code handling users to
 {{{server.ml}}}:
 
 <<code language="ocaml"|
-let connection_service =
-  Eliom_service.Http.post_coservice'
-    ~post_params:Eliom_parameter.(string "name" ** string "password")
+let connection_service = Eliom_service.create
+    ~id:Eliom_service.Global    
+    ~meth:(Eliom_service.Post (
+      Eliom_parameter.unit,
+      Eliom_parameter.(string "name" ** string "password")
+    ))
     ()
 
-let disconnection_service =
-  Eliom_service.Http.post_coservice' ~post_params:Eliom_parameter.unit ()
+let disconnection_service = Eliom_service.create
+    ~id:Eliom_service.Global
+    ~meth:(Eliom_service.Post (Eliom_parameter.unit, Eliom_parameter.unit))
+    ()
 
-let create_account_service =
-  Eliom_service.Http.post_coservice
-    ~fallback:main_service
-    ~post_params:Eliom_parameter.(string "name" ** string "password")
+let create_account_service = Eliom_service.create
+    ~id:(Eliom_service.Fallback main_service)
+    ~meth:(Eliom_service.Post (
+      Eliom_parameter.unit,
+      Eliom_parameter.(string "name" ** string "password")
+    ))
     ()
 
 let user_table = Ocsipersist.open_table "user_table"
+
 let check_pwd name pwd =
   try%lwt
     let%lwt saved_password = Ocsipersist.find user_table name in
@@ -412,29 +430,29 @@ let () =
       Eliom_state.discard ~scope:Eliom_common.default_session_scope ())
 
 let disconnect_box () =
-  Html5.D.Form.post_form disconnection_service
+  Html.D.Form.post_form disconnection_service
     (fun _ ->
-       [Html5.D.p [
-           Html5.D.Form.input
+       [Html.D.p [
+           Html.D.Form.input
              ~input_type:`Submit ~value:"Log out"
-             Html5.D.Form.string
+             Html.D.Form.string
          ]
        ]) ()
 
 let login_name_form service button_text =
-  Html5.D.Form.post_form ~service
+  Html.D.Form.post_form ~service
     (fun (name1, name2) ->
-       [Html5.D.p [
-           Html5.D.pcdata "login: ";
-           Html5.D.Form.input ~input_type:`Text ~name:name1
-             Html5.D.Form.string;
-           Html5.D.br ();
-           Html5.D.pcdata "password: ";
-           Html5.D.Form.input ~input_type:`Password ~name:name2
-             Html5.D.Form.string;
-           Html5.D.br ();
-           Html5.D.Form.input ~input_type:`Submit ~value:button_text
-             Html5.D.Form.string
+       [Html.D.p [
+           Html.D.pcdata "login: ";
+           Html.D.Form.input ~input_type:`Text ~name:name1
+             Html.D.Form.string;
+           Html.D.br ();
+           Html.D.pcdata "password: ";
+           Html.D.Form.input ~input_type:`Password ~name:name2
+             Html.D.Form.string;
+           Html.D.br ();
+           Html.D.Form.input ~input_type:`Submit ~value:button_text
+             Html.D.Form.string
          ]]) ()
 >>
 
@@ -446,10 +464,10 @@ username is always available.
 <<code language="ocaml"|
 let default_content () =
   make_page
-    [Html5.D.h1 [Html5.D.pcdata "Welcome to Multigraffiti"];
-     Html5.D.h2 [Html5.D.pcdata "log in"];
+    [Html.D.h1 [Html.D.pcdata "Welcome to Multigraffiti"];
+     Html.D.h2 [Html.D.pcdata "log in"];
      login_name_form connection_service "Connect";
-     Html5.D.h2 [Html5.D.pcdata "create account"];
+     Html.D.h2 [Html.D.pcdata "create account"];
      login_name_form create_account_service "Create account";]
 
 module Connected_translate =
@@ -478,11 +496,13 @@ let () = My_app.register ~service:main_service
 by :
 
 <<code language="ocaml"|
+let ( !% ) f = fun a b -> return (fun c -> f a b c)
+
 let () = Connected.register
   ~service:main_service
   !% (fun () () username ->
     make_page
-      [Html5.D.h1 [Html5.D.pcdata ("Welcome to Multigraffiti " ^ username)];
+      [Html.D.h1 [Html.D.pcdata ("Welcome to Multigraffiti " ^ username)];
        choose_drawing_form ()])
 >>
 
