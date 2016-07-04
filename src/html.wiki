@@ -137,7 +137,7 @@ inserted twice in a page.
 Module
 <<a_api project="eliom" subproject="client"| module Eliom_content.Html.Manip >>
 makes it possible to manipulate OCaml nodes without conversions
-(add them in a pagen replace a node, add as child of another node,
+(add them in a page, replace a node, add as child of another node,
 add a class, etc.).
 
 === Reactive nodes
