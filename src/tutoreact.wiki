@@ -2,7 +2,7 @@
 
 This is a short tutorial showing how to implement a simple reactive
 client-server application using Js_of_ocaml, Eliom and
-Eliom-base-app. It requires Eliom ≥ 5.0.
+Eliom-base-app. It requires Eliom dev.
 
 Our application displays a list of items to connected users (for
 example a list of messages in a forum), and allows adding new items.
@@ -57,6 +57,12 @@ Compile and run the program:
 make test.byte
 }}}
 
+At any point if you want to get back to this tutorial later you may need to
+start the database again:
+{{{
+make db-start
+}}}
+
 Point your browser to {{{http://localhost:8080}}}.  Register a user
 and log-in. Because the send mail function is not configured, the
 activation links will be printed on the console.
@@ -87,17 +93,23 @@ Implement them for example using pgocaml, or, for a first version, using Ocsiper
 <<code language="ocaml" class="server"|
 [%%server
 module Db = struct
+
   let db = Ocsipersist.open_table "messages"
+
   let last_key =
     Eliom_reference.eref
       ~persistent:"index"
       ~scope:Eliom_common.global_scope (-1)
+
   let get_message id = Ocsipersist.find db (string_of_int id)
+
   let get_messages () =
     let%lwt index = Eliom_reference.get last_key in
     let rec aux n l = if n > index then l else aux (n+1) (n::l) in
     Lwt.return (aux 0 [])
+
   let lock = Lwt_mutex.create ()       
+
   let add_message v =
     let%lwt () = Lwt_mutex.lock lock in
     let%lwt index = Eliom_reference.get last_key in
@@ -106,6 +118,7 @@ module Db = struct
     Lwt_mutex.unlock lock;
     let%lwt () = Ocsipersist.add db (string_of_int index) v in
     Lwt.return index
+
 end
 ]
 >>
@@ -406,7 +419,7 @@ clients to be able to listen on (here lists of message identifiers):
 
 <<code language="ocaml" class="server"|
 [%%server
-module Forum_notif = Eba_notif.Make(struct
+module Forum_notif = Eba_notif.Make (struct
   type key = unit
   type notification = int
 end)
@@ -516,8 +529,25 @@ let%server () =
 
 We need to add a parameter {{{forumid}}} to the function
 {{{display}}}. We need to modify file {{{tutoreact.eliom}}}
-accordingly. For example, we can display forum 0.
+accordingly by changing the {{{main_service_handler}}} and
+the {{{main_service}}} registration.
+For example, we can display forum 0:
 
+<<code language="ocaml" class="server"|
+
+let%server main_service_handler forumid userid_o () () =
+  let%lwt content = Tutoreact_messages.display forumid userid_o in
+  Tutoreact_container.page userid_o content
+
+...
+
+let () =
+...
+  Tutoreact_base.App.register
+    ~service:Eba_services.main_service
+    (Tutoreact_page.Opt.connected_page (main_service_handler 0));
+...
+>>
 ==== Db
 
 Functions Db.get_messages and Db.add_message now take the forum identifier:
@@ -525,17 +555,23 @@ Functions Db.get_messages and Db.add_message now take the forum identifier:
 <<code language="ocaml" class="server"|
 [%%server
 module Db = struct
+
   let db = Ocsipersist.open_table "messages"
+
   let dbf = Ocsipersist.open_table "forums"
+
   let last_key =
     Eliom_reference.eref
       ~persistent:"index" ~scope:Eliom_common.global_scope (-1)
+
   let get_message id = Ocsipersist.find db (string_of_int id)
+
   let get_messages forumid =
     try%lwt
       Ocsipersist.find dbf (string_of_int forumid)
     with Not_found ->
       Lwt.return []
+
   let add_message forumid v =
     let%lwt index = Eliom_reference.get last_key in
     let index = index + 1 in
@@ -548,6 +584,7 @@ module Db = struct
         (index :: l)
     in
     Lwt.return index
+
 end
 ]
 >>
@@ -562,7 +599,7 @@ parameter:
 >>
 <<code language="ocaml" class="server"|
 let%server add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
        (fun userid (forumid, value) ->
@@ -619,7 +656,7 @@ let%server get_data_forum forumid =
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
 let%server get_data_forum_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
   (Eba_session.Opt.connected_rpc
      (fun userid_o forumid -> get_data_forum forumid))
 >>
@@ -707,17 +744,23 @@ you can add a {{{Lwt_unix.sleep}}} in server side's {{{get_data}}} function.
 <<code language="ocaml" class="server"|
 [%%server
 module Db = struct
+
   let db = Ocsipersist.open_table "messages"
+
   let dbf = Ocsipersist.open_table "forums"
+
   let last_key =
     Eliom_reference.eref
       ~persistent:"index" ~scope:Eliom_common.global_scope (-1)
+
   let get_message id = Ocsipersist.find db (string_of_int id)
+
   let get_messages forumid =
     try%lwt
       Ocsipersist.find dbf (string_of_int forumid)
     with Not_found ->
       Lwt.return []
+
   let add_message forumid v =
     let%lwt index = Eliom_reference.get last_key in
     let index = index + 1 in
@@ -730,6 +773,7 @@ module Db = struct
         (index :: l)
     in
     Lwt.return index
+
 end
 
 module Forum_notif = Eba_notif.Make(struct
@@ -747,7 +791,7 @@ end)
 
 <<code language="ocaml" class="server"|
 let%server add_message_rpc =
-  server_function
+  Eliom_client.server_function
     [%derive.json: add_message_type]
     (Eba_session.connected_rpc
        (fun userid (forumid, value) ->
@@ -766,7 +810,7 @@ let%server forumcache :
 let%server get_data = Db.get_message
 
 let%server get_data_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o id -> get_data id))
 >>
@@ -788,7 +832,7 @@ let%server get_data_forum forumid =
   Lwt.return (Eliom_shared.ReactiveData.RList.create ~default messages)
 
 let%server get_data_forum_rpc =
-  server_function [%derive.json: int]
+  Eliom_client.server_function [%derive.json: int]
     (Eba_session.Opt.connected_rpc
        (fun userid_o forumid -> get_data_forum forumid))
 >>
@@ -848,11 +892,10 @@ let%server display userid_o forumid =
   in
   Lwt.return (messages :: l)
 
-let%server forum_service =
-  Eliom_service.App.service
-    ~path:[]
-    ~get_params:Eliom_parameter.(suffix (int "i"))
-    ()
+let%server forum_service = Eliom_service.create
+  ~id:(Eliom_service.Path [""])
+  ~meth:(Eliom_service.Get Eliom_parameter.(suffix (int "i")))
+  ()
 
 let%server forum_service_handler userid_o forumid () =
   let%lwt content = display userid_o forumid in
