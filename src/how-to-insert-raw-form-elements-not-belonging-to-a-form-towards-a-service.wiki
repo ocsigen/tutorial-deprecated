@@ -10,9 +10,11 @@ module [[wiki(15):api/server/Eliom_content.Html5.D.Raw|{{{Eliom_content.Html5.D.
 
 Example:
 
+<<code language='ocaml'|
 {{{
 open Eliom_content.Html5.D
 
 Raw.textarea (pcdata "blah")
 
 }}}
+>>
