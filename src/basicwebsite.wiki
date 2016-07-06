@@ -40,7 +40,7 @@ let main_service =
 
 >>
 
-{{{Eliom_service.Get Eliom_paramer.any}}} means that the service uses the GET method and takes any GET parameter.
+{{{Eliom_service.Get Eliom_parameter.any}}} means that the service uses the GET method and takes any GET parameter.
 
 We recommend to use the program {{{eliom-distillery}}}
 to generate a template for your application (a Makefile and a default
@@ -94,7 +94,7 @@ let post_service =
 What if the user comes back later without POST parameters, for example
 because he put a bookmark on this URL?
 This may produce an error, to prevent this from happening we can
-create a service without POST parameters using the same URL as the first one,
+create a //fallback// service without POST parameters using the same URL as the first one,
 which will be used whenever the POST parameters are not provided.
 
 <<code language="ocaml"|
@@ -108,6 +108,39 @@ let post_service =
     g'
 
 >>
+
+This is the general idea but if we do it this way, there are some drawbacks:
+
+* It is not explicit if there is //fallback// for a given service.
+
+* If we want to change the url later on, we risk breaking the //fallback// behaviour
+  because we need the services to share the same url.
+
+Fortunately there is a better way to handle this without risking the aforementioned issues:
+
+<<code language="ocaml"|
+
+let g getp postp = Lwt.return ("t = " ^ (string_of_int postp))
+
+let g' getp postp = Lwt.return "..."
+
+let fallback_service = Eliom_service.create
+  ~id:(Eliom_service.Path [""])
+  ~meth:(Eliom_service.Get Eliom_parameter.unit)
+  ()
+
+let post_service =
+  Eliom_registration.Html_text.register
+    ~service:fallback_service
+    g';
+  Eliom_registration.Html_text.create
+    ~id:(Eliom_service.Fallback fallback_service)
+    ~meth:(Eliom_service.Post (Eliom_parameter.unit,Eliom_parameter.int "t"))
+    g
+
+>>
+
+Here we have split the 
 
 ==@@id="misc"@@ Going further==
 
