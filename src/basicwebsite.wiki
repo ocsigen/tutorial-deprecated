@@ -40,7 +40,7 @@ let main_service =
 
 >>
 
-{{{Eliom_service.Get Eliom_paramer.any}}} means that the service uses the GET method and takes any GET parameter.
+{{{Eliom_service.Get Eliom_parameter.any}}} means that the service uses the GET method and takes any GET parameter.
 
 We recommend to use the program {{{eliom-distillery}}}
 to generate a template for your application (a Makefile and a default
