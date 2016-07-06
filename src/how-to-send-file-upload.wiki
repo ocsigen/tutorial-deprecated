@@ -18,12 +18,12 @@ For example:
 </ocsigen>
 >>
 
-Example:
+Example with Eliom_content.Html5.D module opened:
 <<code language="ocaml"|
 
 let upload = Eliom_service.Http.service
     ~path:["upload"]
-    ~get_params:unit
+    ~get_params:Eliom_parameter.unit
     ()
 
 let upload2 =
