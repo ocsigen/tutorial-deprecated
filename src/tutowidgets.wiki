@@ -36,8 +36,12 @@ one service, registered at URL {{{/}}} (the root of the website).
 The code also defines a client-side application (section
 {{{ [%%client ... ] }}})
 that appends a client-side generated widget to the page.
-Section {{{ [%%shared ... ] }}} is compiled on both the server and client side programs. Alternatively, you can write {{{ let%client }}}, {{{ let%server }}} or {{{ let%shared }}} (default) to define values on client side, on server side, or on both sides.
-
+Section {{{ [%%shared ... ] }}} is compiled on both the server and the
+client-side programs.
+Inside such a section, you can write {{{ let%server }}} or
+{{{ let%client }}} to override {{{ [%%shared ... ] }}}
+and define a server-only or client-only value (similarly for
+{{{ [%%server ... ] }}} and {{{ [%%client ... ] }}}).
 
 <<code language="ocaml" |
 
