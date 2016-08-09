@@ -920,7 +920,7 @@ You can then test your application ({{{make test.byte}}}).
 To finish the first part of the tutorial, we want to save the current
 drawing on server side and send the current image when a new user
 arrives. To do that, we will use the
-[[http://www.cairographics.org/cairo-ocaml/|Cairo binding]] for OCaml.
+[[https://github.com/Chris00/ocaml-cairo|Cairo binding]] for OCaml.
 
 For using Cairo, first, make sure that it is installed (it is
 available as {{{cairo2}}} via OPAM). Second, add it to the
