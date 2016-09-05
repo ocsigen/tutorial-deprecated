@@ -7,9 +7,9 @@
 <<code language="ocaml"|
 
 let my_json_service =
-  Eliom_service.Http.service
-    ~path:["my_json_service"]
-    ~get_params:Eliom_parameter.unit
+  Eliom_service.create
+    ~path:(Eliom_service.Path ["my_json_service"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
 let _ =

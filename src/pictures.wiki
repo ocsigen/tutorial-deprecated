@@ -63,8 +63,9 @@ let save_image username =
 
 let save_image_box name =
   let save_image_service =
-    Eliom_registration.Action.register_post_coservice'
-      ~post_params:Eliom_parameter.unit
+    Eliom_registration.Action.create
+      ~path:Eliom_service.No_path
+      ~meth:(Eliom_service.Post (Eliom_parameter.unit, Eliom_parameter.unit))
       (fun () () -> save_image name)
   in
   Form.post_form save_image_service
@@ -79,8 +80,11 @@ directory. We use <<a_api project="eliom"| val
 Eliom_uri.make_string_uri >> to get the url as a string.
 
 <<code language="ocaml"|
-let feed_service = Eliom_service.Http.service ~path:["feed"]
-  ~get_params:(Eliom_parameter.string "name") ()
+let feed_service =
+  Eliom_service.create
+    ~path:(Eliom_service.Path ["feed"])
+    ~meth:(Eliom_service.Get (Eliom_parameter.string "name"))
+    ()
 
 let local_filename name number =
   ["graffiti_saved"; Url.encode name ; (string_of_int number) ^ ".png"]

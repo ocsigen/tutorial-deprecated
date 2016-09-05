@@ -48,8 +48,8 @@ Depending on your case the strategies I would recommend would be either:
 is usualy easier to rebuild it from scratch than to rebuild only the
 missing parts: i.e. the braindead/failure proof solution is to reload
 the complete contents
-{{{(Eliom_client.exit_to ~service.Eliom_service.void_coservice' () ())}}}.
+{{{(Eliom_client.exit_to ~service.Eliom_service.reload_action () ())}}}.
 * If you only want to follow a stream of events and missing a few in the
-middle isn't a problem, you can just provides a Caml_service that sends
+middle isn't a problem, you can just provides a Caml service that sends
 a channel, and when your channel disconnects, you just fetch a new one.
 (You may have to use Lwt_stream.concat to do the plumbing)

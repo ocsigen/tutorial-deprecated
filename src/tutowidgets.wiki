@@ -53,7 +53,7 @@ module Ex_app =
 
 let _ = Eliom_content.Html.D.(
   Ex_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        Lwt.return
@@ -204,7 +204,7 @@ let mywidget s1 s2 = Eliom_content.Html.D.(
 
 let _ = Eliom_content.Html.D.(
   Ex_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        Lwt.return
@@ -267,7 +267,7 @@ let%shared mywidget s1 s2 = Eliom_content.Html.D.(
 
 let _ = Eliom_content.Html.D.(
   Ex_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       let _ =
@@ -331,7 +331,7 @@ let%shared mywidget set s1 s2 = Eliom_content.Html.D.(
 
 let _ = Eliom_content.Html.D.(
   Ex_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       let set1 = new_set () in

@@ -16,9 +16,9 @@ module Example =
      end)
 
 let main =
-  Eliom_service.Http.service
-    ~path:[]
-    ~get_params:unit
+  Eliom_service.create
+    ~path:(Eliom_service.Path [])
+    ~meth:(Eliom_service.Get unit)
     ()
 
 let _ =

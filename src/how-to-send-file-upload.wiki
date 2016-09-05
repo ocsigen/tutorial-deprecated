@@ -21,15 +21,17 @@ For example:
 Example with Eliom_content.Html5.D module opened:
 <<code language="ocaml"|
 
-let upload = Eliom_service.Http.service
-    ~path:["upload"]
-    ~get_params:Eliom_parameter.unit
+let upload = Eliom_service.Http.create
+    ~path:(Eliom_service.Path ["upload"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
 let upload2 =
   Eliom_registration.Html5.register_post_service
-   ~fallback:upload
-   ~post_params:(Eliom_parameter.file "file")
+    ~path:(Eliom_service.Path ["upload"])
+    ~meth:(Eliom_service.Post
+             (Eliom_parameter.unit,
+              Eliom_parameter.file "file"))
     (fun () file ->
       let newname = "/var/www/upload/thefile" in
       (try

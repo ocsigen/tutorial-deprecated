@@ -30,7 +30,9 @@ let create_form =
         Html5.D.Form.input ~input_type:`Text ~name:string_name Form.string;
         Html5.D.Form.input ~input_type:`Submit ~value:"Click" Form.string]])
 
-let form = register_service ["form"] unit
+let form = create
+  ~path:(Eliom_service.Path ["form"])
+  ~meth:(Eliom_service.Get unit)
   (fun () () ->
      let f = Html5.D.Form.get_form coucou_params create_form in
      return

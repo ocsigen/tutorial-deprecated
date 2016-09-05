@@ -192,7 +192,7 @@ let graffiti_info = Hashtbl.create 0
 
 let imageservice =
   Eliom_registration.String.create
-    ~id:(Eliom_service.Path ["image"])
+    ~path:(Eliom_service.Path ["image"])
     ~headers:Http_headers.dyn_headers
     ~meth:
       (Eliom_service.Get
@@ -226,13 +226,13 @@ want to go.  The drawing will be sent by the
 <<code language="ocaml"|
 let main_service =
   Eliom_service.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get (Eliom_parameter.unit))
     ()
 
 let multigraffiti_service =
   Eliom_service.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get (Eliom_parameter.(suffix (string "name"))))
     ()
 
@@ -382,7 +382,7 @@ From the previous chapter, we copy the code handling users to
 
 <<code language="ocaml"|
 let connection_service = Eliom_service.create
-    ~id:Eliom_service.Global    
+    ~path:Eliom_service.No_path
     ~meth:(Eliom_service.Post (
       Eliom_parameter.unit,
       Eliom_parameter.(string "name" ** string "password")
@@ -390,16 +390,13 @@ let connection_service = Eliom_service.create
     ()
 
 let disconnection_service = Eliom_service.create
-    ~id:Eliom_service.Global
+    ~path:Eliom_service.No_path
     ~meth:(Eliom_service.Post (Eliom_parameter.unit, Eliom_parameter.unit))
     ()
 
-let create_account_service = Eliom_service.create
-    ~id:(Eliom_service.Fallback main_service)
-    ~meth:(Eliom_service.Post (
-      Eliom_parameter.unit,
-      Eliom_parameter.(string "name" ** string "password")
-    ))
+let create_account_service = Eliom_service.create_post
+    ~fallback:main_service
+    ~post_params:(Eliom_parameter.(string "name" ** string "password"))
     ()
 
 let user_table = Ocsipersist.open_table "user_table"

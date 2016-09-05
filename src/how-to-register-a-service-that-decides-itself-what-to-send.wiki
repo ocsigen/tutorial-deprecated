@@ -6,9 +6,9 @@ In the following example, we send an Html5 page or a redirection:
 
 <<code language="ocaml"|
 let send_any =
-  Eliom_registration.Any.register_service
-    ~path:["any"]
-    ~get_params:(string "s")
+  Eliom_registration.Any.create
+    ~path:(Eliom_service.Path ["any"])
+    ~meth:(Eliom_service.Get (string "s"))
    (fun s () ->
      if s = "toto"
      then

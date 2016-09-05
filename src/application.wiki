@@ -43,7 +43,7 @@ open Eliom_content.Html.D (* provides functions to create HTML nodes *)
 
 let main_service =
   Eliom_registration.Html.create
-    ~id:(Eliom_service.Path ["graff"])
+    ~path:(Eliom_service.Path ["graff"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
@@ -250,7 +250,7 @@ service (now at URL {{{/}}}):
 <<code language="ocaml" class="server"|
 let main_service =
   Graffiti_app.create
-    ~id:(Eliom_servie.Path [""])
+    ~path:(Eliom_servie.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
@@ -370,7 +370,7 @@ let count = ref 0
 
 let main_service =
   Graffiti_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        let c = incr count; !count in
@@ -430,7 +430,7 @@ a copy of the {{{<body>}}} element. Hence, the actual page's
 <<code language="ocaml" class="server"|
 let main_service =
   Graffiti_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       let container = body [h1 [pcdata "Graffiti"]] in
@@ -515,7 +515,7 @@ let%client init_client () =
 <<code language="ocaml" class="server"|
 let main_service =
   Graffiti_app.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
        (* Cf. section "Client side side-effects on the server" *)
@@ -975,7 +975,7 @@ We also define a service that sends the picture:
 <<code language="ocaml" class="server"|
 let imageservice =
   Eliom_registration.String.create
-    ~id:(Eliom_service.Path ["image"])
+    ~path:(Eliom_service.Path ["image"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () -> Lwt.return (image_string (), "image/png"))
 >>

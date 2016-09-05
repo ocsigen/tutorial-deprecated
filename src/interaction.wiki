@@ -34,7 +34,7 @@ Let's start again from scratch with the following site.
 
 let main_service = Eliom_content.Html.D.(
   Eliom_registration.Html.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
@@ -70,7 +70,7 @@ new service, taking the user name as parameter:
 <<code language="ocaml"|
 let user_service = Eliom_content.Html.D.(
   Eliom_registration.Html.create
-    ~id:(Eliom_service.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get (Eliom_parameter.string "name"))
     (fun name () ->
       Lwt.return
@@ -143,7 +143,7 @@ To achieve this we change the definition of the previous service this way:
 <<code language="ocaml"|
 let user_service =
   Eliom_registration.Html.create
-    ~id:(Eliom_service.Path ["users"])
+    ~path:(Eliom_service.Path ["users"])
     ~meth:(Eliom_service.Get (
       Eliom_parameter.(suffix (string "name"))))
     (fun name () -> ... )
@@ -229,12 +229,12 @@ program:
 
 (* Services *)
 let main_service = Eliom_service.create
-  ~id:(Eliom_service.Path [""])
+  ~path:(Eliom_service.Path [""])
   ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
 let user_service  = Eliom_service.create
-  ~id:(Eliom_service.Path ["users"])
+  ~path:(Eliom_service.Path ["users"])
   ~meth:(Eliom_service.Get Eliom_parameter.(suffix (string "name")))
   ()
 
@@ -326,11 +326,9 @@ and password to be shown in the URL, we use //hidden parameters//
 these parameters:
 
 <<code language="ocaml"|
-let connection_service = Eliom_service.create
-  ~id:(Eliom_service.Fallback main_service)
-  ~meth:(Eliom_service.Post (
-    Eliom_parameter.unit,
-    Eliom_parameter.(string "name" ** string "password")))
+let connection_service = Eliom_service.attach_post
+  ~fallback:main_service
+  ~post_params:Eliom_parameter.(string "name" ** string "password")
   ()
 >>
 
@@ -338,11 +336,11 @@ let connection_service = Eliom_service.create
 
 Services using the POST HTTP method are created using the function
 <<a_api project="eliom" | val Eliom_service.create >>
-or <<a_api project="eliom" | val Eliom_service.App.post_service >>
+or <<a_api project="eliom" | val Eliom_service.attach_post >>
 (depending on what type of service you want to create).
 As you can see, there is a major
 difference from the way we created our previous services.
-Instead of providing a path for the {{{~id}}} argument, we gave a
+Instead of providing a path for the {{{~path}}} argument, we gave a
 //fallback// service. This //fallback// is the service that will be used
 if the POST parameters are missing (for example, the user sets a bookmark
 on the page and returns later without POST parameters).
@@ -679,11 +677,11 @@ automatically by Eliom in each form (as hidden field) and link.
 >>
 
 We transform the connection service into a non_attached coservice,
-to do so we replace the path we specified earlier for the {{{~id}}} parameter:
+to do so we replace the path we specified earlier for the {{{~path}}} parameter:
 
 <<code language="ocaml"|
 let connection_service = Eliom_service.create
-  ~id:(Eliom_service.Global)
+  ~path:(Eliom_service.No_path)
   ~meth:(Eliom_service.Post (
     Eliom_parameter.unit,
     Eliom_parameter.(string "name" ** string "password")))
@@ -719,15 +717,13 @@ Example:
 <<code language="ocaml"|
 
 let redir_service = Eliom_service.create
-    ~id:(Eliom_service.Path ["redir"])
+    ~path:(Eliom_service.Path ["redir"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
-let service_to_redirect = Eliom_service.create
-  ~id:(Eliom_service.Fallback redir_service)
-  ~meth:(Eliom_service.Post (
-  	   Eliom_parameter.unit,
-	   Eliom_parameter.string "something"))
+let service_to_redirect = Eliom_service.attach_post
+  ~fallback:redir_service
+  ~post_params:(Eliom_parameter.string "something")
   ()
 
 let () =
@@ -750,8 +746,8 @@ more information in the <<a_manual project="eliom" chapter="server-services"
 fragment="p3preapplied" | Eliom manual >>.)
 
 If you want to do a redirection towards the current page (as in our
-case), use the special service {{{~id}}} parameter <<a_api project="eliom" |
-val Eliom_service.Global >>, which is some kind of POST
+case), use the special service {{{~path}}} parameter <<a_api project="eliom" |
+val Eliom_service.No_path >>, which is some kind of POST
 non-attached coservice without parameter at all.  >>
 
 ===Disconnection===
@@ -765,7 +761,7 @@ data.
 
 <<code language="ocaml"|
 let disconnection_service = Eliom_service.create
-  ~id:(Eliom_service.Global)
+  ~path:(Eliom_service.No_path)
   ~meth:(Eliom_service.Post (Eliom_parameter.unit, Eliom_parameter.unit))
   ()
 
@@ -812,15 +808,13 @@ the "database":
 
 <<code language="ocaml"|
 let new_user_form_service = Eliom_service.create
-  ~id:(Eliom_service.Path ["registration"])
+  ~path:(Eliom_service.Path ["registration"])
   ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
-let create_account_service = Eliom_service.create
-  ~id:(Eliom_service.Fallback main_service)
-  ~meth:(Eliom_service.Post (
-    Eliom_parameter.unit,
-    Eliom_parameter.(string "name" ** string "password")))
+let create_account_service = Eliom_service.attach_post
+  ~fallback:main_service
+  ~post_params:(Eliom_parameter.(string "name" ** string "password"))
   ()
 
 let account_form = Eliom_content.Html.D.(
@@ -893,7 +887,7 @@ are made for.
 >>
 
 It looks great, but if we refresh the page after creating an account,
-we can see there is a problem. We are creating the same account over and 
+we can see there is a problem. We are creating the same account over and
 over again. This is because we are calling the create_account_service each time
 we refresh the page, obviously we don't want that. To solve this issue we will
 implement a dynamically created and registered service with limited lifespan and
@@ -914,12 +908,11 @@ account.  We //replace// the service {{{create_account_service}}} by a
 new POST attached coservice called {{{account_confirmation_service}}}:
 
 <<code language="ocaml"|
-let account_confirmation_service = Eliom_service.create
-  ~id:(Eliom_service.Fallback new_user_form_service)
-  ~meth:(Eliom_service.Post (
-    Eliom_parameter.unit,
-    Eliom_parameter.(string "name" **  string "password")))
-  ()
+let account_confirmation_service =
+  Eliom_service.create
+    ~fallback:new_user_form_service
+    ~post_params:(Eliom_parameter.(string "name" **  string "password"))
+    ()
 >>
 
 and we make the account creation form point at this new service.
@@ -934,9 +927,9 @@ creation service:
     ~service:account_confirmation_service
     (fun () (name, pwd) ->
       let create_account_service =
-	Eliom_service.create
-          ~id:(Eliom_service.Fallback main_service)
-          ~meth:(Eliom_service.Get Eliom_parameter.unit)
+	Eliom_service.attach_get
+          ~fallback:main_service
+          ~get_params:Eliom_parameter.unit
           ~timeout:60.
 	  ~max_use:1
 	  ()

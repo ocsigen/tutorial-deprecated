@@ -10,7 +10,12 @@ there is a way to send it to the server. You can't use the {{{server_function}}}
 Example:
 <<code language="ocaml"|
 let pic_service =
-  post_coservice' ~name:"upload_pic" ~post_params:(file "f") ()
+  Eliom_service.create
+    ~name:"upload_pic"
+    ~path:Eliom_service.No_path
+    ~meth:
+      (Eliom_service.Post (Eliom_parameter.unit, Eliom_parameter.file "f"))
+    ()
 
 let%client upload_pic_form () =
   let file = D.Raw.input ~a:[a_input_type `File] () in

@@ -22,11 +22,14 @@ open Eliom_content.Html5.F
 (* We create two main services on the same URL,             *)
 (* one with a GET integer parameter:                        *)
 
-let calc = Eliom_service.Http.service
-    ~path:["calc"] ~get_params:(Eliom_parameter.unit) ()
-let calc_i = Eliom_service.Http.service ~path:["calc"]
-~get_params:(Eliom_parameter.int "i") ()
-
+let calc = Eliom_service.create
+    ~path:(Eliom_service.Path ["calc"])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit) ()
+let calc_i =
+  Eliom_service.create
+    ~path:(Eliom_service.Path ["calc"])
+    ~meth:(Eliom_service.Get (Eliom_parameter.int "i"))
+    ()
 
 (* -------------------------------------------------------- *)
 (* The handler for the service without parameter.           *)
@@ -60,7 +63,7 @@ let calc_i_handler i () =
   in
   let is = string_of_int i in
   let calc_result =
-    Eliom_registration.Html5.register_coservice
+    Eliom_registration.Html.attach_get
       ~scope:Eliom_common.default_session_scope
       ~fallback:calc
       ~get_params:(Eliom_parameter.int "j")
@@ -80,6 +83,6 @@ let calc_i_handler i () =
 (* Registration of main services:                           *)
 
 let () =
-  Eliom_registration.Html5.register calc   calc_handler;
-  Eliom_registration.Html5.register calc_i calc_i_handler
+  Eliom_registration.Html.register calc   calc_handler;
+  Eliom_registration.Html.register calc_i calc_i_handler
 >>

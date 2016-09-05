@@ -173,7 +173,10 @@ module React_Player_app =
     end)
 
 let media_service =
-  Eliom_service.App.service ~path:[] ~get_params:Eliom_parameter.unit ()
+  Eliom_service.create
+    ~path:(Eliom_service.Path [])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
+    ()
 
 let () =
   React_Player_app.register

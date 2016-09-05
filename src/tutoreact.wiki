@@ -108,7 +108,7 @@ module Db = struct
     let rec aux n l = if n > index then l else aux (n+1) (n::l) in
     Lwt.return (aux 0 [])
 
-  let lock = Lwt_mutex.create ()       
+  let lock = Lwt_mutex.create ()
 
   let add_message v =
     let%lwt () = Lwt_mutex.lock lock in
@@ -512,8 +512,8 @@ We first define a new service, and register a handler.
 <<code language="ocaml" class="server"|
 let%server forum_service =
   Eliom_service.create
-    ~id:(Eliom_service.Path [""])
-    ~meth:(Eliom_service.Get 
+    ~path:(Eliom_service.Path [""])
+    ~meth:(Eliom_service.Get
           (Eliom_parameter.(suffix (int "i"))))
     ()
 
@@ -893,7 +893,7 @@ let%server display userid_o forumid =
   Lwt.return (messages :: l)
 
 let%server forum_service = Eliom_service.create
-  ~id:(Eliom_service.Path [""])
+  ~path:(Eliom_service.Path [""])
   ~meth:(Eliom_service.Get Eliom_parameter.(suffix (int "i")))
   ()
 

@@ -12,10 +12,10 @@ Html5.D.a ~service:coucou_params
 
 (* Link to an external service: *)
 Html5.D.a
-  (external_service
+  (Eliom_service.extern
     ~prefix:"http://fr.wikipedia.org"
     ~path:["wiki";""]
-    ~get_params:(suffix (all_suffix "suff"))
+    ~meth:(Eliom_service.Get Eliom_parameter.(suffix (all_suffix "suff")))
     ())
   [pcdata "OCaml on wikipedia"]
   ["OCaml"];
