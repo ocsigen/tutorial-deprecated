@@ -61,7 +61,7 @@ However, we recommend to use <<a_api project="js_of_ocaml"|module Lwt_js_events>
 
 === Links
 
-* Type <<a_api project="tyxml"|type Html5_types.base_attrib>> (attributes available for every element)
-* signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)
+* Type <<a_api project="tyxml"|type Html_types.base_attrib>> (attributes available for every element)
+* signature <<a_api project="tyxml"|module Html_sigs.T>> (Element attributes)
 * [[http://www.w3schools.com/html5/html5_reference.asp|Official w3 HTML5 elements reference]]
 * [[http://www.w3schools.com/html5/html5_ref_eventattributes.asp|Events attributes]]

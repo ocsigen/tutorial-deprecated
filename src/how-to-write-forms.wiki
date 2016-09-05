@@ -5,11 +5,11 @@
 Just as we do for links, we provide form-building functions that call
 Eliom services in a safe manner. These functions are provided in the
 module
-<<a_api project="eliom" | module Eliom_content.Html5.D.Form >> (and
-<<a_api project="eliom" | module Eliom_content.Html5.F.Form >>).
+<<a_api project="eliom" | module Eliom_content.Html.D.Form >> (and
+<<a_api project="eliom" | module Eliom_content.Html.F.Form >>).
 The functions
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.get_form >> and
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.post_form >>
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.get_form >> and
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.post_form >>
 accept a function (named {{{create_form}}} in our example below)
 which is responsible for generating the content from
 appropriately-typed parameter names.
@@ -19,22 +19,22 @@ appropriately-typed parameter names.
 let create_form =
   (fun (number_name, (number2_name, string_name)) ->
     [p [pcdata "Write an int: ";
-        Html5.D.Form.input
+        Html.D.Form.input
           ~input_type:`Text ~name:number_name
-          Html5.D.Form.int;
+          Html.D.Form.int;
         pcdata "Write another int: ";
-        Html5.D.Form.input
+        Html.D.Form.input
           ~input_type:`Text ~name:number2_name
-          Html5.D.Form.int;
+          Html.D.Form.int;
         pcdata "Write a string: ";
-        Html5.D.Form.input ~input_type:`Text ~name:string_name Form.string;
-        Html5.D.Form.input ~input_type:`Submit ~value:"Click" Form.string]])
+        Html.D.Form.input ~input_type:`Text ~name:string_name Form.string;
+        Html.D.Form.input ~input_type:`Submit ~value:"Click" Form.string]])
 
 let form = create
   ~path:(Eliom_service.Path ["form"])
   ~meth:(Eliom_service.Get unit)
   (fun () () ->
-     let f = Html5.D.Form.get_form coucou_params create_form in
+     let f = Html.D.Form.get_form coucou_params create_form in
      return
        (html
          (head (title (pcdata "")) [])
@@ -43,18 +43,18 @@ let form = create
 >>
 
 As shown in the example,
-<<a_api project="eliom" | module Eliom_content.Html5.D.Form >>
+<<a_api project="eliom" | module Eliom_content.Html.D.Form >>
 provides functions for generating the various widgets, e.g.,
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.input >>.
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.input >>.
 These functions need to be called with a "type" argument (e.g.,
-<<a_api project="eliom" | val Eliom_content.Html5.D.Form.int >>)
+<<a_api project="eliom" | val Eliom_content.Html.D.Form.int >>)
 that matches the type of the corresponding parameter name.
 
 POST forms may also take get parameters, as last argument of function
 {{{post_form}}}:
 
 <<code language="ocaml"|
-Eliom_content.Html5.D.Form.post_form
+Eliom_content.Html.D.Form.post_form
   my_service_with_get_and_post
   (fun chaine ->
     p [pcdata "Write a string: ";
@@ -67,7 +67,7 @@ Eliom_content.Html5.D.Form.post_form
 There is also a raw interface to write basic forms without Eliom,
 using standard tyxml constructors.
 
-Use module [[wiki(15):api/server/Eliom_content.Html5.D.Raw|Eliom_content.Html5.D.Raw]].
+Use module [[wiki(15):api/server/Eliom_content.Html.D.Raw|Eliom_content.Html.D.Raw]].
 
 ===Links
 * [[wiki:manual/how-to-add-a-select-or-other-form-element|How to write a select (or other form element)?]]

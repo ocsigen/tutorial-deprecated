@@ -14,7 +14,7 @@ and we do nothing.
 We will add this code in a new file:
 ===={{{feed.ml}}}====
 <<code language="ocaml"|
-open Eliom_content.Html5.D
+open Eliom_content.Html.D
 
 let static_dir = "/tmp/static/"
 

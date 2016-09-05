@@ -14,7 +14,7 @@ There are 6 types of titles: h1, h2, h3, h4, h5 and h6. h1 is the largest and h6
 p [pcdata "Some text, blah blah blah"]
 >>
 
-**Required parameter**: list containing other elements (content: <<a_api project="tyxml"|type Html5_types.flow5>> elements).
+**Required parameter**: list containing other elements (content: <<a_api project="tyxml"|type Html_types.flow5>> elements).
 
 **Optional parameter** for attributes "a" ([[wiki:manual/how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements?]]).
 
@@ -27,8 +27,8 @@ p [pcdata "Some text, blah blah blah"]
 
 === Links
 
-* Modules <<a_api project="eliom"|module Eliom_content.Html5.D>> and
-  <<a_api project="eliom"|module Eliom_content.Html5.F>>
+* Modules <<a_api project="eliom"|module Eliom_content.Html.D>> and
+  <<a_api project="eliom"|module Eliom_content.Html.F>>
   (HTML5 Elements)
-* The <<a_api project="tyxml"|val Html5_sigs.T.h1>> element
-* signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)
+* The <<a_api project="tyxml"|val Html_sigs.T.h1>> element
+* signature <<a_api project="tyxml"|module Html_sigs.T>> (Element attributes)

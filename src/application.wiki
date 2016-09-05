@@ -418,7 +418,7 @@ on the client.
 
 >>
 
-<<|BB/BS This only applies to elements created by Html5.F
+<<|BB/BS This only applies to elements created by Html.F
 It is possible to send almost any type of values that way, but keep in
 mind that sent values are //copies// of server side ones. For HTML
 elements, this is not always the expected behaviour. Considering the

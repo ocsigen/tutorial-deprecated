@@ -39,5 +39,5 @@ Or you can use:
 === Links
 
 * <<a_manual project="eliom" chapter="misc"|About images, css and javascript>>
-* <<a_api project="eliom" subproject="server" |val Eliom_content.Html5.D.make_uri>>
+* <<a_api project="eliom" subproject="server" |val Eliom_content.Html.D.make_uri>>
 * <<a_manual project="ocsigenserver" chapter="staticmod"|Configuring Ocsigen Server for serving static files>>

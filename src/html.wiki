@@ -69,7 +69,7 @@ Error: This expression has type ([> `PCDATA ] as 'a) Html.elt
        The second variant type does not allow tag(s) `PCDATA
 }}}
 
-where <<a_api project="tyxml" | type Html5_types.head_content_fun >>
+where <<a_api project="tyxml" | type Html_types.head_content_fun >>
 is the type of content allowed inside {{{<head>}}} ({{{<base>}}},
 {{{<command>}}}, {{{<link>}}}, {{{<meta>}}}, etc.). Notice that
 {{{`PCDATA}}} (i.e. raw text) is not included in this polymorphic

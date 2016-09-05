@@ -6,7 +6,7 @@ Here it is! The famous "**Hello World**" for a client/server Eliom application:
 
 <<code language="ocaml"|
 open Eliom_content
-open Html5.D
+open Html.D
 open Eliom_parameter
 
 module Example =

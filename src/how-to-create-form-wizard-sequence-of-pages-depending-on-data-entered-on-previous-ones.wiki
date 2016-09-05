@@ -16,7 +16,7 @@ The scope of these service can be session or global for the site (as coservice
 identifiers are cryptographically safe).
 
 <<code language="ocaml"|
-open Eliom_content.Html5.F
+open Eliom_content.Html.F
 
 (* -------------------------------------------------------- *)
 (* We create two main services on the same URL,             *)

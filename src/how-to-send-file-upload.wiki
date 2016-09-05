@@ -18,7 +18,7 @@ For example:
 </ocsigen>
 >>
 
-Example with Eliom_content.Html5.D module opened:
+Example with Eliom_content.Html.D module opened:
 <<code language="ocaml"|
 
 let upload = Eliom_service.Http.create
@@ -27,7 +27,7 @@ let upload = Eliom_service.Http.create
     ()
 
 let upload2 =
-  Eliom_registration.Html5.register_post_service
+  Eliom_registration.Html.create
     ~path:(Eliom_service.Path ["upload"])
     ~meth:(Eliom_service.Post
              (Eliom_parameter.unit,
@@ -45,7 +45,7 @@ let upload2 =
 
 
 let uploadform =
-  Eliom_registration.Html5.register upload
+  Eliom_registration.Html.register upload
     (fun () () ->
       let f =
         (Form.post_form upload2

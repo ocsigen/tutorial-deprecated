@@ -21,7 +21,7 @@
      li [pcdata "second item"]]
 >>
 
-**Required parameter**: list containing **li** elements ([[wiki(72):tyxml/api/Html5_types#TYPEli_attrib|Details of li content]]).
+**Required parameter**: list containing **li** elements ([[wiki(72):tyxml/api/Html_types#TYPEli_attrib|Details of li content]]).
 
 **Optional parameter** for attributes "a" ([[wiki:manual/how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements?]]).
 
@@ -50,8 +50,8 @@ A list of pair of:
 ** A list of elements of type dd
 
 Details:
-* [[wiki(72):tyxml/api/Html5_types#TYPEphrasing|dd content]]
-* [[wiki(72):tyxml/api/Html5_types#TYPEflow5|dt content]]
+* [[wiki(72):tyxml/api/Html_types#TYPEphrasing|dd content]]
+* [[wiki(72):tyxml/api/Html_types#TYPEflow5|dt content]]
 
 **Optional parameter** for attributes "a" ([[wiki:manual/how-to-set-and-id-classes-or-other-attributes-to-html-elements|How to set and id, classes or other attributes to HTML elements?]]).
 
@@ -64,7 +64,7 @@ Details:
 
 === Links
 
-* Modules <<a_api project="eliom"|module Eliom_content.Html5.D>> and
-  <<a_api project="eliom"|module Eliom_content.Html5.F>>
+* Modules <<a_api project="eliom"|module Eliom_content.Html.D>> and
+  <<a_api project="eliom"|module Eliom_content.Html.F>>
   (HTML5 Elements)
-* signature <<a_api project="tyxml"|module Html5_sigs.T>> (Element attributes)
+* signature <<a_api project="tyxml"|module Html_sigs.T>> (Element attributes)
