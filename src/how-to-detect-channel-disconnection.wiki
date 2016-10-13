@@ -8,15 +8,15 @@
 
 ==Answer
 
-If you are using Eliom-base-app, you probably have nothing to do.
-Eliom-base-app will monitor the life of sessions and close the process
+If you are using Ocsigen-start, you probably have nothing to do.
+Ocsigen-start will monitor the life of sessions and close the process
 when needed.
 
-If you are not using Eliom-base-app, you must catch exceptions
+If you are not using Ocsigen-start, you must catch exceptions
 {{{Eliom_comet.Channel_full}}},
 {{{Eliom_comet.Channel_closed}}} (and {{{Eliom_comet.Process_closed}}}
-on Eliom < 5). Have a look at module {{{Eba_comet}}} in
-Eliom-base-app.
+on Eliom < 5). Have a look at module {{{Os_comet}}} in
+Ocsigen-start.
 
 //explanation pasted from Ocsigen mailing list, 2014-08-06://
 

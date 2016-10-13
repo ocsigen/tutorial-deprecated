@@ -1,20 +1,19 @@
 =How to implement a notification system?=
 
-The easiest way for the server to send notifications to the client
-is to use module
-<<a_api project="eliom-base-app"|module Eba_notif>>
-from Eliom-base-app, but it requires to use EBA's user management
-system. If you are not using EBA, we recommend to get inspiration
-from the code of this module, to implement your notification
-system conveniently and without memory leak.
+The easiest way for the server to send notifications to the client is
+to use module <<a_api project="ocsigen-start"|module Os_notif>> from
+Ocsigen-start (OS), but it requires to use OS's user management
+system. If you are not using OS, we recommend to get inspiration from
+the code of this module, to implement your notification system
+conveniently and without memory leak.
 
-== With {{{Eba_notif}}}
+== With {{{Os_notif}}}
 
 For each type of data on which you want to receive updates,
-instanciate functor {{{Eba_notif.Make}}} on server side:
+instanciate functor {{{Os_notif.Make}}} on server side:
 
 <<code language="ocaml" class="server"|
-module My_notif = Eba_notif.Make(struct
+module My_notif = Os_notif.Make(struct
   type key = ... (* The type of the identifier of the data we want listen on. *)
   type notification = ... (* The type of the notifications that will be sent *)
 end)
@@ -36,7 +35,7 @@ about client-server reactive applications>>.
 
 
 
-== Without {{{Eba_notif}}} (manual implementation)
+== Without {{{Os_notif}}} (manual implementation)
 
 If you want the user to receive notifications from the server
 (for example: "you have a new message"), first create a channel, and
@@ -108,4 +107,4 @@ let notify user_id v =
       that you can get by calling {{{Eliom_request_info.get_sitedata}}}
       during the initialisation phase of the Eliom module.
 
-Have a look at the implementation of {{{Eba_notif}}} for more details.
+Have a look at the implementation of {{{Os_notif}}} for more details.

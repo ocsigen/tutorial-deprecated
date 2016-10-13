@@ -2,14 +2,14 @@
 
 This is a short tutorial showing how to implement a simple reactive
 client-server application using Js_of_ocaml, Eliom and
-Eliom-base-app. It requires Eliom dev.
+Ocsigen-start. It requires Eliom dev.
 
 Our application displays a list of items to connected users (for
 example a list of messages in a forum), and allows adding new items.
 
 You will learn:
 
-* How to use Eliom-base-app to quickly build an application with user
+* How to use Ocsigen-start to quickly build an application with user
   management.
 * How to create a client-server reactive interface: the HTML is
   generated indifferently on server-side or on client-side, and
@@ -22,26 +22,26 @@ You will learn:
 
 == First step: a basic application with user management
 
-Eliom-base-app contains a set of higher level libraries for Eliom
+Ocsigen-start contains a set of higher level libraries for Eliom
 (user management, tips, notifications). It also contains a template
 for {{{eliom-distillery}}} that creates an application with user
 management. You can use this template as a starting point for your
 project.
 
 {{{
-eliom-distillery -name tutoreact -template eba.pgocaml
+eliom-distillery -name tutoreact -template os.pgocaml
 }}}
 
 This template is using Postgresql to save the data.
 You need a recent version of Postgresql installed on your system.
 
-Eliom-base-app is still young, and the creation of the database must
+Ocsigen-start is still young, and the creation of the database must
 be improved (help appreciated). For now, you need to manually create a
 symbolic link to the program {{{pg_ctl}}} in you directory. For
 example:
 
 {{{
-ln -s /usr/lib/postgresql/9.4/bin/pg_ctl
+ln -s /usr/lib/postgresql/9.5/bin/pg_ctl
 }}}
 
 Now create the local database and start the database server:
@@ -210,7 +210,7 @@ use {{{server_function}}}:
 let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: string]
-    (Eba_session.connected_rpc (fun userid value -> Db.add_message value))
+    (Os_session.connected_rpc (fun userid value -> Db.add_message value))
 >>
 
 The parameter {{{[%derive.json: string]}}} describes the type of
@@ -219,11 +219,11 @@ function parameter. This exhibits syntax provided by
 with our JSON plugin. We use this for safe unmarshaling on the server
 side of data sent by the client.
 
-We use the wrapper {{{Eba_session.connected_rpc}}} to make the
+We use the wrapper {{{Os_session.connected_rpc}}} to make the
 function accessible only by connected users. Otherwise, the function
 fails with an exception. If you want to make your function accessible
 for both connected and non-connected users, see function
-{{{Eba_session.Opt.connected_rpc}}}.
+{{{Os_session.Opt.connected_rpc}}}.
 
 === Bind the input to call the function
 
@@ -331,7 +331,7 @@ let%server get_data = Db.get_message
 
 let%server get_data_rpc =
   Eliom_client.server_function [%derive.json: int]
-    (Eba_session.Opt.connected_rpc (fun userid_o id -> get_data id))
+    (Os_session.Opt.connected_rpc (fun userid_o id -> get_data id))
 
 >>
 <<code language="ocaml" class="client"|
@@ -412,14 +412,14 @@ let%server display_messages () =
 == Notifications
 
 We now want to be notified when a message has been added. To do that
-easily, we use the module {{{Eba_notif}}} from Eliom-base-app.
+easily, we use the module {{{Os_notif}}} from Ocsigen-start.
 
 We first define a notification module for the type of data we want
 clients to be able to listen on (here lists of message identifiers):
 
 <<code language="ocaml" class="server"|
 [%%server
-module Forum_notif = Eba_notif.Make (struct
+module Forum_notif = Os_notif.Make (struct
   type key = unit
   type notification = int
 end)
@@ -472,7 +472,7 @@ piece of data:
 let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: string]
-    (Eba_session.connected_rpc
+    (Os_session.connected_rpc
        (fun userid value ->
           let%lwt id = Db.add_message value in
           Forum_notif.notify () (fun userid -> Lwt.return (Some id));
@@ -544,7 +544,7 @@ let%server main_service_handler forumid userid_o () () =
 let () =
 ...
   Tutoreact_base.App.register
-    ~service:Eba_services.main_service
+    ~service:Os_services.main_service
     (Tutoreact_page.Opt.connected_page (main_service_handler 0));
 ...
 >>
@@ -601,7 +601,7 @@ parameter:
 let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: add_message_type]
-    (Eba_session.connected_rpc
+    (Os_session.connected_rpc
        (fun userid (forumid, value) ->
           let%lwt id = Db.add_message forumid value in
           Forum_notif.notify () (fun userid -> Lwt.return (Some id));
@@ -657,7 +657,7 @@ let%server get_data_forum forumid =
 
 let%server get_data_forum_rpc =
   Eliom_client.server_function [%derive.json: int]
-  (Eba_session.Opt.connected_rpc
+  (Os_session.Opt.connected_rpc
      (fun userid_o forumid -> get_data_forum forumid))
 >>
 
@@ -684,7 +684,7 @@ to use an integer (instead of {{{unit}}}):
 
 <<code language="ocaml" class="server"|
 [%server
-module Forum_notif = Eba_notif.Make(struct
+module Forum_notif = Os_notif.Make(struct
   type key = int
   type notification = int
 end)
@@ -776,7 +776,7 @@ module Db = struct
 
 end
 
-module Forum_notif = Eba_notif.Make(struct
+module Forum_notif = Os_notif.Make(struct
   type key = int
   type notification = int
 end)
@@ -793,7 +793,7 @@ end)
 let%server add_message_rpc =
   Eliom_client.server_function
     [%derive.json: add_message_type]
-    (Eba_session.connected_rpc
+    (Os_session.connected_rpc
        (fun userid (forumid, value) ->
           let%lwt id = Db.add_message forumid value in
           Forum_notif.notify forumid (fun userid -> Lwt.return (Some id));
@@ -811,7 +811,7 @@ let%server get_data = Db.get_message
 
 let%server get_data_rpc =
   Eliom_client.server_function [%derive.json: int]
-    (Eba_session.Opt.connected_rpc
+    (Os_session.Opt.connected_rpc
        (fun userid_o id -> get_data id))
 >>
 
@@ -833,7 +833,7 @@ let%server get_data_forum forumid =
 
 let%server get_data_forum_rpc =
   Eliom_client.server_function [%derive.json: int]
-    (Eba_session.Opt.connected_rpc
+    (Os_session.Opt.connected_rpc
        (fun userid_o forumid -> get_data_forum forumid))
 >>
 

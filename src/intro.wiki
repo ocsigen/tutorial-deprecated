@@ -16,7 +16,7 @@ The best way to install OCaml (on MacOS, Linux ...) is to use the Opam
 package manager.
 The [[site:install|installation is described here]].
 
-We recommend to register to our 
+We recommend to register to our
 [[https://sympa.inria.fr/sympa/subscribe/ocsigen|mailing list]]
 where you can ask your questions and get news from the project.
 You can also come and chat with us on
@@ -158,14 +158,12 @@ forms, you can skip the second chapter.
 
 <<div class="tutocase"|
 ;If you want to have quickly a full application with user management (registration, activation emails, authentication)
-: Have a look at [[wiki(81):|Eliom base app]].
+: Have a look at [[wiki(81):|Ocsigen-start]].
 >>
 
-Eliom base app is a library and a template for Eliom distillery that
+Ocsigen-start is a library and a template for Eliom distillery that
 contains a working Eliom application with user and right
 management.
-
-<<wip|Eliom base app is still very young and not fully documented.>>
 
 <<div class="tutocase"|
 You will also find some other tutorials in the menu on the left.
@@ -281,8 +279,8 @@ All your Web sites must be written in Lwt-compatible way!
 * The generated code which is independant of Eliom and the Ocsigen Server. You can use it with any Web server.
 * You can use a standard installation of OCaml to compile your programs. In particular, you do not have to recompile a library to use it with Js_of_ocaml. You just have to link your program with a specific library to interface with the browser API.
 
-===Eliom Base App===
-//Eliom Base App// is a library and a template of Eliom application,
+===Ocsigen-start===
+//Ocsigen-start// is a library and a template of Eliom application,
 with many common features like
 user registration, login box, notification system, etc.
 
