@@ -6,6 +6,7 @@
 ==[[how-to-register-session-data|Session data: Eliom references]]
 ==[[interaction|Service based Web programming]]
 ==[[tutoreact|Reactive client-server Web applications]]
+==[[mobile|Mobile applications]]
 ==[[misc|Mixing traditional Web interaction with client-server app]]
 = 5-minute tutorials
 ==[[lwt|Lwt]]
