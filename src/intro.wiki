@@ -89,6 +89,14 @@ from the very beginning, how to:
 \\
 
 <<div class="tutocase"|
+;If you want to build mobile applications:
+:Read tutorial [[wiki:manual/mobile|Mobile applications with Ocsigen]]
+>>
+
+The tutorial describes how to build a mobile app (e.g., for Android)
+with the same codebase as for your Web application.
+
+<<div class="tutocase"|
 ;If you want to write a more traditional Web site, with pages, forms, and sessions:
 :Read tutorial [[wiki:manual/interaction|Service based Web programming]]
 >>
