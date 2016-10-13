@@ -11,45 +11,43 @@ let wrong_pwd =
 (* =================================Services================================= *)
 
 let main_service = Eliom_service.create
-  ~id:(Eliom_service.Path [""])
+  ~path:(Eliom_service.Path [""])
   ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
 let user_service  = Eliom_service.create
-  ~id:(Eliom_service.Path ["users"])
+  ~path:(Eliom_service.Path ["users"])
   ~meth:(Eliom_service.Get Eliom_parameter.(suffix (string "name")))
   ()
 
 let redir_service = Eliom_service.create
-    ~id:(Eliom_service.Path ["redir"])
+    ~path:(Eliom_service.Path ["redir"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
 let connection_service = Eliom_service.create
-  ~id:(Eliom_service.Global)
+  ~path:(Eliom_service.No_path)
   ~meth:(Eliom_service.Post (
     Eliom_parameter.unit,
     Eliom_parameter.(string "name" ** string "password")))
   ()
 
-let disconnection_service = Eliom_service.create
-  ~id:(Eliom_service.Fallback redir_service)
-  ~meth:(Eliom_service.Post (
-    Eliom_parameter.unit,
-    Eliom_parameter.unit))
-  ()
+let disconnection_service =
+  Eliom_service.attach_post
+    ~fallback:redir_service
+    ~post_params:Eliom_parameter.unit
+    ()
 
 let new_user_form_service = Eliom_service.create
-  ~id:(Eliom_service.Path ["registration"])
+  ~path:(Eliom_service.Path ["registration"])
   ~meth:(Eliom_service.Get Eliom_parameter.unit)
   ()
 
-let account_confirmation_service = Eliom_service.create
-  ~id:(Eliom_service.Fallback new_user_form_service)
-  ~meth:(Eliom_service.Post (
-    Eliom_parameter.unit,
-    Eliom_parameter.(string "name" **  string "password")))
-  ()
+let account_confirmation_service =
+  Eliom_service.attach_post
+    ~fallback:new_user_form_service
+    ~post_params:Eliom_parameter.(string "name" **  string "password")
+    ()
 
 (* ===========================Usernames/Passwords============================ *)
 
@@ -187,9 +185,9 @@ let () = Eliom_content.Html.D.(
     ~service:account_confirmation_service
     (fun () (name, pwd) ->
       let create_account_service =
-	Eliom_service.create
-          ~id:(Eliom_service.Fallback main_service)
-          ~meth:(Eliom_service.Get Eliom_parameter.unit)
+	Eliom_service.attach_get
+          ~fallback:main_service
+          ~get_params:Eliom_parameter.unit
           ~timeout:60.
 	  ~max_use:1
 	  ()
