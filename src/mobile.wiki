@@ -48,7 +48,7 @@ You can verify that the template works correctly by running
 {{{
 make db-init
 make db-create
-make db-update
+make db-schema
 make test.opt
 }}}
 
