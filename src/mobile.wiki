@@ -134,6 +134,6 @@ inspiration.
   interface widgets that are particularly useful for mobile applications.
 
 * Danny Willems provides a comprehensive set of
-  [[https://github.com/dannywillems/ocaml-cordova-plugin-list|Ocaml
+  [[https://github.com/dannywillems/ocaml-cordova-plugin-list|OCaml
   bindings to Cordova plugins]]. These can readily be used for your
   Eliom mobile application.
