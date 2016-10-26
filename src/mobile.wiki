@@ -102,7 +102,42 @@ For iOS:
 
 For Windows:
 
-* See {{{Makefile.mobile}}} in the template.
+{{{Ocsigen-start}}} uses
+[[https://github.com/nordnet/cordova-hot-code-push|cordova-hot-code-push-plugin]]
+to upload local files (like CSS and JavaScript files, images and logo) when the
+server code changes.
+Unfortunately, this plugin is not yet available for
+Windows Phone.
+However, as {{{ocsigen-start}}} also builds the website part, an idea
+is to run the website into a WebView on Windows Phones.
+Even if Cordova allows you to build Windows app, it doesn't authorize you to
+load an external URL without interaction with the user (else, you have the
+error:
+{{{"APPHOST9624: The app can't use script to load the <URL_HERE> url because the
+url launches another app. Only direct user interaction can launch another
+app."}}}
+```
+).
+Another solution is to build an
+[[https://developer.microsoft.com/en-us/windows/bridges/hosted-web-apps|Hosted
+Web App]]). It makes it possible to create easily an application based on your
+website. You can also use Windows JavaScript API (no OCaml binding available for
+the moment) to get access to native components.
+You can create the APPX package (package format for Windows app) by using
+[[http://manifoldjs.com/|Manifold JS]], even if you are on MacOS X or Linux.
+(contains a video describing the entire process available).
+
+If you are on Windows, you can use
+[[https://www.visualstudio.com/vs/community/|Visual Studio Community]].
+The Visual Studio Community solution is recommended to test and debug. You
+can see all errors in the JavaScript console provided in Visual Studio.
+
+[[https://blogs.windows.com/buildingapps/2016/02/17/building-a-great-hosted-web-app||Here]]
+a complete tutorial from the Windows blog for both versions (with Manifold JS
+and Visual Studio):
+
+If you use the Manifold JS solution, you need to sign the APPX before
+installing it on a device.
 
 === Launching the mobile app
 
