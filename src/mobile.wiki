@@ -71,22 +71,38 @@ For all mobile platforms:
 For Android:
 
 * Install JDK 7 or newer ({{{openjdk-7-jdk}}} package in Debian/Ubuntu)
-* Install {{{qemu-kvm}}}
 * Download and untar the [[http://developer.android.com/sdk|Android SDK]]
   (the smaller version without Android Studio suffices).
 * Run {{{tools/android}}}
 * Using the Android package management interface,
   install latest versions of {{{SDK Tools}}}, {{{SDK Platform-tools}}}, and
   {{{SDK Build-tools}}}
-* Install Android API 23: {{{SDK Platform}}} and a x86-64 system image
-  (e.g., {{{Intel x86 Atom_64}}}).
+* Install Android API 23 (which corresponds to Android 6.0): {{{SDK Platform}}} .
 * From Extras, enable the {{{Android Support Repository}}} and the
   {{{Google Repository}}}.
 * For convenience, add the SDK directories {{{platform-tools}}} and
   {{{tools}}} in your {{{$PATH}}}
-* Configure an emulator: from the Android interface, go to
+
+If you will test on an Android device, you don't need to do anything else.
+
+If you want to emulate an Android device, you need to
+* install {{{qemu-kvm}}}
+* install a system image (e.g., {{{Intel x86 Atom_64}}})
+* configure an emulator: from the Android interface, go to
   {{{Tools -> Manage AVDs -> Device definition}}}
   (for example choose Nexus 6 no skin)
+
+You can install any Android API version you want, depending on the platform you
+want to target. By default, in ocsigen-start, the minimal version is Android API
+15.
+
+For iOS:
+
+* Xcode installs all dependencies you need.
+
+For Windows:
+
+* See {{{Makefile.mobile}}} in the template.
 
 === Launching the mobile app
 
@@ -99,7 +115,7 @@ The mobile apps need to communicate with the server in order to
 retrieve data, and thus we are assuming that the server is running at
 all times.
 
-Run:
+To run the application in the emulator, use:
 
 {{{
 make APP_SERVER=http://${YOUR_IP_ADDRESS}:8080 APP_REMOTE=yes emulate-android
@@ -109,10 +125,15 @@ The above command will attempt to launch your app in the Android
 emulator that you have configured previously. Depending on your setup,
 you may need to start the emulator before running the command.
 
+To run the application on a connected device, use:
+{{{
+make APP_SERVER=http://${YOUR_IP_ADDRESS}:8080 APP_REMOTE=yes run-android
+}}}
+
 Notice that the {{{APP_SERVER}}} argument needs to point to your LAN
 or public address (e.g., {{{192.168.1.x}}}), not to {{{127.0.0.1}}}
 (neither to {{{localhost}}}). The reason is that the address will be
-used by the Android emulator, inside which {{{127.0.0.1}}} has
+used by the Android emulator/device, inside which {{{127.0.0.1}}} has
 different meaning; it points to the Android host itself.
 
 == Programming style
