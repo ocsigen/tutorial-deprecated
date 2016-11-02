@@ -6,12 +6,12 @@
 ==[[how-to-register-session-data|Session data: Eliom references]]
 ==[[interaction|Service based Web programming]]
 ==[[tutoreact|Reactive client-server Web applications]]
-==[[mobile|Mobile applications]]
 ==[[misc|Mixing traditional Web interaction with client-server app]]
 = 5-minute tutorials
 ==[[lwt|Lwt]]
 ==[[html|HTML]]
 = Other tutorials: Miscellanous features
+==[[mobile|Mobile applications with Ocsigen]]
 ==[[custom-conf|Custom configuration]]
 ==[[rest|RESTful JSON API]]
 ==[[ocsipersist|Persistent tables with Ocsipersist]]
