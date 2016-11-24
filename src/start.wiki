@@ -2,40 +2,39 @@
 
 //The code of this tutorial has been tested against Eliom dev.// \\
 
-<<|wip|This tutorial is work in progress. Please send us any mistake or comment./>>
+<<|wip|This tutorial is work in progress. Please send us any corrections or comments./>>
 
+This tutorial describes how to get started with Ocsigen
+quickly. Thanks to an application template provided by the Ocsigen
+team, you will get to a working application with standard
+functionality like users and notifications in only a few minutes. This
+template can be used for learning purposes, or even as a starting
+point for your own product.
 
-This tutorial will show you how to generate an application template,
-with samples of code, that you can use as a demo, to learn Ocsigen,
-or as a basis for quickly developing your own minimum viable product.
+The template you will use comes from [[wiki(81):|Ocsigen Start]].
+Ocsigen Start provides a complete mechanism for adding and managing
+users, including activation links and password reset. It additionally
+contains a module for displaying tips, a module for sending
+notifications to your users, and other utilities typically needed in
+modern Web applications.
 
-This template is called [[wiki(81):|Ocsigen Start]].
-It has a complete mechanism to create users, with activation links,
-reset passwords. It contains a module for displaying tips, a module
-to send notifications to your users.
-It also contains some code samples that you can use to learn:
+The template comes with a beautiful default style (developed with
+SASS) that follows modern Web practices, e.g., it is responsive and
+thus mobile-friendly. Of course, you are free to modify the style to
+match your own brand or personality.
 
-* How to do a remote procedure call
-* How to save session data (in //Eliom references//)
-* How to use the notification system
-* How to create a reactive page
-* Many example of widgets (from [[wiki(83):|Ocsigen Toolkit]])
-** Carousel
-** Pages with several tabs
-** Time and date picker
-* ...
+The template is multi-platform. This means that it can run on a Web
+browser or as a mobile app for Android, iOS, or Windows.
 
-This is a multi-platform client-server application,
-that can run on a Web browser or in a mobile app for Android, iOS, or Windows.
+== Installation
 
-
-Install the dependencies (postgresql, sass or sassc).
-On Debian based systems:
+Install the dependencies ({{{postgresql}}} and one of {{{sass}}}, {{{sassc}}}).
+On Debian-based systems:
 {{{
-apt-get install postgresql sass
+apt-get install postgresql ruby-sass
 }}}
 
-Install Ocsigen Start and all its OCaml dependencies using Opam:
+Install Ocsigen Start and all its OCaml dependencies using OPAM:
 {{{
 opam install ocsigen-start
 }}}
@@ -49,5 +48,24 @@ Have a look at the
 [[https://github.com/ocsigen/ocsigen-start/blob/master/template.distillery/README.md|README]]
 file to learn how to compile it
 and, possibly, to generate the mobile applications.
+
+== I installed it and compiled it, what next?
+
+It is now time to learn Ocsigen! The template is a great way to get
+started, because it comes with multiple runnable examples that show
+you:
+
+* How to do remote procedure calls (RPCs);
+* How to save session data (in //Eliom references//);
+* How to use the notification system;
+* How to create reactive pages;
+* Many examples of widgets from [[wiki(83):|Ocsigen Toolkit]]:
+** Carousel
+** Pages with several tabs
+** Time and date pickers
+* ...
+
+The corresponding files are well-commented, so you can quickly find
+out how things work.
 
 Have fun!
