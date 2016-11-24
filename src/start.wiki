@@ -1,0 +1,53 @@
+<<header| =Your first app in 5 minutes >>
+
+//The code of this tutorial has been tested against Eliom dev.// \\
+
+<<|wip|This tutorial is work in progress. Please send us any mistake or comment./>>
+
+
+This tutorial will show you how to generate an application template,
+with samples of code, that you can use as a demo, to learn Ocsigen,
+or as a basis for quickly developing your own minimum viable product.
+
+This template is called [[wiki(81):|Ocsigen Start]].
+It has a complete mechanism to create users, with activation links,
+reset passwords. It contains a module for displaying tips, a module
+to send notifications to your users.
+It also contains some code samples that you can use to learn:
+
+* How to do a remote procedure call
+* How to save session data (in //Eliom references//)
+* How to use the notification system
+* How to create a reactive page
+* Many example of widgets (from [[wiki(83):|Ocsigen Toolkit]])
+** Carousel
+** Pages with several tabs
+** Time and date picker
+* ...
+
+This is a multi-platform client-server application,
+that can run on a Web browser or in a mobile app for Android, iOS, or Windows.
+
+
+Install the dependencies (postgresql, sass or sassc).
+On Debian based systems:
+{{{
+apt-get install postgresql sass
+}}}
+
+Install Ocsigen Start and all its OCaml dependencies using Opam:
+{{{
+opam install ocsigen-start
+}}}
+
+Create your application using Eliom distillery:
+{{{
+eliom-distillery -name myapp -template os.pgocaml
+}}}
+
+Have a look at the
+[[https://github.com/ocsigen/ocsigen-start/blob/master/template.distillery/README.md|README]]
+file to learn how to compile it
+and, possibly, to generate the mobile applications.
+
+Have fun!
