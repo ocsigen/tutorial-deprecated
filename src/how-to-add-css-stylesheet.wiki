@@ -1,5 +1,7 @@
 =How to add a CSS stylesheet?=
 
+//Warning: css_link and make_uri come from Eliom_content.Html.D module. This module is opened for each piece of code//
+
 CSS stylesheet are included in the header using the **css_link** function.
 
 <<code language="ocaml"|
