@@ -1,8 +1,0 @@
-
-1. $ mkdir YOUR_PROJECT
-2. $ ./eliom-destillery --destination YOUR_PROJECT
-
-3. $ cd YOUR_PROJECT
-4. $ make byte run.local
-     ... ^C
-
