@@ -14,32 +14,69 @@ accept a function (named {{{create_form}}} in our example below)
 which is responsible for generating the content from
 appropriately-typed parameter names.
 
-<<code language="ocaml"|
+Here a complete example.
 
-let create_form =
+<<code language="ocaml"|
+[%%shared
+  open Eliom_parameter
+  open Eliom_content.Html.D
+]
+(* Create the form with some inputs *)
+let%server create_form =
   (fun (number_name, (number2_name, string_name)) ->
     [p [pcdata "Write an int: ";
-        Html.D.Form.input
+        Form.input
           ~input_type:`Text ~name:number_name
-          Html.D.Form.int;
+          Form.int;
         pcdata "Write another int: ";
-        Html.D.Form.input
+        Form.input
           ~input_type:`Text ~name:number2_name
-          Html.D.Form.int;
+          Form.int;
         pcdata "Write a string: ";
-        Html.D.Form.input ~input_type:`Text ~name:string_name Form.string;
-        Html.D.Form.input ~input_type:`Submit ~value:"Click" Form.string]])
+        Form.input ~input_type:`Text ~name:string_name Form.string;
+        Form.input ~input_type:`Submit ~value:"Click" Form.string]])
 
-let form = create
+let%server form_result_service = Eliom_service.create
+  ~path:(Eliom_service.Path ["form-result"])
+  ~meth:(Eliom_service.Get ((int "number_name") ** ((int "number2_name") ** (string "string_name"))))
+  ()
+
+let%server form_result_handler =
+  (fun (number_name, (number2_name, string_name)) () ->
+     Lwt.return (
+       (html
+          (head (title (pcdata "")) [])
+          (body [
+             p [
+               pcdata "First number: ";
+               pcdata (string_of_int number_name);
+             ];
+             p [
+               pcdata "Second number: ";
+               pcdata (string_of_int number2_name);
+             ];
+             p [
+               pcdata "String: ";
+               pcdata string_name
+             ]
+           ]))))
+
+let%server form_service = Eliom_service.create
   ~path:(Eliom_service.Path ["form"])
   ~meth:(Eliom_service.Get unit)
-  (fun () () ->
-     let f = Html.D.Form.get_form coucou_params create_form in
-     return
-       (html
-         (head (title (pcdata "")) [])
-         (body [f])))
+  ()
 
+let%server form_handler =
+  (fun () () ->
+     let form = Form.get_form ~service:form_result_service create_form in
+     Lwt.return
+       (html
+         (head (title (pcdata "Form example")) [])
+         (body [form])))
+
+let%server () =
+  Eliom_registration.Html.register ~service:form_result_service form_result_handler;
+  Eliom_registration.Html.register ~service:form_service form_handler
 >>
 
 As shown in the example,
@@ -56,9 +93,9 @@ POST forms may also take get parameters, as last argument of function
 <<code language="ocaml"|
 Eliom_content.Html.D.Form.post_form
   my_service_with_get_and_post
-  (fun chaine ->
+  (fun my_string ->
     p [pcdata "Write a string: ";
-       Form.input ~input_type:`Text ~name:chaine Form.string])
+       Form.input ~input_type:`Text ~name:my_string Form.string])
   222
 >>
 
