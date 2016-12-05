@@ -38,4 +38,4 @@ Read manuals for mor information about these compilers.
 
 === Links
 
-* <<a_manual project="eliom" chapter="workflow-compiling" fragment="h5o-2"|Full documentation about Ocsigen compilation>>
+* <<a_manual project="eliom" chapter="workflow-compilation" |Full documentation about Ocsigen compilation>>
