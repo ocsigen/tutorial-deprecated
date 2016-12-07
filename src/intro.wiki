@@ -52,6 +52,13 @@ dive into the details if you want to.
 The tutorial is divided into several parts, mostly independant:
 
 <<div class="tutocase"|
+Quick start
+; Your first cross-platform client-server app in 5 minutes
+:Read this [[wiki:manual/start|tutorial]]
+>>
+
+\\
+<<div class="tutocase"|
 Quick start: the basics
 ; A short tutorial explaining how to write a dynamic Web site by generating pages using OCaml functions
 :Read tutorial [[wiki:manual/basicwebsite|Basic web site]]
