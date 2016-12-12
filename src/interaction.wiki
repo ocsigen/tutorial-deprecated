@@ -1,6 +1,6 @@
 =Implementing Web Interaction Using Eliom=
 
-//The code of this tutorial has been tested with Eliom dev (30/06/2016) .// \\
+//The code of this tutorial has been tested with Eliom 6.0.// \\
 
 <<|outline target="documentation">>
 

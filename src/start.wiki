@@ -1,6 +1,6 @@
 <<header| =Your first app in 5 minutes >>
 
-//The code of this tutorial has been tested against Eliom dev.// \\
+//The code of this tutorial has been tested against Eliom 6.0.// \\
 
 <<|wip|This tutorial is work in progress. Please send us any corrections or comments./>>
 
@@ -98,8 +98,6 @@ out how things work.
 <<div class="screenshots"|
 [[wiki:files/screenshots/start-mobile-3.png|
 {{wiki(79):files/screenshots/start-mobile-3.png|Ocsigen Start}}]]
-[[wiki:files/screenshots/start-mobile-5.png|
-{{wiki(79):files/screenshots/start-mobile-5.png|Ocsigen Start}}]]
 [[wiki:files/screenshots/start-mobile-6.png|
 {{wiki(79):files/screenshots/start-mobile-6.png|Ocsigen Start}}]]
 [[wiki:files/screenshots/start-mobile-7.png|
