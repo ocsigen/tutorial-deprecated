@@ -1,6 +1,6 @@
 <<header| =Writing a client/server Eliom application >>
 
-//The code of this tutorial has been tested against Eliom dev (30/06/2016).// \\
+//The code of this tutorial has been tested against Eliom 6.0.// \\
 
 In this chapter, we will write a [[site:graffiti/|collaborative
 drawing application]]. It is a client/server web application

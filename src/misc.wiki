@@ -2,7 +2,7 @@
 
 <<|outline target="documentation">>
 
-//The code of this tutorial has been tested with Eliom dev (30/06/2016).// \\
+//The code of this tutorial has been tested with Eliom 6.0.// \\
 
 ==Multi-user collaborative drawing application==
 

@@ -1,6 +1,6 @@
 <<header| =Writing a basic Web site in OCaml >>
 
-//The code of this tutorial has been tested against Eliom dev.// \\
+//The code of this tutorial has been tested against Eliom 6.0.// \\
 
 <<|wip|This tutorial is work in progress. Please send us any mistake or comment./>>
 
