@@ -2,14 +2,14 @@
 
 This is a short tutorial showing how to implement a simple reactive
 client-server application using Js_of_ocaml, Eliom and
-Ocsigen-start. It requires Eliom dev.
+Ocsigen Start.
 
 Our application displays a list of items to connected users (for
 example a list of messages in a forum), and allows adding new items.
 
 You will learn:
 
-* How to use Ocsigen-start to quickly build an application with user
+* How to use Ocsigen Start to quickly build an application with user
   management.
 * How to create a client-server reactive interface: the HTML is
   generated indifferently on server-side or on client-side, and
@@ -18,11 +18,9 @@ You will learn:
 * How to implement a notification system for your application. Users
   are notified when a new item arrives.
 
-
-
 == First step: a basic application with user management
 
-Ocsigen-start contains a set of higher level libraries for Eliom
+Ocsigen Start contains a set of higher level libraries for Eliom
 (user management, tips, notifications). It also contains a template
 for {{{eliom-distillery}}} that creates an application with user
 management. You can use this template as a starting point for your
@@ -32,24 +30,14 @@ project.
 eliom-distillery -name tutoreact -template os.pgocaml
 }}}
 
-This template is using Postgresql to save the data.
-You need a recent version of Postgresql installed on your system.
-
-Ocsigen-start is still young, and the creation of the database must
-be improved (help appreciated). For now, you need to manually create a
-symbolic link to the program {{{pg_ctl}}} in you directory. For
-example:
-
-{{{
-ln -s /usr/lib/postgresql/9.5/bin/pg_ctl
-}}}
-
-Now create the local database and start the database server:
+This template is using PostgreSQL to store the data. You need a recent
+version of Postgresql installed on your system.  With that available,
+you can create the local database and start the database server:
 
 {{{
 make db-init
 make db-create
-make db-update
+make db-schema
 }}}
 
 Compile and run the program:
@@ -412,7 +400,7 @@ let%server display_messages () =
 == Notifications
 
 We now want to be notified when a message has been added. To do that
-easily, we use the module {{{Os_notif}}} from Ocsigen-start.
+easily, we use the module {{{Os_notif}}} from Ocsigen Start.
 
 We first define a notification module for the type of data we want
 clients to be able to listen on (here lists of message identifiers):
@@ -514,7 +502,7 @@ let%server forum_service =
   Eliom_service.create
     ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get
-          (Eliom_parameter.(suffix (int "i"))))
+            (Eliom_parameter.(suffix (int "i"))))
     ()
 
 let%server forum_service_handler userid_o forumid () =
