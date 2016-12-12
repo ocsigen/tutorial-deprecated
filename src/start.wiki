@@ -26,6 +26,17 @@ match your own brand or personality.
 The template is multi-platform. This means that it can run on a Web
 browser or as a mobile app for Android, iOS, or Windows.
 
+<<div class="schreenshots"|
+{{wiki(79):files/screenshots/start1.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start2.png|Ocsigen Start}}
+>>
+
+<<div class="schreenshots"|
+{{wiki(79):files/screenshots/start-mobile-1.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-2.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-4.png|Ocsigen Start}}
+>>
+
 == Installation
 
 Install the dependencies ({{{postgresql}}} and one of {{{sass}}}, {{{sassc}}}).
@@ -67,5 +78,20 @@ you:
 
 The corresponding files are well-commented, so you can quickly find
 out how things work.
+
+<<div class="schreenshots"|
+{{wiki(79):files/screenshots/start3.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start4.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start5.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start6.png|Ocsigen Start}}
+>>
+
+<<div class="schreenshots"|
+{{wiki(79):files/screenshots/start-mobile-3.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-5.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-6.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-7.png|Ocsigen Start}}
+{{wiki(79):files/screenshots/start-mobile-8.png|Ocsigen Start}}
+>>
 
 Have fun!
