@@ -8,12 +8,15 @@ argument).
 <<code language="ocaml"|
 let f x = ...
 
-let%client f_rpc = ~%(server_function [%derive.json: int] f)
+let%client f_rpc = ~%(Eliom_client.server_function [%derive.json: int] f)
 
 ...
 
 [%client ... f_rpc 4 ... ]
 >>
+
+The server-side function ({{{f}}} in the example) needs to return an
+Lwt value.
 
 Server functions are just syntactic sugar for pathless services
 returning OCaml values.
