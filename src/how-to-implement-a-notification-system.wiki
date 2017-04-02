@@ -10,10 +10,10 @@ conveniently and without memory leak.
 == With {{{Os_notif}}}
 
 For each type of data on which you want to receive updates,
-instanciate functor {{{Os_notif.Make}}} on server side:
+instanciate functor {{{Os_notif.Make_Simple}}} on server side:
 
 <<code language="ocaml" class="server"|
-module My_notif = Os_notif.Make(struct
+module My_notif = Os_notif.Make_Simple (struct
   type key = ... (* The type of the identifier of the data we want listen on. *)
   type notification = ... (* The type of the notifications that will be sent *)
 end)

@@ -407,7 +407,7 @@ clients to be able to listen on (here lists of message identifiers):
 
 <<code language="ocaml" class="server"|
 [%%server
-module Forum_notif = Os_notif.Make (struct
+module Forum_notif = Os_notif.Make_Simple (struct
   type key = unit
   type notification = int
 end)
@@ -672,7 +672,7 @@ to use an integer (instead of {{{unit}}}):
 
 <<code language="ocaml" class="server"|
 [%server
-module Forum_notif = Os_notif.Make(struct
+module Forum_notif = Os_notif.Make_Simple (struct
   type key = int
   type notification = int
 end)
@@ -764,7 +764,7 @@ module Db = struct
 
 end
 
-module Forum_notif = Os_notif.Make(struct
+module Forum_notif = Os_notif.Make_Simple (struct
   type key = int
   type notification = int
 end)
