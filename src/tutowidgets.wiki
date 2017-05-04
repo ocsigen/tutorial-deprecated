@@ -195,7 +195,7 @@ let mywidget s1 s2 = Eliom_content.Html.D.(
   let content = div ~a:[a_class ["content"]] [pcdata s2] in
   let _ = [%client
     (Lwt.async (fun () ->
-       Lwt_js_events.clicks (To_dom.of_element ~%button)
+       Lwt_js_events.clicks (Eliom_content.Html.To_dom.of_element ~%button)
          (fun _ _ -> switch_visibility ~%content; Lwt.return ()))
      : unit)
   ] in
