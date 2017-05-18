@@ -36,14 +36,14 @@ And during a request, set this reference:
 <<code language="ocaml"|
 
   ...
-  Eliom_reference.Volatile.Ext.set myref (Some "user data")
+  Eliom_reference.Volatile.set myref (Some "user data")
 
 >>
 
 The value of this reference is different for each user:
 <<code language="ocaml"|
 
-  Eliom_reference.Volatile.Ext.get myref
+  Eliom_reference.Volatile.get myref
 
 >>
 
@@ -59,6 +59,13 @@ use scope {{{Eliom_common.default_process_scope}}}.
 
 If you want to store server side data during one request,
 use scope {{{Eliom_common.request_scope}}}.
+
+==Persistent references==
+
+Module
+<<a_api project="eliom" subproject="server"|module Eliom_reference>>
+also defines an interface for persistent references, that will survive
+if you restart the server.
 
 ==Links
 
