@@ -18,7 +18,7 @@ contains a module for displaying tips, a module for sending
 notifications to your users, and other utilities typically needed in
 modern Web applications.
 
-The template comes with a beautiful default style (developed with
+The template comes with a default style (developed with
 SASS) that follows modern Web practices, e.g., it is responsive and
 thus mobile-friendly. Of course, you are free to modify the style to
 match your own brand or personality.
