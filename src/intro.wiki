@@ -258,19 +258,21 @@ complex configurations of sites.
 
 Eliom is an extension for //Ocsigen Server//
 that allows the creation of reliable client/server Web applications,
-mobile apps, (or traditional dynamic Web sites) in OCaml.
+mobile apps, and traditional dynamic Web sites in OCaml.
 
-It transforms OCaml into a multi-tier language, making it possible to
+Eliom transforms OCaml into a multi-tier language, allowing one to
 implement (both the server and client parts of) a distributed application
-fully in OCaml, as a single program.
-This simplifies a lot the communication between server and client.
-Applications can run on any Web browser or mobile device (iOS, Android ...),
-saving from the need to develop one version for each platform.
+entirely in OCaml, as a single program.
+This radically simplifies the communication between server and client.
+Applications can run on any Web browser or mobile device (iOS, Android, ...),
+thus eliminating the need for one custom version per platform.
 
-Eliom has support for reactive pages (generated on server or client), advanced session mechanism, server to client communication, continuation based Web programming, etc.
+Eliom also provides reactive pages (generated on server or client), an
+advanced session mechanism, facilities for server to client
+communication, support for continuation-based Web programming, etc.
 
 Eliom can also be used for more traditional Web or mobile apps:
-server only, single page applications, REST API, etc.
+server-only, single-page applications, REST APIs, etc.
 
 
 ====Expressiveness====
