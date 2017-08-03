@@ -8,8 +8,7 @@
 
 We now want to turn our collaborative drawing application into a
 multi-user one. Each user will have their own drawing, where everyone
-can draw, and the owner will have the ability to save the drawing they
-want and create an Atom feed containing all saved drawings.
+can draw.
 
 See the
 [[https://github.com/ocsigen/graffiti/tree/master/extended/|full code of examples]].
