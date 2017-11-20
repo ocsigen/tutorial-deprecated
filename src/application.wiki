@@ -250,7 +250,7 @@ service (now at URL {{{/}}}):
 <<code language="ocaml" class="server"|
 let main_service =
   Graffiti_app.create
-    ~path:(Eliom_servie.Path [""])
+    ~path:(Eliom_service.Path [""])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     (fun () () ->
       Lwt.return
