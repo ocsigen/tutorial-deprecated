@@ -8,7 +8,7 @@ fact, one single codebase can be used to produce all these
 applications simultaneously.
 
 The easiest way to get started with Ocsigen-based mobile development
-is to use [[site:/ocsigen-start|Ocsigen-start]].  Ocsigen-start is a
+is to use [[wiki("ocsigen-start"):|Ocsigen-start]].  Ocsigen-start is a
 library and skeleton for building "minimum viable product" Web
 applications with standard functionality like users, notifications,
 etc. This skeleton is immediately usable as a mobile application. You
@@ -23,8 +23,8 @@ template's {{{README.md}}}.
 
 You need to follow a certain programming style for your Eliom code to
 work flawlessly inside an Ocsigen-start mobile app. This style is
-described in the [[site:/eliom/manual/clientserver-services|chapter on
-client services]] from the Eliom manual. The idea is that you
+described in the <<a_manual project="eliom" chapter="clientserver-services"|chapter on
+client services>> from the Eliom manual. The idea is that you
 implement as much of your application as possible in shared sections
 ({{{[%%shared ...]}}} or {{{let%shared ... = ...}}}), and that you
 register handlers for your Eliom services on both the client and the
@@ -34,7 +34,7 @@ inspiration.
 
 == Going further
 
-* [[site:/ocsigen-toolkit|Ocsigen-toolkit]] provides a set of user
+* [[wiki("ocsigen-toolkit"):|Ocsigen-toolkit]] provides a set of user
   interface widgets that are particularly useful for mobile applications.
 
 * Danny Willems provides a comprehensive set of
